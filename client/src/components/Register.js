@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
+import backgroundVideo from '../assets/videos/fieldlogin.mp4';
 
 function Register() {
   const [name, setName] = useState('');
@@ -11,7 +12,6 @@ function Register() {
   const { signup } = useAuth();
   const navigate = useNavigate();
 
-  // Email validation regex pattern
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   const validateForm = () => {
@@ -70,83 +70,104 @@ function Register() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-secondary">
-      <div className="w-full max-w-md p-8 space-y-6 bg-primary rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold text-center text-text">Register</h2>
+    <div className="relative flex items-center justify-center min-h-screen">
+      {/* Video Background */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="absolute top-0 left-0 w-full h-full object-cover -z-10"
+      >
+        <source src={backgroundVideo} type="video/mp4" />
+      </video>
+      
+      {/* Overlay to make the form more visible */}
+      <div className="absolute top-0 left-0 w-full h-full bg-black/30 -z-5" />
+      
+      {/* Register Form */}
+      <div className="backdrop-blur-md bg-white/30 p-8 rounded-lg shadow-2xl w-full max-w-md mx-4 border border-white/20">
+        <h2 className="text-3xl font-semibold text-center mb-6 text-white">Register</h2>
         
         {error && (
-          <div className="p-3 text-sm text-red-700 bg-red-100 rounded-lg" role="alert">
+          <div className="mb-6 text-red-500 text-center bg-white/80 rounded-md py-2 px-3" role="alert">
             {error}
           </div>
         )}
 
-        <form className="space-y-4" onSubmit={handleSubmit}>
-          <div>
-            <label className="block text-sm font-medium text-text">Name</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-2 mt-1 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
-              placeholder="Enter your name"
-              required
-            />
+        <form onSubmit={handleSubmit}>
+          <div className="space-y-4 mb-6">
+            <div>
+              <label className="block text-white text-sm font-medium mb-1">Name</label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm"
+                placeholder="Enter your name"
+                required
+              />
+            </div>
+            
+            <div>
+              <label className="block text-white text-sm font-medium mb-1">Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  setError('');
+                }}
+                className="w-full px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm"
+                placeholder="Enter your email"
+                required
+              />
+            </div>
+            
+            <div>
+              <label className="block text-white text-sm font-medium mb-1">Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setError('');
+                }}
+                className="w-full px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm"
+                placeholder="Enter your password"
+                required
+              />
+            </div>
+            
+            <div>
+              <label className="block text-white text-sm font-medium mb-1">Confirm Password</label>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => {
+                  setConfirmPassword(e.target.value);
+                  setError('');
+                }}
+                className="w-full px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm"
+                placeholder="Confirm your password"
+                required
+              />
+            </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-text">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                setError('');
-              }}
-              className="w-full px-4 py-2 mt-1 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
-              placeholder="Enter your email"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-text">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                setError('');
-              }}
-              className="w-full px-4 py-2 mt-1 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
-              placeholder="Enter your password"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-text">Confirm Password</label>
-            <input
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => {
-                setConfirmPassword(e.target.value);
-                setError('');
-              }}
-              className="w-full px-4 py-2 mt-1 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
-              placeholder="Confirm your password"
-              required
-            />
-          </div>
+          
           <button
             type="submit"
-            className="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:bg-blue-700"
+            className="w-full bg-white/20 backdrop-blur-sm text-white py-3 rounded-lg hover:bg-white/30 focus:outline-none focus:ring-2 focus:ring-white/50 text-lg font-semibold transition-colors border border-white/30"
           >
             Register
           </button>
         </form>
-        <p className="text-sm text-center text-text">
-          Already have an account?{' '}
-          <Link to="/login" className="text-blue-500 hover:text-blue-600">
-            Login
+        
+        <div className="mt-6 text-center">
+          <Link to="/login" className="text-white hover:text-gray-200 font-medium">
+            Already have an account? Login
           </Link>
-        </p>
+        </div>
       </div>
     </div>
   );
