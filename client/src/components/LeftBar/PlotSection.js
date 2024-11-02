@@ -2,23 +2,21 @@ import React, { useState, useEffect } from 'react';
 import getEquipmentByUserUID from './queries'
 import {useAuth} from '../../contexts/AuthContext'
 import { Folder, FolderOpen, Plus } from 'lucide-react';
-import { size } from 'lodash';
-import EquipmentCard from './EquipmentCard';
 
-function EquipmentSection() {
+function PlotSection() {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [equipment, setEquipment] = useState([])
+  const [plot, setPlot] = useState([])
   const { currentUser } = useAuth();
   const [toggleAdd, setToggleAdd] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
 
   useEffect(() => {
-    const setEquipmentList = async() => {
-      setEquipment(await getEquipmentByUserUID(currentUser))
+    const setPlotList = async() => {
+      //setPlot(await getPlotByUserUID(currentUser))
     }
 
-    setEquipmentList()
+    setPlotList()
     setIsLoading(false)
   }, [])
 
@@ -32,7 +30,7 @@ function EquipmentSection() {
           onClick={toggleDropdown}
         >
           {isOpen ? <FolderOpen size={24} className="text-text mr-3" /> : <Folder size={24} className="text-text mr-3" />}
-          <h3 className="text-lg font-semibold">Equipment</h3>
+          <h3 className="text-lg font-semibold">Plots</h3>
         </div>
         <div className='pr-4'>
           <Plus 
@@ -48,8 +46,8 @@ function EquipmentSection() {
         </div>
       ) : (
         <div className="p-4 space-y-2">
-          {equipment.map((tool) => (
-            <EquipmentCard equipment={tool}/>
+          {plot.map((tool) => (
+            <div>Plot!</div>
           ))}
         </div>
       ))}
@@ -57,4 +55,4 @@ function EquipmentSection() {
   );
 }
 
-export default EquipmentSection;
+export default PlotSection;
