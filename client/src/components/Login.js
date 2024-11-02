@@ -28,7 +28,7 @@ function Login() {
         <form onSubmit={handleSubmit}>
           <div className="mb-4 flex items-center">
             <label htmlFor="username" className="mr-2 text-gray-700 w-20 text-right">
-              Username:
+              Email:
             </label>
             <input
               type="text"

@@ -42,3 +42,25 @@
     transform: rotate(360deg);
   }
 }
+
+:root {
+  --primary-color: #ffffff;
+}
+
+[data-theme='day'] {
+  --primary-color: #ffffff;
+  --secondary-color: #d3d3d3;
+  --text-color: #000000;
+}
+
+[data-theme='night'] {
+  --primary-color: #000000;
+  --secondary-color: #2a2a2a;
+  --text-color: #ffffff;
+}
+
+[data-theme='dawndusk'] {
+  --primary-color: #a1a1a1;
+  --secondary-color: #909090; 
+  --text-color: #000000;
+}
