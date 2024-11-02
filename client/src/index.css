@@ -8,11 +8,11 @@
   }
   
 [data-theme='day'] {
---primary-color: #feebca;
+--primary-color: #D3D3D3;
 --secondary-color: #1e293b;
 --tertiary-color: #feebca;
 --FOUR-color: #909090;
---text-color: #000000;
+--text-color: #363232;
 }
 
 [data-theme='night'] {
