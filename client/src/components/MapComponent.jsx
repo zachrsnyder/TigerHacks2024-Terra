@@ -32,6 +32,16 @@ const MapComponent = ({
     setPolygon(poly);
   }, []);
 
+  const handlePlotClick = useCallback((plot, event) => {
+    // Prevent triggering map click when clicking on a plot
+    if (event) {
+      event.stop();
+    }
+    if (onPlotClick) {
+      onPlotClick(plot);
+    }
+  }, [onPlotClick]);
+
   const handleVertexEdit = useCallback(() => {
     if (!polygon) return;
     
