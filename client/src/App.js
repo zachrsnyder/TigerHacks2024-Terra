@@ -6,6 +6,7 @@ import Register from './components/Register';
 import Dashboard from './components/Dashboard';
 import Navbar from './components/Navbar';
 import MyFarm from './components/MyFarm';
+import getTimeOfDayTheme from './utils/theme';
 
 function PrivateRoute({ children }) {
   const { currentUser } = useAuth();
