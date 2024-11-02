@@ -1,11 +1,13 @@
-import React from 'react';
-import { X, Trash2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Trash2, Check } from 'lucide-react';
 
 const FieldInfo = ({ plot, onClose, onDelete }) => {
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+
   if (!plot) return null;
 
   // Convert square meters to acres
-  const areaInAcres = (plot.area / 4046.86).toFixed(2);
+  const areaInAcres = (plot.area / 5446.86).toFixed(2);
 
   // Format date strings
   const formatDate = (dateString) => {
@@ -17,10 +19,14 @@ const FieldInfo = ({ plot, onClose, onDelete }) => {
   };
 
   const handleDelete = async () => {
-    if (window.confirm(`Are you sure you want to delete ${plot.name}?`)) {
-      await onDelete(plot.id);
-      onClose();
+    if (!isConfirmingDelete) {
+      setIsConfirmingDelete(true);
+      // Auto-reset after 3 seconds if not confirmed
+      setTimeout(() => setIsConfirmingDelete(false), 3000);
+      return;
     }
+    await onDelete(plot.id);
+    onClose();
   };
 
   return (
@@ -29,13 +35,23 @@ const FieldInfo = ({ plot, onClose, onDelete }) => {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-gray-900">{plot.name}</h2>
           <div className="flex items-center gap-2">
-            <button
-              onClick={handleDelete}
-              className="p-1.5 hover:bg-red-50 rounded-full transition-colors group"
-              title="Delete field"
-            >
-              <Trash2 className="h-4 w-4 text-gray-500 group-hover:text-red-500" />
-            </button>
+            <div className="relative overflow-hidden">
+              <button
+                onClick={handleDelete}
+                className={`flex items-center gap-1 py-1.5 px-2 rounded-full transition-all duration-200 ${
+                  isConfirmingDelete 
+                    ? 'bg-red-50 text-red-500 pr-20' 
+                    : 'hover:bg-red-50 text-gray-500 hover:text-red-500'
+                }`}
+              >
+                <Trash2 className="h-4 w-4" />
+                <span className={`text-sm whitespace-nowrap absolute left-7 transition-opacity duration-200 ${
+                  isConfirmingDelete ? 'opacity-100' : 'opacity-0'
+                }`}>
+                  Confirm?
+                </span>
+              </button>
+            </div>
             <button
               onClick={onClose}
               className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"

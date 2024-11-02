@@ -1,298 +1,126 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { X, Upload, Image, Loader2, AlertCircle } from 'lucide-react';
 
-const AddImageModal = ({ setShowAddModal }) => {
+const AddEquipmentModal = ({ isOpen, onClose }) => {
     const [newDocument, setDocument] = useState({
-        Name: "",
-        patientID: "",
-        file: null
-    });
-    const [patients, setPatients] = useState([]);
-    const [error, setError] = useState('');
-    const [loadingPatients, setLoadingPatients] = useState(true);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [preview, setPreview] = useState(null);
-    const [isDragging, setIsDragging] = useState(false);
-    const [touched, setTouched] = useState({
-        patientID: false,
-        Name: false
+        VehicleID: "",
+        Make: "",
+        Model: "",
+        Type: "",
+        Description: "",
     });
 
-    const isFormValid = newDocument.patientID && newDocument.Name && newDocument.file;
-
-    const fetchPatients = async () => {
-        try {
-            const response = await fetch('/PatientRecords/GetAllPatients', {
-                credentials: 'include'
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch patients');
-            }
-
-            const data = await response.json();
-            setPatients(data);
-        } catch (err) {
-            setError(err.message);
-        } finally {
-            setLoadingPatients(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchPatients();
-    }, []);
-
-    useEffect(() => {
-        if (!newDocument.file) {
-            setPreview(null);
-            return;
-        }
-
-        const objectUrl = URL.createObjectURL(newDocument.file);
-        setPreview(objectUrl);
-
-        return () => URL.revokeObjectURL(objectUrl);
-    }, [newDocument.file]);
-
-    const handleDragOver = useCallback((e) => {
-        e.preventDefault();
-        setIsDragging(true);
-    }, []);
-
-    const handleDragLeave = useCallback((e) => {
-        e.preventDefault();
-        setIsDragging(false);
-    }, []);
-
-    const handleDrop = useCallback((e) => {
-        e.preventDefault();
-        setIsDragging(false);
-
-        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-            const file = e.dataTransfer.files[0];
-            if (file.type.startsWith('image/')) {
-                setDocument(prev => ({ ...prev, file }));
-            } else {
-                setError('Please upload an image file');
-            }
-        }
-    }, []);
-
-    const handleFileChange = (e) => {
-        if (e.target.files && e.target.files[0]) {
-            setDocument(prev => ({ ...prev, file: e.target.files[0] }));
-        }
-    };
-
-    const handleBlur = (field) => {
-        setTouched(prev => ({ ...prev, [field]: true }));
-    };
-
-    const handleAddDoc = async (e) => {
-        e.preventDefault();
-
-        // Set all fields as touched when attempting to submit
-        setTouched({
-            patientID: true,
-            Name: true
-        });
-
-        if (!isFormValid) {
-            return;
-        }
-
-        setIsSubmitting(true);
-        setError('');
-
-        try {
-            const formData = new FormData();
-            formData.append("Name", newDocument.Name + "_Image");
-            formData.append("PatientID", newDocument.patientID);
-            formData.append("File", newDocument.file);
-
-            const response = await fetch('DocumentMetadatas/AddDocument', {
-                method: 'POST',
-                body: formData,
-                credentials: 'include'
-            });
-
-            if (response.status === 400) {
-                const errorText = await response.text();
-                throw new Error(errorText);
-            }
-
-            setShowAddModal(false);
-        } catch (ex) {
-            setError(ex.message || 'Failed to add document');
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    const getFieldError = (field) => {
-        if (!touched[field]) return null;
-
-        switch (field) {
-            case 'patientID':
-                return !newDocument.patientID ? 'Please select a patient' : null;
-            case 'Name':
-                return !newDocument.Name ? 'Please enter a document name' : null;
-            default:
-                return null;
-        }
-    };
-
+    if (!isOpen) return null;
+   
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl h-[90vh] flex flex-col">
+        <div className="fixed inset-0 flex items-center justify-center z-50 overflow-hidden">
+            {/* Backdrop */}
+            <div 
+                className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                onClick={onClose}
+            />
+            
+            {/* Modal Content */}
+            <div className="relative backdrop-blur-md bg-white/30 rounded-lg shadow-2xl w-full max-w-md mx-4 border border-white/20">
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b">
-                    <h2 className="text-xl font-semibold text-gray-800">Upload Image Document</h2>
-                    <button
-                        onClick={() => setShowAddModal(false)}
-                        className="p-2 text-gray-600 hover:text-gray-800 transition-colors"
-                        title="Close"
+                <div className="flex justify-between items-center p-4 border-b border-white/20">
+                    <h2 className="text-xl font-semibold text-white">Add Equipment</h2>
+                    <button 
+                        onClick={onClose}
+                        className="text-white hover:text-gray-200 transition-colors"
                     >
-                        <X className="h-5 w-5" />
+                        <X size={24} />
                     </button>
                 </div>
 
-                {/* Content */}
-                <div className="flex-1 overflow-y-auto p-6">
-                    {loadingPatients ? (
-                        <div className="flex items-center justify-center h-full">
-                            <Loader2 className="h-8 w-8 animate-spin text-gray-600" />
-                            <span className="ml-2 text-gray-600">Loading patient information...</span>
-                        </div>
-                    ) : (
-                        <form onSubmit={handleAddDoc} className="space-y-6">
-                            {error && (
-                                <div className="p-4 bg-red-50 rounded-lg flex items-center text-red-600 text-sm">
-                                    <AlertCircle className="h-4 w-4 mr-2" />
-                                    {error}
-                                </div>
-                            )}
+                {/* Form Content */}
+                <div className="p-6 space-y-4">
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Document Name <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    value={newDocument.Name}
-                                    onChange={(e) => setDocument({ ...newDocument, Name: e.target.value })}
-                                    onBlur={() => handleBlur('Name')}
-                                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-colors ${getFieldError('Name') ? 'border-red-500' : 'border-gray-300'
-                                        }`}
-                                    required
-                                />
-                                {getFieldError('Name') && (
-                                    <p className="mt-1 text-sm text-red-500">{getFieldError('Name')}</p>
-                                )}
-                            </div>
+                    <div>
+                        <label className="block text-white text-sm font-medium mb-1">
+                            Vehicle ID
+                        </label>
+                        <input
+                            type="text"
+                            value={newDocument.VehicleID}
+                            onChange={(e) => setDocument({...newDocument, VehicleID: e.target.value})}
+                            className="w-full px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm"
+                            placeholder="Enter vehicle ID"
+                        />
+                    </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Select Patient <span className="text-red-500">*</span>
-                                </label>
-                                <select
-                                    value={newDocument.patientID}
-                                    onChange={(e) => setDocument({ ...newDocument, patientID: e.target.value })}
-                                    onBlur={() => handleBlur('patientID')}
-                                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-colors ${getFieldError('patientID') ? 'border-red-500' : 'border-gray-300'
-                                        }`}
-                                    required
-                                >
-                                    <option value="">Select a patient</option>
-                                    {patients.map((patient) => (
-                                        <option key={patient.ID} value={patient.ID}>
-                                            {patient.name} (ID: {patient.ID})
-                                        </option>
-                                    ))}
-                                </select>
-                                {getFieldError('patientID') && (
-                                    <p className="mt-1 text-sm text-red-500">{getFieldError('patientID')}</p>
-                                )}
-                            </div>
+                    <div>
+                        <label className="block text-white text-sm font-medium mb-1">
+                            Make
+                        </label>
+                        <input
+                            type="text"
+                            value={newDocument.Make}
+                            onChange={(e) => setDocument({...newDocument, Make: e.target.value})}
+                            className="w-full px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm"
+                            placeholder="Enter vehicle make"
+                        />
+                    </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Upload Image <span className="text-red-500">*</span>
-                                </label>
-                                <div
-                                    className={`border-2 border-dashed rounded-lg p-8 text-center ${isDragging ? 'border-rose-500 bg-rose-50' : 'border-gray-300'
-                                        }`}
-                                    onDragOver={handleDragOver}
-                                    onDragLeave={handleDragLeave}
-                                    onDrop={handleDrop}
-                                >
-                                    {preview ? (
-                                        <div className="space-y-4">
-                                            <img src={preview} alt="Preview" className="max-h-64 mx-auto rounded-lg" />
-                                            <button
-                                                type="button"
-                                                onClick={() => setDocument(prev => ({ ...prev, file: null }))}
-                                                className="text-sm text-red-600 hover:text-red-700"
-                                            >
-                                                Remove image
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <div className="space-y-2">
-                                            <Image className="h-12 w-12 mx-auto text-gray-400" />
-                                            <div className="text-gray-600">
-                                                Drag and drop your image here, or
-                                                <label className="ml-1 text-rose-600 hover:text-rose-700 cursor-pointer">
-                                                    browse
-                                                    <input
-                                                        type="file"
-                                                        className="hidden"
-                                                        accept="image/*"
-                                                        onChange={handleFileChange}
-                                                    />
-                                                </label>
-                                            </div>
-                                            <p className="text-sm text-gray-500">
-                                                Supports: JPG, PNG, GIF (max 10MB)
-                                            </p>
-                                        </div>
-                                    )}
-                                </div>
-                                {touched.patientID && !newDocument.file && (
-                                    <p className="mt-1 text-sm text-red-500">Please upload an image</p>
-                                )}
-                            </div>
-                        </form>
-                    )}
+                    <div>
+                        <label className="block text-white text-sm font-medium mb-1">
+                            Model
+                        </label>
+                        <input
+                            type="text"
+                            value={newDocument.Model}
+                            onChange={(e) => setDocument({...newDocument, Model: e.target.value})}
+                            className="w-full px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm"
+                            placeholder="Enter vehicle model"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-white text-sm font-medium mb-1">
+                            Type
+                        </label>
+                        <select
+                            value={newDocument.Type}
+                            onChange={(e) => setDocument({...newDocument, Type: e.target.value})}
+                            className="w-full px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm"
+                        >
+                            <option value="">Select equipment type</option>
+                            <option value="Tractor">Tractor</option>
+                            <option value="Harvester">Harvester</option>
+                            <option value="Sprayer">Sprayer</option>
+                            <option value="Planter">Planter</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label className="block text-white text-sm font-medium mb-1">
+                            Description
+                        </label>
+                        <textarea
+                            value={newDocument.Description}
+                            onChange={(e) => setDocument({ ...newDocument, Description: e.target.value })}
+                            className="w-full h-20 px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm resize-none"
+                            placeholder="Enter a short description"
+                        />
+                    </div>
+
+
+
                 </div>
 
                 {/* Footer */}
-                <div className="flex justify-end space-x-3 px-6 py-4 border-t">
+                <div className="flex justify-end gap-3 p-4 border-t border-white/20">
                     <button
-                        type="button"
-                        onClick={() => setShowAddModal(false)}
-                        className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
-                        disabled={isSubmitting}
+                        onClick={onClose}
+                        className="px-4 py-2 text-white hover:bg-white/10 rounded-lg transition-colors"
                     >
                         Cancel
                     </button>
                     <button
-                        onClick={handleAddDoc}
-                        disabled={isSubmitting || !isFormValid}
-                        className="flex items-center px-4 py-2 bg-rose-600 text-white rounded-md hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 transition-colors disabled:opacity-50"
+                        className="px-4 py-2 bg-white/20 text-white rounded-lg hover:bg-white/30 transition-colors"
                     >
-                        {isSubmitting ? (
-                            <>
-                                <Loader2 className="animate-spin -ml-1 mr-2 h-4 w-4" />
-                                Uploading...
-                            </>
-                        ) : (
-                            <>
-                                <Upload className="h-4 w-4 mr-2" />
-                                Upload Image
-                            </>
-                        )}
+                        Add Equipment
                     </button>
                 </div>
             </div>
@@ -300,5 +128,4 @@ const AddImageModal = ({ setShowAddModal }) => {
     );
 };
 
-export default AddImageModal;import { title } from '@metascraper/helpers';
-
+export default AddEquipmentModal;
