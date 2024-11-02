@@ -4,22 +4,17 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDDYQELHIQl9MV_-MJg1eV86PoVP3vXpoA",
-  authDomain: "tigerhacks2024-terra.firebaseapp.com",
-  projectId: "tigerhacks2024-terra",
-  storageBucket: "tigerhacks2024-terra.firebasestorage.app",
-  messagingSenderId: "826255283083",
-  appId: "1:826255283083:web:fcd4e85a7395195e76158e",
-  measurementId: "G-0VVSNZW4S6"
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID,
+  measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-
-// Initialize Firebase Authentication and get a reference to the service
 const auth = getAuth(app);
-
-// Initialize Firestore
 const db = getFirestore(app);
 
 export { auth, db };

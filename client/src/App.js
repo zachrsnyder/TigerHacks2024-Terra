@@ -5,9 +5,7 @@ import Login from './components/Login';
 import Register from './components/Register';
 import Dashboard from './components/Dashboard';
 import Navbar from './components/Navbar';
-import getTimeOfDayTheme from './utils/theme';
-
-
+import MyFarm from './components/MyFarm';
 
 function PrivateRoute({ children }) {
   const { currentUser } = useAuth();
@@ -27,13 +25,21 @@ function App() {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route 
-              path="/" 
+            <Route
+              path="/"
               element={
                 <PrivateRoute>
                   <Dashboard />
                 </PrivateRoute>
-              } 
+              }
+            />
+            <Route
+              path="/myfarm"
+              element={
+                <PrivateRoute>
+                  <MyFarm />
+                </PrivateRoute>
+              }
             />
           </Routes>
         </div>
