@@ -13,10 +13,14 @@ const EquipmentSection = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const { currentUser } = useAuth();
 
+  // State to track which types of equipment are expanded
+  const [expandedTypes, setExpandedTypes] = useState({});
+
   useEffect(() => {
     if (!currentUser) return;
 
     const equipmentRef = collection(db, 'farms', currentUser.uid, 'equipment');
+
     const unsubscribe = onSnapshot(
       query(equipmentRef),
       (snapshot) => {
@@ -49,6 +53,21 @@ const EquipmentSection = () => {
 
   const toggleDropdown = () => setIsOpen(!isOpen);
 
+  // Group equipment by type
+  const equipmentByType = equipment.reduce((acc, curr) => {
+    acc[curr.Type] = acc[curr.Type] || [];
+    acc[curr.Type].push(curr);
+    return acc;
+  }, {});
+
+  // Toggle the expanded state for a specific type
+  const toggleTypeExpansion = (type) => {
+    setExpandedTypes((prev) => ({
+      ...prev,
+      [type]: !prev[type]
+    }));
+  };
+
   return (
     <div className="border-b border-gray-300">
       <div className="flex justify-between items-center">
@@ -73,17 +92,35 @@ const EquipmentSection = () => {
       </div>
 
       {isOpen && (
-        <div className="p-4 space-y-2">
+        <div className="p-4 space-y-4">
           {isLoading ? (
             <div className="text-text text-center">Loading...</div>
-          ) : equipment.length > 0 ? (
-            equipment.map((item) => (
-              <EquipmentCard
-                key={item.id}
-                equipment={item}
-                displayName={`${item.Name} (${item.Type})`} // Combining Name and Type for display
-                onDelete={handleDeleteEquipment}
-              />
+          ) : Object.keys(equipmentByType).length > 0 ? (
+            Object.keys(equipmentByType).map((type) => (
+              <div key={type}>
+                <div
+                  className="flex justify-between items-center cursor-pointer"
+                  onClick={() => toggleTypeExpansion(type)}
+                >
+                  <h4 className="text-lg font-semibold text-text my-2">{type}</h4>
+                  {expandedTypes[type] ? (
+                    <FolderOpen size={20} className="text-text" />
+                  ) : (
+                    <Folder size={20} className="text-text" />
+                  )}
+                </div>
+                {expandedTypes[type] && (
+                  <div className="pl-4 space-y-2">
+                    {equipmentByType[type].map((item) => (
+                      <EquipmentCard
+                        key={item.id}
+                        equipment={item}
+                        onDelete={handleDeleteEquipment}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
             ))
           ) : (
             <div className="text-text/70 text-center">No equipment added yet</div>
