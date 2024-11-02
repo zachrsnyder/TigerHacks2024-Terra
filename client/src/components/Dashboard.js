@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../firebase';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { Search } from 'lucide-react';
 
 const Dashboard = () => {
@@ -12,6 +12,27 @@ const Dashboard = () => {
   const [zipCode, setZipCode] = useState('');
   const [isInitialView, setIsInitialView] = useState(true);
   const [error, setError] = useState('');
+
+  // Fetch farm data on component mount
+  useEffect(() => {
+    const fetchFarmData = async () => {
+      try {
+        const farmDoc = await getDoc(doc(db, 'farms', currentUser.uid));
+        if (farmDoc.exists()) {
+          const farmData = farmDoc.data();
+          if (farmData.location) {
+            setCoordinates(farmData.location);
+            setZipCode(farmData.zipCode || '');
+            setIsInitialView(false);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching farm data:', error);
+      }
+    };
+
+    fetchFarmData();
+  }, [currentUser.uid]);
 
   const handleLogout = async () => {
     try {
@@ -37,17 +58,25 @@ const Dashboard = () => {
 
       if (data.results && data.results[0]) {
         const { lat, lng } = data.results[0].geometry.location;
-        setCoordinates({ lat, lng });
-        setIsInitialView(false);
-        setError('');
-
+        const location = { lat, lng };
+        
+        // Store in Firestore farms collection
         try {
-          await setDoc(doc(db, 'users', currentUser.uid), {
-            farmLocation: { lat, lng },
-            zipCode: zipCode
+          await setDoc(doc(db, 'farms', currentUser.uid), {
+            owner: currentUser.uid,
+            ownerEmail: currentUser.email,
+            location: location,
+            zipCode: zipCode,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
           }, { merge: true });
+
+          setCoordinates(location);
+          setIsInitialView(false);
+          setError('');
         } catch (firestoreError) {
-          console.log('Firestore save error:', firestoreError);
+          console.error('Firestore save error:', firestoreError);
+          setError('Error saving farm location');
         }
       } else {
         setError('Invalid zip code');
