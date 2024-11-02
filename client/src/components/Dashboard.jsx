@@ -1,4 +1,3 @@
-// Dashboard.jsx
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -94,12 +93,29 @@ const Dashboard = () => {
     return Math.round(area);
   };
 
+  const handlePolygonEdit = (updatedPoints) => {
+    setPoints(updatedPoints);
+  };
+
   const handlePlotNameSubmit = async (e) => {
     e.preventDefault();
     if (!newPlotName.trim()) {
       setError('Please enter a plot name');
       return;
     }
+  
+    const calcualteCenter = (points) => {
+      let center = [0, 0];
+      let lat = 0;
+      let lng = 0;
+      for (let i = 0; i < points.length; i++) {
+        const j = (i + 1) % points.length;
+        lat += points[i].lat;
+        lng += points[i].lng;
+      }
+      center = [lat / points.length, lng / points.length];
+      return center;
+    };
 
     try {
       const plotRef = doc(collection(db, 'farms', currentUser.uid, 'plots'));
@@ -110,7 +126,8 @@ const Dashboard = () => {
         updatedAt: new Date().toISOString(),
         farmId: currentUser.uid,
         area: calculateArea(points),
-        active: true
+        active: true,
+        center: calcualteCenter(points)
       });
 
       setExistingPlots(prev => [...prev, {
@@ -129,25 +146,6 @@ const Dashboard = () => {
       console.error('Error saving plot:', error);
       setError('Error saving plot');
     }
-  };
-
-  const handlePolygonEdit = (e) => {
-    const exactPoint = {
-      lat: e.latLng.lat(),
-      lng: e.latLng.lng()
-    };
-
-    const updatedPoints = [...points];
-
-    if (e.vertex !== undefined) {
-      // Update existing vertex
-      updatedPoints[e.vertex] = exactPoint;
-    } else if (e.edge !== undefined) {
-      // Insert new point at the midpoint position
-      updatedPoints.splice(e.edge + 1, 0, exactPoint);
-    }
-
-    setPoints(updatedPoints);
   };
 
   const handleFarmNameSubmit = async (e) => {

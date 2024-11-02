@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { GoogleMap, Polygon } from '@react-google-maps/api';
 
 const containerStyle = {
@@ -18,6 +18,7 @@ const MapComponent = ({
 }) => {
   const [map, setMap] = useState(null);
   const [hoveredPlotId, setHoveredPlotId] = useState(null);
+  const [polygon, setPolygon] = useState(null);
 
   const onLoad = useCallback((map) => {
     setMap(map);
@@ -27,15 +28,54 @@ const MapComponent = ({
     setMap(null);
   }, []);
 
-  const handlePlotClick = (plot, event) => {
-    // Prevent triggering map click when clicking on a plot
-    if (event) {
-      event.stop();
+  const onPolygonLoad = useCallback((poly) => {
+    setPolygon(poly);
+  }, []);
+
+  const handleVertexEdit = useCallback(() => {
+    if (!polygon) return;
+    
+    try {
+      const path = polygon.getPath();
+      const updatedPoints = [];
+      
+      for (let i = 0; i < path.getLength(); i++) {
+        const point = path.getAt(i);
+        updatedPoints.push({
+          lat: point.lat(),
+          lng: point.lng()
+        });
+      }
+      
+      onPolygonEdit(updatedPoints);
+    } catch (error) {
+      console.error('Error updating polygon:', error);
     }
-    if (onPlotClick) {
-      onPlotClick(plot);
-    }
-  };
+  }, [polygon, onPolygonEdit]);
+
+  useEffect(() => {
+    if (!polygon || !window.google) return;
+
+    const path = polygon.getPath();
+    
+    // Remove existing listeners to prevent duplicates
+    window.google.maps.event.clearListeners(path, 'insert_at');
+    window.google.maps.event.clearListeners(path, 'remove_at');
+    window.google.maps.event.clearListeners(path, 'set_at');
+
+    // Add new listeners
+    const insertListener = path.addListener('insert_at', handleVertexEdit);
+    const removeListener = path.addListener('remove_at', handleVertexEdit);
+    const setListener = path.addListener('set_at', handleVertexEdit);
+
+    return () => {
+      if (path) {
+        insertListener.remove();
+        removeListener.remove();
+        setListener.remove();
+      }
+    };
+  }, [polygon, handleVertexEdit]);
 
   if (!isLoaded) return <div>Loading...</div>;
 
@@ -67,7 +107,9 @@ const MapComponent = ({
             editable: true,
             draggable: false,
           }}
-          onMouseUp={onPolygonEdit}
+          onLoad={onPolygonLoad}
+          onMouseUp={handleVertexEdit}
+          onDragEnd={handleVertexEdit}
         />
       )}
       {existingPlots.map((plot) => (
