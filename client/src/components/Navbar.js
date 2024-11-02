@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { X } from 'lucide-react';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../firebase';
 
 const Navbar = () => {
   const { currentUser, logout } = useAuth();
@@ -9,6 +11,8 @@ const Navbar = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const buttonRef = useRef(null);
   const modalRef = useRef(null);
+  const [farmName, setFarmName] = useState('');
+  
 
   useEffect(() => {
     if (isModalOpen && buttonRef.current && modalRef.current) {
@@ -24,6 +28,7 @@ const Navbar = () => {
     try {
       await logout();
       setIsModalOpen(false);
+      setFarmName(''); // Clear farm name state
       navigate('/login');
     } catch (error) {
       console.error('Failed to log out:', error);
@@ -36,6 +41,24 @@ const Navbar = () => {
     setIsModalOpen(false);
   };
 
+
+  useEffect(() => {
+    const getFarmName = async () => {
+      if (currentUser) {
+        try {
+          const farmDoc = await getDoc(doc(db, 'farms', currentUser.uid));
+          if (farmDoc.exists()) {
+            setFarmName(farmDoc.data().farmName);
+          }
+        } catch (error) {
+          console.error('Error getting farm name:', error);
+        }
+      }
+    };
+
+    getFarmName();
+  }, [currentUser]);
+
   if (!currentUser) return null;
 
   return (
@@ -45,10 +68,10 @@ const Navbar = () => {
           <div className="w-full px-0">
             <div className="flex justify-between items-center h-16">
               {/* Logo/Brand section */}
-              <div className="ml-10">
-                <h1 className="text-white text-xl font-bold">Terra</h1>
-              </div>
-
+                <div className="ml-10 flex flex-col items-start">
+                    <h1 className="text-white text-xl font-bold -mt-1">{farmName}</h1>
+                    <span className="text-gray-300 text-xs tracking-wide">Terra</span>
+                </div>
               {/* User section */}
               <div className="flex items-center mr-4 relative">
                 {/* User email */}
