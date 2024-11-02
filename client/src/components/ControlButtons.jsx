@@ -1,5 +1,6 @@
 // ControlButtons.jsx
 import React from 'react';
+import { Plus } from 'lucide-react';
 
 const ControlButtons = ({ 
   isDrawingMode, 
@@ -10,7 +11,7 @@ const ControlButtons = ({
   onCancelDrawing 
 }) => {
   return (
-    <div className="absolute bottom-8 right-8 z-10 space-y-2">
+    <div className="absolute top-20 right-0 z-10 space-y-2">
       {/* <button
         onClick={onLocationChange}
         className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all w-full"
@@ -20,16 +21,19 @@ const ControlButtons = ({
       {!isDrawingMode ? (
         <button
           onClick={onDrawingStart}
-          className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all mr-8"
+          className="bg-primary backdrop-blur-sm px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all mr-8"
         >
-          Draw New Plot
+          <div className="flex items-center gap-2">
+            <Plus className="h-5 w-5" />
+            Add Field
+          </div>
         </button>
       ) : (
         <>
           {points.length >= 3 ? (
             <button
               onClick={onSavePlot}
-              className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all w-full"
+              className="bg-primary backdrop-blur-sm px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all w-full"
             >
               Save Plot
             </button>
@@ -43,7 +47,7 @@ const ControlButtons = ({
           )}
           <button
             onClick={onCancelDrawing}
-            className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all w-full"
+            className="bg-red-400 text-white px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all w-full hover:bg-red-600"
           >
             Cancel Drawing
           </button>
