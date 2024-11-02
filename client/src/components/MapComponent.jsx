@@ -122,7 +122,8 @@ const MapComponent = ({
         mapTypeControl: false,
         fullscreenControl: false,
         streetViewControl: false,
-        zoomControl: false
+        zoomControl: false,
+        tilt: 0
       }}
     >
       {points.length > 0 && (
