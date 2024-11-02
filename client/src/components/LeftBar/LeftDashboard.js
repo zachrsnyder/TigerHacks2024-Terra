@@ -2,6 +2,7 @@ import {React, useEffect, useState} from 'react'
 import EquipmentSection from './EquipmentSection'
 import {Check, ChevronRight, ChevronLeft} from 'lucide-react'
 import PlotSection from './PlotSection'
+import VehicleSection from './VehicleSection'
 
 
 const LeftDashboard = ({pointPlots, setPointPlots, selectedPlot, setSelectedPlot}) => {
@@ -16,6 +17,7 @@ const LeftDashboard = ({pointPlots, setPointPlots, selectedPlot, setSelectedPlot
     <div className='absolute left-0 top-16 h-screen flex '>
       <aside className={`h-screen z-10 text-text transition-all duration-300 bg-primary ${
           isCollapsed ? 'w-0 p-0' : 'w-[20vw]'} overflow-hidden`}>
+        <VehicleSection />
         <EquipmentSection />
         <PlotSection pointPlots={pointPlots} setSelectedPlot={setSelectedPlot} selectedPlot={selectedPlot}/>
       </aside>
