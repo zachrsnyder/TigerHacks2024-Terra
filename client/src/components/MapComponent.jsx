@@ -14,7 +14,8 @@ const MapComponent = ({
   isDrawingMode, 
   onMapClick, 
   onPolygonEdit,
-  onPlotClick 
+  onPlotClick,
+  onMapClickOutside  // Add new prop
 }) => {
   const { mapInstance, setMapInstance, coordinates } = useMap();
   const [hoveredPlotId, setHoveredPlotId] = useState(null);
@@ -41,6 +42,18 @@ const MapComponent = ({
       onPlotClick(plot);
     }
   }, [onPlotClick]);
+
+  const handleMapClick = useCallback((event) => {
+    // Call the regular onMapClick handler first (for drawing mode)
+    if (onMapClick) {
+      onMapClick(event);
+    }
+    
+    // If we're not in drawing mode, trigger the outside click handler
+    if (!isDrawingMode && onMapClickOutside) {
+      onMapClickOutside();
+    }
+  }, [onMapClick, onMapClickOutside, isDrawingMode]);
 
   const handleVertexEdit = useCallback(() => {
     if (!polygon) return;
@@ -103,7 +116,7 @@ const MapComponent = ({
       zoom={18}
       onLoad={onLoad}
       onUnmount={onUnmount}
-      onClick={onMapClick}
+      onClick={handleMapClick}
       options={{
         mapTypeId: 'satellite',
         mapTypeControl: false,
