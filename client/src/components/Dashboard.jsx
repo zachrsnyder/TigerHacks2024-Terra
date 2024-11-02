@@ -295,17 +295,18 @@ const Dashboard = () => {
     <div className="h-screen w-screen relative">
         <LeftDashboard pointPlots={existingPlots} setPointPlots={setExistingPlots} selectedPlot={selectedPlot} setSelectedPlot={setSelectedPlot}/>
       <div className="h-screen w-screen">
-        <MapComponent
-          isLoaded={isLoaded}
-          coordinates={coordinates}
-          points={points}
-          existingPlots={existingPlots.filter(plot => 
-            !editingPlot || plot.id !== editingPlot.id
-          )}
-          isDrawingMode={isDrawingMode}
-          onMapClick={handleMapClick}
-          onPolygonEdit={handlePolygonEdit}
-          onPlotClick={(plot) => setSelectedPlot(plot)}
+      <MapComponent
+        isLoaded={isLoaded}
+        coordinates={coordinates}
+        points={points}
+        existingPlots={existingPlots.filter(plot => 
+          !editingPlot || plot.id !== editingPlot.id
+        )}
+        isDrawingMode={isDrawingMode}
+        onMapClick={handleMapClick}
+        onPolygonEdit={handlePolygonEdit}
+        onPlotClick={(plot) => setSelectedPlot(plot)}
+        onMapClickOutside={() => setSelectedPlot(null)}
         />
       </div>
       
