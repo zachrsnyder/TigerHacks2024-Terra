@@ -117,7 +117,7 @@ const Navbar = () => {
   return (
     <>
       <div className="absolute top-0 left-0 right-0 z-[100]">
-        <nav className="bg-slate-800/90 backdrop-blur-sm shadow-lg">
+        <nav className="bg-slate-800 backdrop-blur-sm shadow-lg">
           <div className="w-full px-0">
             <div className="flex justify-between items-center h-16">
               {/* Logo/Brand section */}

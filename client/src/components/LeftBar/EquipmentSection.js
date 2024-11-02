@@ -4,11 +4,6 @@ import {useAuth} from '../../contexts/AuthContext'
 import { Folder, FolderOpen, Plus } from 'lucide-react';
 import { size } from 'lodash';
 
-
-
-//reuseable dropdown container logic
-
-
 function EquipmentSection() {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -31,14 +26,19 @@ function EquipmentSection() {
   return (
     <div className="border-b border-gray-300">
       <div className='flex justify-between items-center'>
-        <div className="flex items-center cursor-pointer p-4"
+        <div 
+          className="flex items-center cursor-pointer p-4"
           onClick={toggleDropdown}
         >
           {isOpen ? <FolderOpen size={24} className="text-text mr-3" /> : <Folder size={24} className="text-text mr-3" />}
           <h3 className="text-lg font-semibold">Equipment</h3>
         </div>
         <div className='pr-4'>
-          <Plus size={24} className="text-white" onClick={setShowAddModal(true)}/>
+          <Plus 
+            size={24} 
+            className="text-white cursor-pointer" 
+            onClick={() => setShowAddModal(true)} // Fixed this line
+          />
         </div>
       </div>
       {isOpen && (isLoading ? (
