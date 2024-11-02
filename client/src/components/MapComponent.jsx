@@ -3,8 +3,21 @@ import { GoogleMap, Polygon, useJsApiLoader } from '@react-google-maps/api';
 import { useMap } from '../contexts/MapContext';
 import { loaderOptions } from './JsApiLoaderConfig';
 
-const MapComponent = ({ points, existingPlots, isDrawingMode, onMapClick, onPolygonEdit, onPlotClick }) => {
-  const { isLoaded } = useJsApiLoader(loaderOptions);
+const containerStyle = {
+  width: '100%',
+  height: '100%'
+};
+
+const MapComponent = ({ 
+  isLoaded, 
+  points, 
+  existingPlots, 
+  isDrawingMode, 
+  onMapClick, 
+  onPolygonEdit,
+  onPlotClick,
+  onMapClickOutside  // Add new prop
+}) => {
   const { mapInstance, setMapInstance, coordinates } = useMap();
   const [hoveredPlotId, setHoveredPlotId] = useState(null);
   const [polygon, setPolygon] = useState(null);
@@ -25,6 +38,18 @@ const MapComponent = ({ points, existingPlots, isDrawingMode, onMapClick, onPoly
     if (event) event.stop();
     if (onPlotClick) onPlotClick(plot);
   }, [onPlotClick]);
+
+  const handleMapClick = useCallback((event) => {
+    // Call the regular onMapClick handler first (for drawing mode)
+    if (onMapClick) {
+      onMapClick(event);
+    }
+    
+    // If we're not in drawing mode, trigger the outside click handler
+    if (!isDrawingMode && onMapClickOutside) {
+      onMapClickOutside();
+    }
+  }, [onMapClick, onMapClickOutside, isDrawingMode]);
 
   const handleVertexEdit = useCallback(() => {
     if (!polygon) return;
@@ -78,13 +103,15 @@ const MapComponent = ({ points, existingPlots, isDrawingMode, onMapClick, onPoly
       zoom={18}
       onLoad={onLoad}
       onUnmount={onUnmount}
-      onClick={onMapClick}
+      onClick={handleMapClick}
       options={{
         mapTypeId: 'satellite',
         mapTypeControl: false,
         fullscreenControl: false,
         streetViewControl: false,
         zoomControl: false,
+        tilt: 0,
+        rotateControl: false
       }}
     >
       {points.length > 0 && (
@@ -109,15 +136,15 @@ const MapComponent = ({ points, existingPlots, isDrawingMode, onMapClick, onPoly
           key={plot.id}
           path={plot.boundary}
           options={{
-            fillColor: hoveredPlotId === plot.id ? "#66BB6A" : "#4CAF50",
+            fillColor: hoveredPlotId === plot.id ? plot.color || "#66BB6A" : plot.color || "#4CAF50",
             fillOpacity: hoveredPlotId === plot.id ? 0.9 : 0.8,
-            strokeColor: hoveredPlotId === plot.id ? "#66BB6A" : "#4CAF50",
+            strokeColor: hoveredPlotId === plot.id ? plot.color || "#66BB6A" : plot.color || "#4CAF50",
             strokeOpacity: 1,
             strokeWeight: hoveredPlotId === plot.id ? 2 : 1,
             editable: false,
             draggable: false,
-            cursor: 'pointer',
-          }}
+            cursor: 'pointer'
+    }}
           onClick={(e) => handlePlotClick(plot, e)}
           onMouseOver={() => setHoveredPlotId(plot.id)}
           onMouseOut={() => setHoveredPlotId(null)}

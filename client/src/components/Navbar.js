@@ -5,6 +5,7 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { MapPin, Search, X, Trees  } from 'lucide-react';
 import { useMap } from '../contexts/MapContext';
+import logoImage from '../assets/farm t.png';
 
 
 const Navbar = () => {
@@ -145,7 +146,7 @@ const Navbar = () => {
                 className="flex items-center ml-4 cursor-pointer" 
                 onClick={handleFarmClick}
               >
-                <Trees />
+                <img src={logoImage} alt="Logo" className='w-12 h-12 shadow-sm '/>
                 <div className="ml-4 flex flex-col items-start">
                   {farmName ? (
                     <>

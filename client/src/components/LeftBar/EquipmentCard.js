@@ -1,22 +1,30 @@
 import React from 'react';
+import { Tractor, Trash2 } from 'lucide-react'; // Import appropriate icons
 
-const EquipmentCard = ({equipment}) => {
+const EquipmentCard = ({ equipment, onDelete }) => {
   return (
-    <div className="w-full p-4 bg-white border-solid border-y-2 border-black">
-      <div className="flex justify-between items-center mb-2"> 
-        <h3 className="text-lg font-semibold">test</h3>
-        <span className={`text-sm font-medium ${'Active' === 'Active' ? 'text-green-500' : 'text-gray-500'}`}>
-          Active
-        </span>
+    <div className="bg-secondary/50 p-3 rounded-lg hover:bg-secondary/70 transition-colors">
+      <div className="flex justify-between items-start">
+        <div className="flex items-center space-x-3">
+          <Tractor className="text-text" size={20} />
+          <div>
+            {/* Displaying Name and Type */}
+            <h3 className="text-text font-medium">{equipment.Name} ({equipment.Type})</h3>
+            <p className="text-text/70 text-sm">{equipment.VehicleID}</p>
+          </div>
+        </div>
+        <button
+          onClick={() => onDelete(equipment.id)}
+          className="text-red-400 hover:text-red-500 transition-colors"
+        >
+          <Trash2 size={18} />
+        </button>
       </div>
-      <div className="relative h-2 w-full bg-gray-200 rounded-full">
-        <div
-          className="absolute top-0 left-0 h-full bg-blue-500 rounded-full"
-          style={{ width: `${50}%` }}
-        ></div>
-      </div>
+      {equipment.Description && (
+        <p className="text-text/70 text-sm mt-2">{equipment.Description}</p>
+      )}
     </div>
-  )
-}
+  );
+};
 
-export default EquipmentCard
+export default EquipmentCard;
