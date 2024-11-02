@@ -1,4 +1,3 @@
-// MapComponent.jsx
 import React, { useState, useCallback } from 'react';
 import { GoogleMap, Polygon } from '@react-google-maps/api';
 
@@ -14,9 +13,11 @@ const MapComponent = ({
   existingPlots, 
   isDrawingMode, 
   onMapClick, 
-  onPolygonEdit 
+  onPolygonEdit,
+  onPlotClick 
 }) => {
   const [map, setMap] = useState(null);
+  const [hoveredPlotId, setHoveredPlotId] = useState(null);
 
   const onLoad = useCallback((map) => {
     setMap(map);
@@ -25,6 +26,16 @@ const MapComponent = ({
   const onUnmount = useCallback(() => {
     setMap(null);
   }, []);
+
+  const handlePlotClick = (plot, event) => {
+    // Prevent triggering map click when clicking on a plot
+    if (event) {
+      event.stop();
+    }
+    if (onPlotClick) {
+      onPlotClick(plot);
+    }
+  };
 
   if (!isLoaded) return <div>Loading...</div>;
 
@@ -64,14 +75,18 @@ const MapComponent = ({
           key={plot.id}
           path={plot.boundary}
           options={{
-            fillColor: "#4CAF50",
-            fillOpacity: 0.8,
-            strokeColor: "#4CAF50",
+            fillColor: hoveredPlotId === plot.id ? "#66BB6A" : "#4CAF50",
+            fillOpacity: hoveredPlotId === plot.id ? 0.9 : 0.8,
+            strokeColor: hoveredPlotId === plot.id ? "#66BB6A" : "#4CAF50",
             strokeOpacity: 1,
-            strokeWeight: 1,
+            strokeWeight: hoveredPlotId === plot.id ? 2 : 1,
             editable: false,
             draggable: false,
+            cursor: 'pointer'
           }}
+          onClick={(e) => handlePlotClick(plot, e)}
+          onMouseOver={() => setHoveredPlotId(plot.id)}
+          onMouseOut={() => setHoveredPlotId(null)}
         />
       ))}
     </GoogleMap>

@@ -11,6 +11,7 @@ import PlotNameInput from './PlotNameInput';
 import ControlButtons from './ControlButtons';
 import ErrorMessage from './ErrorMessage';
 import LeftDashboard from './LeftBar/LeftDashboard';
+import FieldInfo from './FieldInfo';
 
 const Dashboard = () => {
   const { currentUser } = useAuth();
@@ -25,6 +26,7 @@ const Dashboard = () => {
   const [isNamingPlot, setIsNamingPlot] = useState(false);
   const [newPlotName, setNewPlotName] = useState('');
   const [isDrawingMode, setIsDrawingMode] = useState(false);
+  const [selectedPlot, setSelectedPlot] = useState(null);
 
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
@@ -39,7 +41,7 @@ const Dashboard = () => {
         if (farmDoc.exists()) {
           const farmData = farmDoc.data();
           if (farmData.farmName && farmData.location) {
-            setFarmName(farmData.farmName);
+            setFarmName(farmData.farmName); 
             setCoordinates(farmData.location);
             setZipCode(farmData.zipCode || '');
             setCurrentStep('complete');
@@ -231,6 +233,7 @@ const Dashboard = () => {
           isDrawingMode={isDrawingMode}
           onMapClick={handleMapClick}
           onPolygonEdit={handlePolygonEdit}
+          onPlotClick={(plot) => setSelectedPlot(plot)}
         />
       </div>
       
@@ -264,6 +267,13 @@ const Dashboard = () => {
       )}
       
       <ErrorMessage error={error} />
+
+      {selectedPlot && (
+      <FieldInfo
+      plot={selectedPlot}
+      onClose={() => setSelectedPlot(null)}
+      />
+)}
     </div>
   );
 };
