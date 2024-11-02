@@ -3,7 +3,7 @@ import getEquipmentByUserUID from './queries'
 import {useAuth} from '../../contexts/AuthContext'
 import { Folder, FolderOpen, Plus } from 'lucide-react';
 
-function PlotSection() {
+function PlotSection({pointPlots}) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [plot, setPlot] = useState([])
@@ -14,11 +14,12 @@ function PlotSection() {
   useEffect(() => {
     const setPlotList = async() => {
       //setPlot(await getPlotByUserUID(currentUser))
+      
     }
-
+ 
     setPlotList()
     setIsLoading(false)
-  }, [])
+  }, [pointPlots])
 
   const toggleDropdown = () => setIsOpen(!isOpen);
 
