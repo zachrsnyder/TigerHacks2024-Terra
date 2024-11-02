@@ -7,7 +7,7 @@ const PlotCard = ({data}) => {
 
 
   return (
-    <div className='w-full border-b-2 border-secondary' onClick={handleClick}>
+    <div className=' rounded-md shadow-md hover:bg-primary-hover mx-2 my-[.1rem] bg-primary' onClick={handleClick}>
         <p className='text-xl'>{data.name}</p>
     </div>
   )

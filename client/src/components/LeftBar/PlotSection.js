@@ -19,22 +19,21 @@ function PlotSection({pointPlots}) {
   useEffect(() => {
     setIsLoading(true);
 
-    // Define the asynchronous function inside useEffect
+    // fetch plots function
     const fetchPlots = async () => {
         async function getFarmPlots(farmId) {
             // Reference the farm document
             const farmDocRef = doc(db, 'farms', farmId);
             console.log(farmDocRef);
 
-            // Reference the plots subcollection within the specific farm document
             const plotsCollectionRef = collection(farmDocRef, 'plots');
             console.log(plotsCollectionRef);
 
-            // Fetch all documents in the plots subcollection
+            // fetch plot docs from collection
             const plotsSnapshot = await getDocs(plotsCollectionRef);
             console.log(plotsSnapshot);
 
-            // Extract plot data
+            //map the docs to plots array
             const plots = plotsSnapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data(),
@@ -46,7 +45,6 @@ function PlotSection({pointPlots}) {
 
         try {
             const myPlots = await getFarmPlots(currentUser.uid);
-            console.log(myPlots); // Use myPlots here
             setPlots(myPlots);
             console.log(Array.isArray(myPlots));
         } catch (error) {
@@ -56,7 +54,6 @@ function PlotSection({pointPlots}) {
         }
     };
 
-    // Call the async function
     fetchPlots();
 }, [pointPlots]);
 
@@ -66,7 +63,7 @@ function PlotSection({pointPlots}) {
     <div className="border-b border-gray-300">
       <div className='flex justify-between items-center'>
         <div 
-          className="flex items-center cursor-pointer p-4"
+          className="flex items-center cursor-pointer pt-4 px-4"
           onClick={toggleDropdown}
         >
           {isOpen ? <FolderOpen size={24} className="text-text mr-3" /> : <Folder size={24} className="text-text mr-3" />}
@@ -85,8 +82,8 @@ function PlotSection({pointPlots}) {
           <h2>Loading...</h2>
         </div>
       ) : (
-        <div className="p-4 space-y-2">
-          {plots.forEach((plot) => (
+        <div className="">
+          {plots.map((plot) => (
             <PlotCard data={plot}/>
           ))}
         </div>
