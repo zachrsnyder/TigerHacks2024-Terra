@@ -11,16 +11,16 @@ const ControlButtons = ({
 }) => {
   return (
     <div className="absolute bottom-8 right-8 z-10 space-y-2">
-      <button
+      {/* <button
         onClick={onLocationChange}
         className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all w-full"
       >
         Change Location
-      </button>
+      </button> */}
       {!isDrawingMode ? (
         <button
           onClick={onDrawingStart}
-          className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all w-full"
+          className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all mr-8"
         >
           Draw New Plot
         </button>
