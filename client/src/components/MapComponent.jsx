@@ -149,15 +149,15 @@ const MapComponent = ({
           key={plot.id}
           path={plot.boundary}
           options={{
-            fillColor: hoveredPlotId === plot.id ? "#66BB6A" : "#4CAF50",
+            fillColor: hoveredPlotId === plot.id ? plot.color || "#66BB6A" : plot.color || "#4CAF50",
             fillOpacity: hoveredPlotId === plot.id ? 0.9 : 0.8,
-            strokeColor: hoveredPlotId === plot.id ? "#66BB6A" : "#4CAF50",
+            strokeColor: hoveredPlotId === plot.id ? plot.color || "#66BB6A" : plot.color || "#4CAF50",
             strokeOpacity: 1,
             strokeWeight: hoveredPlotId === plot.id ? 2 : 1,
             editable: false,
             draggable: false,
             cursor: 'pointer'
-          }}
+    }}
           onClick={(e) => handlePlotClick(plot, e)}
           onMouseOver={() => setHoveredPlotId(plot.id)}
           onMouseOut={() => setHoveredPlotId(null)}
