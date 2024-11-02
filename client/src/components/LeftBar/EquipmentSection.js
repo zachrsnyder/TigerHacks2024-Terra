@@ -3,6 +3,7 @@ import getEquipmentByUserUID from './queries'
 import {useAuth} from '../../contexts/AuthContext'
 import { Folder, FolderOpen, Plus } from 'lucide-react';
 import { size } from 'lodash';
+import EquipmentCard from './EquipmentCard';
 
 function EquipmentSection() {
   const [isOpen, setIsOpen] = useState(false);
@@ -48,7 +49,7 @@ function EquipmentSection() {
       ) : (
         <div className="p-4 space-y-2">
           {equipment.map((tool) => (
-            <EquipmentSection equipment={tool}/>
+            <EquipmentCard equipment={tool}/>
           ))}
         </div>
       ))}

@@ -1,13 +1,33 @@
 import {React, useEffect, useState} from 'react'
 import EquipmentSection from './EquipmentSection'
+import {Check, ChevronRight, ChevronLeft} from 'lucide-react'
+import { transform } from 'lodash'
+import { color } from 'chart.js/helpers'
+import PlotSection from './PlotSection'
 
 
 const LeftDashboard = () => {
-    
+    const [isCollapsed, setIsCollapsed] = useState(false);
+    const [isHovered, setIsHovered] = useState(false);
+
+    const toggleAside = () => {
+      setIsCollapsed(!isCollapsed);
+    };  
+
     return (
-    <aside className='w-1/4 h-screen z-10 bg-secondary text-text fixed top-16 left-0'>
+    <div className='absolute left-0 top-16 h-screen flex '>
+      <aside className={`h-screen z-10 text-text transition-all duration-300 bg-secondary ${
+          isCollapsed ? 'w-0 p-0' : 'w-[20vw]'} overflow-hidden`}>
         <EquipmentSection />
-    </aside>
+        <PlotSection />
+      </aside>
+      <div className='h-full items-center relative flex justify-center'>
+        <div className="w-[2vw] h-[6vw] bg-primary rounded-r-full justify-center align-middle items-center flex" style={{ opacity: isHovered ? .70 : .30, color: 'white' }} onClick={toggleAside} onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}>
+          {isCollapsed ? (<ChevronRight color='white' size={24}/>) : (<ChevronLeft color='white' size={24}/>) }
+        </div>
+      </div>
+    </div>
   )
 }
 
