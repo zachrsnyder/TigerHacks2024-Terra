@@ -5,7 +5,7 @@ import Login from './components/Login';
 import Register from './components/Register';
 import Dashboard from './components/Dashboard';
 import Navbar from './components/Navbar';
-import YourFarm from './components/YourFarm';
+import MyFarm from './components/MyFarm';
 
 function PrivateRoute({ children }) {
   const { currentUser } = useAuth();
@@ -33,7 +33,7 @@ function App() {
               path="/myfarm"
               element={
                 <PrivateRoute>
-                  <YourFarm />
+                  <MyFarm />
                 </PrivateRoute>
               }
             />
