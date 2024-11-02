@@ -5,7 +5,7 @@ import PlotSection from './PlotSection'
 
 
 const LeftDashboard = ({pointPlots, setPointPlots, selectedPlot, setSelectedPlot}) => {
-    const [isCollapsed, setIsCollapsed] = useState(false);
+    const [isCollapsed, setIsCollapsed] = useState(true);
     const [isHovered, setIsHovered] = useState(false);
 
     const toggleAside = () => {

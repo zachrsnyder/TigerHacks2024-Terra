@@ -11,11 +11,12 @@ import ControlButtons from './ControlButtons';
 import ErrorMessage from './ErrorMessage';
 import LeftDashboard from './LeftBar/LeftDashboard';
 import FieldInfo from './FieldInfo';
+import { useMap } from '../contexts/MapContext';
 
 const Dashboard = () => {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
-  const [coordinates, setCoordinates] = useState({ lat: 38.9517, lng: -92.3341 });
+  const { coordinates, setCoordinates } = useMap();
   const [farmName, setFarmName] = useState('');
   const [zipCode, setZipCode] = useState('');
   const [currentStep, setCurrentStep] = useState('loading');
@@ -26,12 +27,48 @@ const Dashboard = () => {
   const [newPlotName, setNewPlotName] = useState('');
   const [isDrawingMode, setIsDrawingMode] = useState(false);
   const [selectedPlot, setSelectedPlot] = useState(null);
+  const [editingPlot, setEditingPlot] = useState(null);
+  const [isEditingShape, setIsEditingShape] = useState(false);
+
+  const handleStartShapeEdit = (plot) => {
+    setEditingPlot(plot);
+    setIsEditingShape(true);
+    setPoints(plot.boundary);
+    setIsDrawingMode(true);
+  };
 
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
     libraries: ['geometry']
   });
+
+  const handleUpdatePlot = async (plotId, updatedData) => {
+    try {
+      // Update in Firestore
+      await setDoc(
+        doc(db, 'farms', currentUser.uid, 'plots', plotId),
+        updatedData,
+        { merge: true }
+      );
+      
+      // Update local state
+      setExistingPlots(prevPlots =>
+        prevPlots.map(plot =>
+          plot.id === plotId ? { ...plot, ...updatedData } : plot
+        )
+      );
+      
+      // Update selected plot
+      setSelectedPlot(prev =>
+        prev.id === plotId ? { ...prev, ...updatedData } : prev
+      );
+    } catch (error) {
+      console.error('Error updating plot:', error);
+      setError('Error updating plot');
+    }
+  };
+  
 
   useEffect(() => {
     const fetchData = async () => {
@@ -105,42 +142,61 @@ const Dashboard = () => {
     }
   
     const calcualteCenter = (points) => {
-      let center = [0, 0];
       let lat = 0;
       let lng = 0;
       for (let i = 0; i < points.length; i++) {
-        const j = (i + 1) % points.length;
         lat += points[i].lat;
         lng += points[i].lng;
       }
-      center = [lat / points.length, lng / points.length];
-      return center;
+      return [lat / points.length, lng / points.length];
     };
-
+  
     try {
-      const plotRef = doc(collection(db, 'farms', currentUser.uid, 'plots'));
-      await setDoc(plotRef, {
-        boundary: points,
-        name: newPlotName.trim(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        farmId: currentUser.uid,
-        area: calculateArea(points),
-        active: true,
-        center: calcualteCenter(points)
-      });
-
-      setExistingPlots(prev => [...prev, {
-        id: plotRef.id,
-        boundary: points,
-        name: newPlotName.trim(),
-        area: calculateArea(points)
-      }]);
-
+      if (editingPlot) {
+        // Update existing plot
+        const updatedPlot = {
+          ...editingPlot,
+          boundary: points,
+          area: calculateArea(points),
+          center: calcualteCenter(points),
+          updatedAt: new Date().toISOString()
+        };
+  
+        await setDoc(
+          doc(db, 'farms', currentUser.uid, 'plots', editingPlot.id),
+          updatedPlot,
+          { merge: true }
+        );
+  
+        setExistingPlots(prev =>
+          prev.map(plot =>
+            plot.id === editingPlot.id ? updatedPlot : plot
+          )
+        );
+      } else {
+        // Create new plot
+        const plotRef = doc(collection(db, 'farms', currentUser.uid, 'plots'));
+        const newPlot = {
+          boundary: points,
+          name: newPlotName.trim(),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          farmId: currentUser.uid,
+          area: calculateArea(points),
+          active: true,
+          center: calcualteCenter(points)
+        };
+  
+        await setDoc(plotRef, newPlot);
+        setExistingPlots(prev => [...prev, { id: plotRef.id, ...newPlot }]);
+      }
+  
       setNewPlotName('');
       setPoints([]);
       setIsNamingPlot(false);
       setIsDrawingMode(false);
+      setIsEditingShape(false);
+      setEditingPlot(null);
       setError('');
     } catch (error) {
       console.error('Error saving plot:', error);
@@ -231,6 +287,8 @@ const Dashboard = () => {
     setIsDrawingMode(false);
     setIsNamingPlot(false);
     setNewPlotName('');
+    setIsEditingShape(false);
+    setEditingPlot(null);
   };
 
   return (
@@ -241,7 +299,9 @@ const Dashboard = () => {
           isLoaded={isLoaded}
           coordinates={coordinates}
           points={points}
-          existingPlots={existingPlots}
+          existingPlots={existingPlots.filter(plot => 
+            !editingPlot || plot.id !== editingPlot.id
+          )}
           isDrawingMode={isDrawingMode}
           onMapClick={handleMapClick}
           onPolygonEdit={handlePolygonEdit}
@@ -268,25 +328,36 @@ const Dashboard = () => {
       )}
       
       {currentStep === 'complete' && (
-        <ControlButtons
-          isDrawingMode={isDrawingMode}
-          points={points}
-          onLocationChange={() => setCurrentStep('zipCode')}
-          onDrawingStart={() => setIsDrawingMode(true)}
-          onSavePlot={() => setIsNamingPlot(true)}
-          onCancelDrawing={clearDrawing}
-        />
+      <ControlButtons
+        isDrawingMode={isDrawingMode}
+        points={points}
+        onLocationChange={() => setCurrentStep('zipCode')}
+        onDrawingStart={() => {
+          setIsDrawingMode(true);
+          setEditingPlot(null);
+        }}
+        onSavePlot={() => {
+          setIsNamingPlot(true);
+          if (editingPlot) {
+            setNewPlotName(editingPlot.name);
+          }
+        }}
+        onCancelDrawing={clearDrawing}
+        isEditing={isEditingShape}
+      />
       )}
       
       <ErrorMessage error={error} />
 
       {selectedPlot && (
-        <FieldInfo
+      <FieldInfo
         plot={selectedPlot}
         onClose={() => setSelectedPlot(null)}
         onDelete={handleDeletePlot}
+        onUpdate={handleUpdatePlot}
+        onStartShapeEdit={handleStartShapeEdit}
       />
-)}
+    )}
 
     </div>
   );
