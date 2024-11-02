@@ -6,7 +6,7 @@ export default async function getEquipmentByUserUID(userUID) {
     const equipmentRef = collection(db, "Equipment");
 
     //query for equipment for current user
-    const q = query(equipmentRef, where("UserUID", "==", userUID));
+    const q = query(equipmentRef, where("UserUID", "==", userUID.uid));
 
     // query db
     const querySnapshot = await getDocs(q);

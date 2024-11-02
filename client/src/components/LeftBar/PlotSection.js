@@ -2,24 +2,63 @@ import React, { useState, useEffect } from 'react';
 import getEquipmentByUserUID from './queries'
 import {useAuth} from '../../contexts/AuthContext'
 import { Folder, FolderOpen, Plus } from 'lucide-react';
+import { doc, collection, getDocs } from 'firebase/firestore';
+import PlotCard from './PlotCard';
+import { db } from '../../firebase';
+import { uid } from 'chart.js/helpers';
+import { map, isArray } from 'lodash';
 
 function PlotSection({pointPlots}) {
-  const [isOpen, setIsOpen] = useState(false);
+    const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [plot, setPlot] = useState([])
+  const [plots, setPlots] = useState([])
   const { currentUser } = useAuth();
   const [toggleAdd, setToggleAdd] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
 
   useEffect(() => {
-    const setPlotList = async() => {
-      //setPlot(await getPlotByUserUID(currentUser))
-      
-    }
- 
-    setPlotList()
-    setIsLoading(false)
-  }, [pointPlots])
+    setIsLoading(true);
+
+    // Define the asynchronous function inside useEffect
+    const fetchPlots = async () => {
+        async function getFarmPlots(farmId) {
+            // Reference the farm document
+            const farmDocRef = doc(db, 'farms', farmId);
+            console.log(farmDocRef);
+
+            // Reference the plots subcollection within the specific farm document
+            const plotsCollectionRef = collection(farmDocRef, 'plots');
+            console.log(plotsCollectionRef);
+
+            // Fetch all documents in the plots subcollection
+            const plotsSnapshot = await getDocs(plotsCollectionRef);
+            console.log(plotsSnapshot);
+
+            // Extract plot data
+            const plots = plotsSnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data(),
+            }));
+            console.log(plots);
+
+            return plots;
+        }
+
+        try {
+            const myPlots = await getFarmPlots(currentUser.uid);
+            console.log(myPlots); // Use myPlots here
+            setPlots(myPlots);
+            console.log(Array.isArray(myPlots));
+        } catch (error) {
+            console.error("Error fetching plots:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Call the async function
+    fetchPlots();
+}, [pointPlots]);
 
   const toggleDropdown = () => setIsOpen(!isOpen);
 
@@ -47,8 +86,8 @@ function PlotSection({pointPlots}) {
         </div>
       ) : (
         <div className="p-4 space-y-2">
-          {plot.map((tool) => (
-            <div>Plot!</div>
+          {plots.forEach((plot) => (
+            <PlotCard data={plot}/>
           ))}
         </div>
       ))}
