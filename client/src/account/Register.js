@@ -21,12 +21,12 @@ function Register() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold text-center text-gray-700">Register</h2>
+    <div className="flex items-center justify-center min-h-screen bg-secondary">
+      <div className="w-full max-w-md p-8 space-y-6 bg-primary rounded-lg shadow-lg">
+        <h2 className="text-2xl font-bold text-center text-text">Register</h2>
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
-            <label className="block text-sm font-medium text-gray-600">Name</label>
+            <label className="block text-sm font-medium text-text">Name</label>
             <input
               type="text"
               value={name}
@@ -37,7 +37,7 @@ function Register() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-600">Email</label>
+            <label className="block text-sm font-medium text-text">Email</label>
             <input
               type="email"
               value={email}
@@ -48,7 +48,7 @@ function Register() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-600">Password</label>
+            <label className="block text-sm font-medium text-text">Password</label>
             <input
               type="password"
               value={password}
@@ -59,7 +59,7 @@ function Register() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-600">Confirm Password</label>
+            <label className="block text-sm font-medium text-text">Confirm Password</label>
             <input
               type="password"
               value={confirmPassword}
@@ -76,7 +76,7 @@ function Register() {
             Register
           </button>
         </form>
-        <p className="text-sm text-center text-gray-600">
+        <p className="text-sm text-center text-text">
           Already have an account?{' '}
           <a href="#" className="text-blue-500 hover:underline">
             Login
