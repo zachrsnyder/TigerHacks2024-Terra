@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { GoogleMap, Polygon } from '@react-google-maps/api';
+import { useMap } from '../contexts/MapContext';
 
 const containerStyle = {
   width: '100%',
@@ -8,7 +9,6 @@ const containerStyle = {
 
 const MapComponent = ({ 
   isLoaded, 
-  coordinates, 
   points, 
   existingPlots, 
   isDrawingMode, 
@@ -16,17 +16,17 @@ const MapComponent = ({
   onPolygonEdit,
   onPlotClick 
 }) => {
-  const [map, setMap] = useState(null);
+  const { mapInstance, setMapInstance, coordinates } = useMap();
   const [hoveredPlotId, setHoveredPlotId] = useState(null);
   const [polygon, setPolygon] = useState(null);
-
+  
   const onLoad = useCallback((map) => {
-    setMap(map);
-  }, []);
+    setMapInstance(map);
+  }, [setMapInstance]);
 
   const onUnmount = useCallback(() => {
-    setMap(null);
-  }, []);
+    setMapInstance(null);
+  }, [setMapInstance]);
 
   const onPolygonLoad = useCallback((poly) => {
     setPolygon(poly);
@@ -86,6 +86,13 @@ const MapComponent = ({
       }
     };
   }, [polygon, handleVertexEdit]);
+
+  // Clean up mapInstance on component unmount
+  useEffect(() => {
+    return () => {
+      setMapInstance(null);
+    };
+  }, [setMapInstance]);
 
   if (!isLoaded) return <div>Loading...</div>;
 

@@ -4,9 +4,12 @@ import { useAuth } from '../contexts/AuthContext';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { MapPin, Search, X, Trees  } from 'lucide-react';
+import { useMap } from '../contexts/MapContext';
 
 
 const Navbar = () => {
+
+    const { centerMap } = useMap();
     const { currentUser, logout } = useAuth();
     const navigate = useNavigate();
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -112,6 +115,24 @@ const Navbar = () => {
     }
   };
 
+  const handleFarmClick = async () => {
+    if (zipCode) {
+      try {
+        const response = await fetch(
+          `https://maps.googleapis.com/maps/api/geocode/json?address=${zipCode}&key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY}`
+        );
+        const data = await response.json();
+
+        if (data.results && data.results[0]) {
+          const { lat, lng } = data.results[0].geometry.location;
+          centerMap({ lat, lng });
+        }
+      } catch (error) {
+        console.error('Error getting coordinates:', error);
+      }
+    }
+  };
+
   if (!currentUser) return null;
 
   return (
@@ -120,7 +141,10 @@ const Navbar = () => {
         <nav className="bg-primary backdrop-blur-sm shadow-lg">
           <div className="w-full px-0">
             <div className="flex justify-between items-center h-16">
-              <div className="flex items-center ml-4">
+            <div 
+                className="flex items-center ml-4 cursor-pointer" 
+                onClick={handleFarmClick}
+              >
                 <Trees />
                 <div className="ml-4 flex flex-col items-start">
                   {farmName ? (

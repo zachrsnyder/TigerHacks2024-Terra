@@ -11,11 +11,12 @@ import ControlButtons from './ControlButtons';
 import ErrorMessage from './ErrorMessage';
 import LeftDashboard from './LeftBar/LeftDashboard';
 import FieldInfo from './FieldInfo';
+import { useMap } from '../contexts/MapContext';
 
 const Dashboard = () => {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
-  const [coordinates, setCoordinates] = useState({ lat: 38.9517, lng: -92.3341 });
+  const { coordinates, setCoordinates } = useMap();
   const [farmName, setFarmName] = useState('');
   const [zipCode, setZipCode] = useState('');
   const [currentStep, setCurrentStep] = useState('loading');
