@@ -5,7 +5,7 @@ const FieldInfo = ({ plot, onClose, onDelete }) => {
   if (!plot) return null;
 
   // Convert square meters to acres
-  const areaInAcres = (plot.area / 4046.86).toFixed(2);
+  const areaInAcres = (plot.area / 5446.86).toFixed(2);
 
   // Format date strings
   const formatDate = (dateString) => {
