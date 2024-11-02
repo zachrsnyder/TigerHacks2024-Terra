@@ -1,21 +1,30 @@
+// src/components/Login.js
 import React, { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate, Link } from 'react-router-dom'; // Add Link import
 
 function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Username:', username);
-    console.log('Password:', password);
-    setUsername('');
-    setPassword('');
+    try {
+      await login(username, password);
+      navigate('/');
+    } catch (error) {
+      setError('Failed to sign in: ' + error.message);
+    }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-sm">
         <h2 className="text-2xl font-semibold text-center mb-6">Login</h2>
+        {error && <div className="mb-4 text-red-500 text-center">{error}</div>}
         <form onSubmit={handleSubmit}>
           <div className="mb-4 flex items-center">
             <label htmlFor="username" className="mr-2 text-gray-700 w-20 text-right">
@@ -50,6 +59,11 @@ function Login() {
             Login
           </button>
         </form>
+        <div className="mt-4 text-center">
+          <Link to="/register" className="text-blue-500 hover:text-blue-600">
+            Need an account? Register
+          </Link>
+        </div>
       </div>
     </div>
   );

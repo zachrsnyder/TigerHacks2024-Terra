@@ -1,23 +1,28 @@
-// src/Register.js
-
+// src/components/Register.js
 import React, { useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate, Link } from 'react-router-dom';
 
 function Register() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const { signup } = useAuth();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
       alert("Passwords do not match!");
       return;
     }
-    console.log('Name:', name);
-    console.log('Email:', email);
-    console.log('Password:', password);
-    // Add registration logic here
+    try {
+      await signup(email, password);
+      navigate('/');
+    } catch (error) {
+      console.log('Failed to create account:', error.message);
+    }
   };
 
   return (
@@ -78,9 +83,9 @@ function Register() {
         </form>
         <p className="text-sm text-center text-gray-600">
           Already have an account?{' '}
-          <a href="#" className="text-blue-500 hover:underline">
+          <Link to="/login" className="text-blue-500 hover:text-blue-600">
             Login
-          </a>
+          </Link>
         </p>
       </div>
     </div>
