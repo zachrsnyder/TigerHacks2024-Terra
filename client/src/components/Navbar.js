@@ -69,8 +69,14 @@ const Navbar = () => {
             <div className="flex justify-between items-center h-16">
               {/* Logo/Brand section */}
                 <div className="ml-10 flex flex-col items-start">
-                    <h1 className="text-white text-xl font-bold -mt-1">{farmName}</h1>
-                    <span className="text-gray-300 text-xs tracking-wide">Terra</span>
+                    {farmName ? (
+                        <>
+                        <h1 className="text-white text-xl font-bold -mt-1">{farmName}</h1>
+                        <span className="text-gray-300 text-xs tracking-wide">Terra</span>
+                        </>
+                    ) : (
+                        <h1 className="text-white text-xl font-bold">Terra</h1>
+                    )}
                 </div>
               {/* User section */}
               <div className="flex items-center mr-4 relative">
