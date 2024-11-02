@@ -7,6 +7,10 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
   const [editedPlot, setEditedPlot] = useState(plot);
   const [showColorPicker, setShowColorPicker] = useState(false);
 
+  useEffect(() => {
+    setEditedPlot(plot);
+  }, [plot]);
+
   // Predefined colors for the color picker
   const colors = [
     '#4CAF50', '#66BB6A', '#81C784', '#2196F3', '#42A5F5', 
