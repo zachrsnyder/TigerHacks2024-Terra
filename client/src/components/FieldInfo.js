@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { X, Trash2, Check } from 'lucide-react';
+import { X, Trash2, Save, Edit2 } from 'lucide-react';
 
-const FieldInfo = ({ plot, onClose, onDelete }) => {
+const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedPlot, setEditedPlot] = useState(plot);
 
   if (!plot) return null;
 
@@ -21,7 +23,6 @@ const FieldInfo = ({ plot, onClose, onDelete }) => {
   const handleDelete = async () => {
     if (!isConfirmingDelete) {
       setIsConfirmingDelete(true);
-      // Auto-reset after 3 seconds if not confirmed
       setTimeout(() => setIsConfirmingDelete(false), 3000);
       return;
     }
@@ -29,29 +30,58 @@ const FieldInfo = ({ plot, onClose, onDelete }) => {
     onClose();
   };
 
+  const handleUpdate = async () => {
+    await onUpdate(plot.id, {
+      ...editedPlot,
+      updatedAt: new Date().toISOString()
+    });
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setEditedPlot(plot);
+    setIsEditing(false);
+  };
+
+  const handleEditShape = () => {
+    onStartShapeEdit(plot);
+    onClose();
+  };
+
   return (
     <div className="fixed right-4 top-32 w-80 bg-white rounded-lg shadow-xl border border-gray-200 animate-fade-in">
       <div className="p-4">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-gray-900">{plot.name}</h2>
+          {isEditing ? (
+            <input
+              type="text"
+              value={editedPlot.name}
+              onChange={(e) => setEditedPlot({ ...editedPlot, name: e.target.value })}
+              className="text-xl font-bold text-gray-900 border-b border-gray-300 focus:outline-none focus:border-blue-500"
+            />
+          ) : (
+            <h2 className="text-xl font-bold text-gray-900">{plot.name}</h2>
+          )}
           <div className="flex items-center gap-2">
-            <div className="relative overflow-hidden">
-              <button
-                onClick={handleDelete}
-                className={`flex items-center gap-1 py-1.5 px-2 rounded-full transition-all duration-200 ${
-                  isConfirmingDelete 
-                    ? 'bg-red-50 text-red-500 pr-20' 
-                    : 'hover:bg-red-50 text-gray-500 hover:text-red-500'
-                }`}
-              >
-                <Trash2 className="h-4 w-4" />
-                <span className={`text-sm whitespace-nowrap absolute left-7 transition-opacity duration-200 ${
-                  isConfirmingDelete ? 'opacity-100' : 'opacity-0'
-                }`}>
-                  Confirm?
-                </span>
-              </button>
-            </div>
+            {!isEditing && (
+              <div className="relative overflow-hidden">
+                <button
+                  onClick={handleDelete}
+                  className={`flex items-center gap-1 py-1.5 px-2 rounded-full transition-all duration-200 ${
+                    isConfirmingDelete 
+                      ? 'bg-red-50 text-red-500 pr-20' 
+                      : 'hover:bg-red-50 text-gray-500 hover:text-red-500'
+                  }`}
+                >
+                  <Trash2 className="h-4 w-4" />
+                  <span className={`text-sm whitespace-nowrap absolute left-7 transition-opacity duration-200 ${
+                    isConfirmingDelete ? 'opacity-100' : 'opacity-0'
+                  }`}>
+                    Confirm?
+                  </span>
+                </button>
+              </div>
+            )}
             <button
               onClick={onClose}
               className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
@@ -85,29 +115,81 @@ const FieldInfo = ({ plot, onClose, onDelete }) => {
 
           <div className="flex items-center justify-between py-2">
             <div className="flex items-center">
-              <div
-                className={`h-2.5 w-2.5 rounded-full mr-2 ${
-                  plot.active ? 'bg-green-500' : 'bg-gray-400'
-                }`}
-              />
-              <span className="text-sm font-medium text-gray-700">
-                {plot.active ? 'Active' : 'Inactive'}
-              </span>
+              {isEditing ? (
+                <button
+                  onClick={() => setEditedPlot({ ...editedPlot, active: !editedPlot.active })}
+                  className="flex items-center gap-2"
+                >
+                  <div
+                    className={`h-2.5 w-2.5 rounded-full ${
+                      editedPlot.active ? 'bg-green-500' : 'bg-gray-400'
+                    }`}
+                  />
+                  <span className="text-sm font-medium text-gray-700">
+                    {editedPlot.active ? 'Active' : 'Inactive'}
+                  </span>
+                </button>
+              ) : (
+                <>
+                  <div
+                    className={`h-2.5 w-2.5 rounded-full mr-2 ${
+                      plot.active ? 'bg-green-500' : 'bg-gray-400'
+                    }`}
+                  />
+                  <span className="text-sm font-medium text-gray-700">
+                    {plot.active ? 'Active' : 'Inactive'}
+                  </span>
+                </>
+              )}
             </div>
             
-            <button
-              className="px-3 py-1.5 text-sm font-medium text-gray-700 
-                        bg-white border border-gray-300 rounded-md
-                        hover:bg-gray-50 focus:outline-none focus:ring-2 
-                        focus:ring-offset-1 focus:ring-blue-500
-                        transition-colors"
-              onClick={() => {
-                // TODO: Add edit functionality
-                console.log('Edit plot:', plot.id);
-              }}
-            >
-              Edit Field
-            </button>
+            <div className="flex gap-2">
+              {isEditing ? (
+                <>
+                  <button
+                    onClick={handleCancel}
+                    className="px-3 py-1.5 text-sm font-medium text-gray-700 
+                              bg-white border border-gray-300 rounded-md
+                              hover:bg-gray-50 focus:outline-none focus:ring-2 
+                              focus:ring-offset-1 focus:ring-blue-500
+                              transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleUpdate}
+                    className="px-3 py-1.5 text-sm font-medium text-white
+                              bg-blue-500 rounded-md hover:bg-blue-600 
+                              focus:outline-none focus:ring-2 focus:ring-offset-1 
+                              focus:ring-blue-500 transition-colors"
+                  >
+                    Save
+                  </button>
+                </>
+              ) : (
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="px-3 py-1.5 text-sm font-medium text-gray-700 
+                              bg-white border border-gray-300 rounded-md
+                              hover:bg-gray-50 focus:outline-none focus:ring-2 
+                              focus:ring-offset-1 focus:ring-blue-500
+                              transition-colors"
+                  >
+                    Edit Info
+                  </button>
+                  <button
+                    onClick={handleEditShape}
+                    className="px-3 py-1.5 text-sm font-medium text-white
+                              bg-blue-500 rounded-md hover:bg-blue-600 
+                              focus:outline-none focus:ring-2 focus:ring-offset-1 
+                              focus:ring-red-500 transition-colors"
+                  >
+                    Edit Shape
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
