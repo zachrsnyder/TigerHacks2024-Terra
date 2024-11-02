@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { db } from '../firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { Search, Fence } from 'lucide-react';
+import LeftDashboard from './LeftBar/LeftDashboard';
 
 const Dashboard = () => {
   const { currentUser, logout } = useAuth();
@@ -157,7 +158,7 @@ const Dashboard = () => {
 
   return (
     <div className="h-screen w-screen relative">
-      
+      <LeftDashboard/>
 
       {/* Fullscreen Map */}
       <div className="h-screen w-screen">

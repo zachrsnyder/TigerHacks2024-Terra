@@ -1,10 +1,13 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Login from './components/Login';
 import Register from './components/Register';
 import Dashboard from './components/Dashboard';
 import Navbar from './components/Navbar';
+import getTimeOfDayTheme from './utils/theme';
+
+
 
 function PrivateRoute({ children }) {
   const { currentUser } = useAuth();
@@ -12,6 +15,10 @@ function PrivateRoute({ children }) {
 }
 
 function App() {
+  useEffect(() => {
+    const theme = getTimeOfDayTheme();
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [])
   return (
     <Router>
       <AuthProvider>
