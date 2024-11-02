@@ -3,14 +3,15 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { db } from '../firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { Search } from 'lucide-react';
+import { Search, Fence } from 'lucide-react';
 
 const Dashboard = () => {
   const { currentUser, logout } = useAuth();
   const navigate = useNavigate();
   const [coordinates, setCoordinates] = useState({ lat: 38.9517, lng: -92.3341 });
+  const [farmName, setFarmName] = useState('');
   const [zipCode, setZipCode] = useState('');
-  const [isInitialView, setIsInitialView] = useState(true);
+  const [currentStep, setCurrentStep] = useState('loading'); // loading, name, zipCode, complete
   const [error, setError] = useState('');
 
   // Fetch farm data on component mount
@@ -20,14 +21,23 @@ const Dashboard = () => {
         const farmDoc = await getDoc(doc(db, 'farms', currentUser.uid));
         if (farmDoc.exists()) {
           const farmData = farmDoc.data();
-          if (farmData.location) {
+          if (farmData.farmName && farmData.location) {
+            setFarmName(farmData.farmName);
             setCoordinates(farmData.location);
             setZipCode(farmData.zipCode || '');
-            setIsInitialView(false);
+            setCurrentStep('complete');
+          } else if (farmData.farmName) {
+            setFarmName(farmData.farmName);
+            setCurrentStep('zipCode');
+          } else {
+            setCurrentStep('name');
           }
+        } else {
+          setCurrentStep('name');
         }
       } catch (error) {
         console.error('Error fetching farm data:', error);
+        setCurrentStep('name');
       }
     };
 
@@ -40,6 +50,30 @@ const Dashboard = () => {
       navigate('/login');
     } catch (error) {
       console.error('Failed to log out:', error);
+    }
+  };
+
+  const handleFarmNameSubmit = async (e) => {
+    e.preventDefault();
+    if (!farmName.trim()) {
+      setError('Please enter a farm name');
+      return;
+    }
+
+    try {
+      await setDoc(doc(db, 'farms', currentUser.uid), {
+        owner: currentUser.uid,
+        ownerEmail: currentUser.email,
+        farmName: farmName.trim(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }, { merge: true });
+
+      setError('');
+      setCurrentStep('zipCode');
+    } catch (error) {
+      console.error('Error saving farm name:', error);
+      setError('Error saving farm name');
     }
   };
 
@@ -60,19 +94,15 @@ const Dashboard = () => {
         const { lat, lng } = data.results[0].geometry.location;
         const location = { lat, lng };
         
-        // Store in Firestore farms collection
         try {
           await setDoc(doc(db, 'farms', currentUser.uid), {
-            owner: currentUser.uid,
-            ownerEmail: currentUser.email,
             location: location,
             zipCode: zipCode,
-            createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
           }, { merge: true });
 
           setCoordinates(location);
-          setIsInitialView(false);
+          setCurrentStep('complete');
           setError('');
         } catch (firestoreError) {
           console.error('Firestore save error:', firestoreError);
@@ -85,6 +115,44 @@ const Dashboard = () => {
       setError('Error finding location');
       console.error('Geocoding error:', error);
     }
+  };
+
+  const renderSearchBar = () => {
+    const isNameStep = currentStep === 'name';
+    const handleSubmit = isNameStep ? handleFarmNameSubmit : handleZipCodeSubmit;
+    const value = isNameStep ? farmName : zipCode;
+    const setValue = isNameStep ? setFarmName : setZipCode;
+    const placeholder = isNameStep ? "Enter your farm's name" : "Enter your farm's zip code";
+    const maxLength = isNameStep ? 50 : 5;
+
+    return (
+      <div className="absolute top-1/4 left-1/2 transform -translate-x-1/2 z-20">
+        <form onSubmit={handleSubmit} className="w-full">
+          <div className="relative">
+            <div className="flex items-center bg-white rounded-full shadow-lg hover:shadow-xl transition-shadow w-96 h-12 px-4">
+              {isNameStep ? (
+                <Fence className="text-gray-400 mr-2" size={20} />
+              ) : (
+                <Search className="text-gray-400 mr-2" size={20} />
+              )}
+              <input
+                type="text"
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                className="w-full bg-transparent outline-none text-gray-700 placeholder-gray-400"
+                placeholder={placeholder}
+                maxLength={maxLength}
+              />
+            </div>
+            {error && (
+              <p className="absolute mt-2 text-sm text-red-600 text-center w-full">
+                {error}
+              </p>
+            )}
+          </div>
+        </form>
+      </div>
+    );
   };
 
   return (
@@ -101,37 +169,14 @@ const Dashboard = () => {
         />
       </div>
 
-      {/* Google-style Search Bar */}
-      {(isInitialView || error) && (
-        <div className="absolute top-1/4 left-1/2 transform -translate-x-1/2 z-20">
-          <form onSubmit={handleZipCodeSubmit} className="w-full">
-            <div className="relative">
-              <div className="flex items-center bg-white rounded-full shadow-lg hover:shadow-xl transition-shadow w-96 h-12 px-4">
-                <Search className="text-gray-400 mr-2" size={20} />
-                <input
-                  type="text"
-                  value={zipCode}
-                  onChange={(e) => setZipCode(e.target.value)}
-                  className="w-full bg-transparent outline-none text-gray-700 placeholder-gray-400"
-                  placeholder="Enter your zip code to begin"
-                  maxLength={5}
-                />
-              </div>
-              {error && (
-                <p className="absolute mt-2 text-sm text-red-600 text-center w-full">
-                  {error}
-                </p>
-              )}
-            </div>
-          </form>
-        </div>
-      )}
+      {/* Search Bars */}
+      {currentStep !== 'complete' && renderSearchBar()}
 
       {/* Map Controls */}
-      {!isInitialView && (
+      {currentStep === 'complete' && (
         <div className="absolute bottom-8 right-8 z-10">
           <button
-            onClick={() => setIsInitialView(true)}
+            onClick={() => setCurrentStep('zipCode')}
             className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all"
           >
             Change Location
