@@ -8,7 +8,7 @@ import { db } from '../../firebase';
 import { uid } from 'chart.js/helpers';
 import { map, isArray } from 'lodash';
 
-function PlotSection({pointPlots}) {
+function PlotSection({pointPlots, setSelectedPlot, selectedPlot}) {
     const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [plots, setPlots] = useState([])
@@ -84,7 +84,7 @@ function PlotSection({pointPlots}) {
       ) : (
         <div className="">
           {plots.map((plot) => (
-            <PlotCard data={plot}/>
+            <PlotCard data={plot} setSelectedPlot={setSelectedPlot} selectedPlot={selectedPlot}/>
           ))}
         </div>
       ))}

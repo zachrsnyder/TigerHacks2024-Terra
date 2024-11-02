@@ -4,7 +4,7 @@ import {Check, ChevronRight, ChevronLeft} from 'lucide-react'
 import PlotSection from './PlotSection'
 
 
-const LeftDashboard = ({pointPlots}) => {
+const LeftDashboard = ({pointPlots, setPointPlots, selectedPlot, setSelectedPlot}) => {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [isHovered, setIsHovered] = useState(false);
 
@@ -17,7 +17,7 @@ const LeftDashboard = ({pointPlots}) => {
       <aside className={`h-screen z-10 text-text transition-all duration-300 bg-primary ${
           isCollapsed ? 'w-0 p-0' : 'w-[20vw]'} overflow-hidden`}>
         <EquipmentSection />
-        <PlotSection pointPlots={pointPlots}/>
+        <PlotSection pointPlots={pointPlots} setSelectedPlot={setSelectedPlot} selectedPlot={selectedPlot}/>
       </aside>
       <div className='h-full items-center relative flex justify-center'>
         <div className="w-[2vw] h-[6vw] bg-primary rounded-r-full justify-center align-middle items-center flex z-10" style={{ opacity: isHovered ? .70 : .30, color: 'white' }} onClick={toggleAside} onMouseEnter={() => setIsHovered(true)}

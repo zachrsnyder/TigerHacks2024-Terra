@@ -235,7 +235,7 @@ const Dashboard = () => {
 
   return (
     <div className="h-screen w-screen relative">
-      <LeftDashboard />
+        <LeftDashboard pointPlots={existingPlots} setPointPlots={setExistingPlots} selectedPlot={selectedPlot} setSelectedPlot={setSelectedPlot}/>
       <div className="h-screen w-screen">
         <MapComponent
           isLoaded={isLoaded}
