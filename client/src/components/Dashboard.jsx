@@ -1,16 +1,16 @@
-// Dashboard.jsx
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useJsApiLoader } from '@react-google-maps/api';
 import { db } from '../firebase';
-import { doc, getDoc, setDoc, collection, getDocs } from 'firebase/firestore';
+import { doc, getDoc, setDoc, deleteDoc, collection, getDocs } from 'firebase/firestore';
 import MapComponent from './MapComponent';
 import SearchBar from './SearchBar';
 import PlotNameInput from './PlotNameInput';
 import ControlButtons from './ControlButtons';
 import ErrorMessage from './ErrorMessage';
 import LeftDashboard from './LeftBar/LeftDashboard';
+import FieldInfo from './FieldInfo';
 
 const Dashboard = () => {
   const { currentUser } = useAuth();
@@ -25,6 +25,7 @@ const Dashboard = () => {
   const [isNamingPlot, setIsNamingPlot] = useState(false);
   const [newPlotName, setNewPlotName] = useState('');
   const [isDrawingMode, setIsDrawingMode] = useState(false);
+  const [selectedPlot, setSelectedPlot] = useState(null);
 
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
@@ -39,7 +40,7 @@ const Dashboard = () => {
         if (farmDoc.exists()) {
           const farmData = farmDoc.data();
           if (farmData.farmName && farmData.location) {
-            setFarmName(farmData.farmName);
+            setFarmName(farmData.farmName); 
             setCoordinates(farmData.location);
             setZipCode(farmData.zipCode || '');
             setCurrentStep('complete');
@@ -92,12 +93,29 @@ const Dashboard = () => {
     return Math.round(area);
   };
 
+  const handlePolygonEdit = (updatedPoints) => {
+    setPoints(updatedPoints);
+  };
+
   const handlePlotNameSubmit = async (e) => {
     e.preventDefault();
     if (!newPlotName.trim()) {
       setError('Please enter a plot name');
       return;
     }
+  
+    const calcualteCenter = (points) => {
+      let center = [0, 0];
+      let lat = 0;
+      let lng = 0;
+      for (let i = 0; i < points.length; i++) {
+        const j = (i + 1) % points.length;
+        lat += points[i].lat;
+        lng += points[i].lng;
+      }
+      center = [lat / points.length, lng / points.length];
+      return center;
+    };
 
     try {
       const plotRef = doc(collection(db, 'farms', currentUser.uid, 'plots'));
@@ -108,7 +126,8 @@ const Dashboard = () => {
         updatedAt: new Date().toISOString(),
         farmId: currentUser.uid,
         area: calculateArea(points),
-        active: true
+        active: true,
+        center: calcualteCenter(points)
       });
 
       setExistingPlots(prev => [...prev, {
@@ -127,25 +146,6 @@ const Dashboard = () => {
       console.error('Error saving plot:', error);
       setError('Error saving plot');
     }
-  };
-
-  const handlePolygonEdit = (e) => {
-    const exactPoint = {
-      lat: e.latLng.lat(),
-      lng: e.latLng.lng()
-    };
-
-    const updatedPoints = [...points];
-
-    if (e.vertex !== undefined) {
-      // Update existing vertex
-      updatedPoints[e.vertex] = exactPoint;
-    } else if (e.edge !== undefined) {
-      // Insert new point at the midpoint position
-      updatedPoints.splice(e.edge + 1, 0, exactPoint);
-    }
-
-    setPoints(updatedPoints);
   };
 
   const handleFarmNameSubmit = async (e) => {
@@ -212,6 +212,20 @@ const Dashboard = () => {
     }
   };
 
+  const handleDeletePlot = async (plotId) => {
+    try {
+      // Delete from Firestore
+      await deleteDoc(doc(db, 'farms', currentUser.uid, 'plots', plotId));
+      
+      // Update local state
+      setExistingPlots(prevPlots => prevPlots.filter(plot => plot.id !== plotId));
+      setSelectedPlot(null);
+    } catch (error) {
+      console.error('Error deleting plot:', error);
+      setError('Error deleting plot');
+    }
+  };
+
   const clearDrawing = () => {
     setPoints([]);
     setIsDrawingMode(false);
@@ -231,6 +245,7 @@ const Dashboard = () => {
           isDrawingMode={isDrawingMode}
           onMapClick={handleMapClick}
           onPolygonEdit={handlePolygonEdit}
+          onPlotClick={(plot) => setSelectedPlot(plot)}
         />
       </div>
       
@@ -264,6 +279,15 @@ const Dashboard = () => {
       )}
       
       <ErrorMessage error={error} />
+
+      {selectedPlot && (
+        <FieldInfo
+        plot={selectedPlot}
+        onClose={() => setSelectedPlot(null)}
+        onDelete={handleDeletePlot}
+      />
+)}
+
     </div>
   );
 };

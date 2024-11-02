@@ -1,5 +1,4 @@
-// MapComponent.jsx
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { GoogleMap, Polygon } from '@react-google-maps/api';
 
 const containerStyle = {
@@ -14,9 +13,12 @@ const MapComponent = ({
   existingPlots, 
   isDrawingMode, 
   onMapClick, 
-  onPolygonEdit 
+  onPolygonEdit,
+  onPlotClick 
 }) => {
   const [map, setMap] = useState(null);
+  const [hoveredPlotId, setHoveredPlotId] = useState(null);
+  const [polygon, setPolygon] = useState(null);
 
   const onLoad = useCallback((map) => {
     setMap(map);
@@ -25,6 +27,65 @@ const MapComponent = ({
   const onUnmount = useCallback(() => {
     setMap(null);
   }, []);
+
+  const onPolygonLoad = useCallback((poly) => {
+    setPolygon(poly);
+  }, []);
+
+  const handlePlotClick = useCallback((plot, event) => {
+    // Prevent triggering map click when clicking on a plot
+    if (event) {
+      event.stop();
+    }
+    if (onPlotClick) {
+      onPlotClick(plot);
+    }
+  }, [onPlotClick]);
+
+  const handleVertexEdit = useCallback(() => {
+    if (!polygon) return;
+    
+    try {
+      const path = polygon.getPath();
+      const updatedPoints = [];
+      
+      for (let i = 0; i < path.getLength(); i++) {
+        const point = path.getAt(i);
+        updatedPoints.push({
+          lat: point.lat(),
+          lng: point.lng()
+        });
+      }
+      
+      onPolygonEdit(updatedPoints);
+    } catch (error) {
+      console.error('Error updating polygon:', error);
+    }
+  }, [polygon, onPolygonEdit]);
+
+  useEffect(() => {
+    if (!polygon || !window.google) return;
+
+    const path = polygon.getPath();
+    
+    // Remove existing listeners to prevent duplicates
+    window.google.maps.event.clearListeners(path, 'insert_at');
+    window.google.maps.event.clearListeners(path, 'remove_at');
+    window.google.maps.event.clearListeners(path, 'set_at');
+
+    // Add new listeners
+    const insertListener = path.addListener('insert_at', handleVertexEdit);
+    const removeListener = path.addListener('remove_at', handleVertexEdit);
+    const setListener = path.addListener('set_at', handleVertexEdit);
+
+    return () => {
+      if (path) {
+        insertListener.remove();
+        removeListener.remove();
+        setListener.remove();
+      }
+    };
+  }, [polygon, handleVertexEdit]);
 
   if (!isLoaded) return <div>Loading...</div>;
 
@@ -39,7 +100,9 @@ const MapComponent = ({
       options={{
         mapTypeId: 'satellite',
         mapTypeControl: false,
-        fullscreenControl: false
+        fullscreenControl: false,
+        streetViewControl: false,
+        zoomControl: false
       }}
     >
       {points.length > 0 && (
@@ -54,7 +117,9 @@ const MapComponent = ({
             editable: true,
             draggable: false,
           }}
-          onMouseUp={onPolygonEdit}
+          onLoad={onPolygonLoad}
+          onMouseUp={handleVertexEdit}
+          onDragEnd={handleVertexEdit}
         />
       )}
       {existingPlots.map((plot) => (
@@ -62,14 +127,18 @@ const MapComponent = ({
           key={plot.id}
           path={plot.boundary}
           options={{
-            fillColor: "#4CAF50",
-            fillOpacity: 0.8,
-            strokeColor: "#4CAF50",
+            fillColor: hoveredPlotId === plot.id ? "#66BB6A" : "#4CAF50",
+            fillOpacity: hoveredPlotId === plot.id ? 0.9 : 0.8,
+            strokeColor: hoveredPlotId === plot.id ? "#66BB6A" : "#4CAF50",
             strokeOpacity: 1,
-            strokeWeight: 1,
+            strokeWeight: hoveredPlotId === plot.id ? 2 : 1,
             editable: false,
             draggable: false,
+            cursor: 'pointer'
           }}
+          onClick={(e) => handlePlotClick(plot, e)}
+          onMouseOver={() => setHoveredPlotId(plot.id)}
+          onMouseOut={() => setHoveredPlotId(null)}
         />
       ))}
     </GoogleMap>
