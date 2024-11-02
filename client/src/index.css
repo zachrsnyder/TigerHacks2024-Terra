@@ -9,6 +9,7 @@
   
 [data-theme='day'] {
 --primary-color: #D3D3D3;
+--primary-hover: #a9a9a9;
 --secondary-color: #1e293b;
 --tertiary-color: #feebca;
 --FOUR-color: #909090;
