@@ -103,15 +103,15 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
                 aria-label="Change plot color"
               />
               {showColorPicker && (
-                <div className="absolute z-10 top-full left-0 mt-2 p-3 bg-white rounded-lg shadow-xl border border-gray-200">
-                  <div className="flex flex-col gap-2">
-                    <p className="text-sm text-gray-600 mb-1">Select plot color</p>
-                    <div className="grid grid-cols-5 gap-2">
+                <div className="absolute z-10 top-full -left-20 mt-2 p-4 bg-white rounded-lg shadow-xl border border-gray-200 min-w-[200px]">
+                  <div className="flex flex-col gap-3">
+                    <p className="text-sm text-gray-600">Select plot color</p>
+                    <div className="grid grid-cols-4 gap-3">
                       {colors.map((color) => (
                         <button
                           key={color}
                           onClick={() => handleColorChange(color)}
-                          className="w-8 h-8 rounded-full hover:scale-110 transition-transform duration-200 shadow-sm hover:shadow-md"
+                          className="w-10 h-10 rounded hover:scale-105 transition-transform duration-200 shadow-sm hover:shadow-md"
                           style={{ 
                             backgroundColor: color,
                             border: editedPlot.color === color ? '2px solid #000' : '1px solid #e5e7eb'
