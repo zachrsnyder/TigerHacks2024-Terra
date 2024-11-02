@@ -4,9 +4,7 @@ import { collection, addDoc, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useAuth } from '../../contexts/AuthContext';
 
-// Success Modal Component
 const SuccessModal = ({ message, onClose }) => {
-    // Auto-close after 3 seconds
     React.useEffect(() => {
         const timer = setTimeout(() => {
             onClose();
@@ -34,10 +32,10 @@ const AddEquipmentModal = ({ isOpen, onClose }) => {
     const { currentUser } = useAuth();
     
     const [newDocument, setDocument] = useState({
-        Make: "",
-        Model: "",
+        Name: "",
+        Manufacturer: "",
         Type: "",
-        Description: "",
+        Notes: "",
     });
 
     const generateEquipmentId = async (type) => {
@@ -48,14 +46,26 @@ const AddEquipmentModal = ({ isOpen, onClose }) => {
             const paddedNumber = String(count).padStart(3, '0');
             
             switch(type) {
-                case 'Tractor':
-                    return `TCTR${paddedNumber}`;
                 case 'Harvester':
                     return `HARV${paddedNumber}`;
                 case 'Sprayer':
                     return `SPRY${paddedNumber}`;
                 case 'Planter':
                     return `PLNT${paddedNumber}`;
+                case 'Tiller':
+                    return `TILL${paddedNumber}`;
+                case 'Backhoe':
+                    return `BCKH${paddedNumber}`;
+                case 'Rotary Cutter':
+                    return `RCUT${paddedNumber}`;
+                case 'Pallet Fork':
+                    return `PLTF${paddedNumber}`;
+                case 'Post Hole Digger':
+                    return `PHLD${paddedNumber}`;
+                case 'Box Blade':
+                    return `BBLD${paddedNumber}`;
+                case 'Harrow':
+                    return `HRRW${paddedNumber}`;
                 case 'Other':
                     return `OTH${paddedNumber}`;
                 default:
@@ -68,7 +78,8 @@ const AddEquipmentModal = ({ isOpen, onClose }) => {
     };
 
     const handleSubmit = async () => {
-        if (!newDocument.Make || !newDocument.Model || !newDocument.Type) {
+        // Corrected validation check
+        if (!newDocument.Name || !newDocument.Manufacturer || !newDocument.Type) {
             setError('Please fill in all required fields');
             return;
         }
@@ -92,19 +103,16 @@ const AddEquipmentModal = ({ isOpen, onClose }) => {
 
             await addDoc(equipmentCollectionRef, equipmentData);
 
-            // Show success modal
-            setSuccessMessage(`${newDocument.Make} ${equipmentId} has been successfully added`);
+            setSuccessMessage(`${newDocument.Name} ${equipmentId} has been successfully added`);
             setShowSuccess(true);
 
-            // Reset form
             setDocument({
-                Make: "",
-                Model: "",
+                Name: "",
+                Manufacturer: "",
                 Type: "",
-                Description: "",
+                Notes: "",
             });
             
-            // Close the main modal
             onClose();
 
         } catch (err) {
@@ -155,60 +163,70 @@ const AddEquipmentModal = ({ isOpen, onClose }) => {
                         <div className="p-6 space-y-4">
                             <div>
                                 <label className="block text-white text-sm font-medium mb-1">
-                                    Type*
+                                    Type
                                 </label>
-                                <select
+                                <input
+                                    list="equipment-types"
                                     value={newDocument.Type}
-                                    onChange={(e) => setDocument({...newDocument, Type: e.target.value})}
+                                    onChange={(e) => setDocument({ ...newDocument, Type: e.target.value })}
                                     className="w-full px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm"
+                                    placeholder="Search or select equipment type"
                                     required
-                                >
-                                    <option value="">Select equipment type</option>
-                                    <option value="Tractor">Tractor</option>
+                                />
+                                
+                                {/* datalist with searchable options */}
+                                <datalist id="equipment-types">
                                     <option value="Harvester">Harvester</option>
                                     <option value="Sprayer">Sprayer</option>
                                     <option value="Planter">Planter</option>
+                                    <option value="Tiller">Tiller</option>
+                                    <option value="Backhoe">Backhoe</option>
+                                    <option value="Rotary Cutter">Rotary Cutter</option>
+                                    <option value="Pallet Fork">Pallet Fork</option>
+                                    <option value="Post Hole Digger">Post Hole Digger</option>
+                                    <option value="Box Blade">Box Blade</option>
+                                    <option value="Harrow">Harrow</option>
                                     <option value="Other">Other</option>
-                                </select>
+                                </datalist>
                             </div>
 
                             <div>
                                 <label className="block text-white text-sm font-medium mb-1">
-                                    Make*
+                                    Name
                                 </label>
                                 <input
                                     type="text"
-                                    value={newDocument.Make}
-                                    onChange={(e) => setDocument({...newDocument, Make: e.target.value})}
+                                    value={newDocument.Name}
+                                    onChange={(e) => setDocument({...newDocument, Name: e.target.value})}
                                     className="w-full px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm"
-                                    placeholder="Enter vehicle make"
+                                    placeholder="Enter equipment name"
                                     required
                                 />
                             </div>
 
                             <div>
                                 <label className="block text-white text-sm font-medium mb-1">
-                                    Model*
+                                    Manufacturer
                                 </label>
                                 <input
                                     type="text"
-                                    value={newDocument.Model}
-                                    onChange={(e) => setDocument({...newDocument, Model: e.target.value})}
+                                    value={newDocument.Manufacturer}
+                                    onChange={(e) => setDocument({...newDocument, Manufacturer: e.target.value})}
                                     className="w-full px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm"
-                                    placeholder="Enter vehicle model"
+                                    placeholder="Enter equipment manufacturer"
                                     required
                                 />
                             </div>
 
                             <div>
                                 <label className="block text-white text-sm font-medium mb-1">
-                                    Description
+                                    Notes
                                 </label>
                                 <textarea
-                                    value={newDocument.Description}
-                                    onChange={(e) => setDocument({ ...newDocument, Description: e.target.value })}
+                                    value={newDocument.Notes}
+                                    onChange={(e) => setDocument({ ...newDocument, Notes: e.target.value })}
                                     className="w-full h-20 px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm resize-none"
-                                    placeholder="Enter a short description"
+                                    placeholder="Enter any additional notes (optional)"
                                 />
                             </div>
                         </div>
@@ -224,17 +242,11 @@ const AddEquipmentModal = ({ isOpen, onClose }) => {
                             </button>
                             <button
                                 onClick={handleSubmit}
+                                className={`flex items-center px-4 py-2 text-white rounded-lg transition-colors ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white/10'}`}
                                 disabled={isSubmitting}
-                                className="px-4 py-2 bg-white/20 text-white rounded-lg hover:bg-white/30 transition-colors flex items-center space-x-2"
                             >
-                                {isSubmitting ? (
-                                    <>
-                                        <Loader2 className="animate-spin" size={18} />
-                                        <span>Adding...</span>
-                                    </>
-                                ) : (
-                                    <span>Add Equipment</span>
-                                )}
+                                {isSubmitting && <Loader2 className="animate-spin mr-2" />}
+                                Add Equipment
                             </button>
                         </div>
                     </div>
