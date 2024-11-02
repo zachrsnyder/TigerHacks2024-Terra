@@ -20,7 +20,7 @@ const LeftDashboard = ({pointPlots}) => {
         <PlotSection pointPlots={pointPlots}/>
       </aside>
       <div className='h-full items-center relative flex justify-center'>
-        <div className="w-[2vw] h-[6vw] bg-primary rounded-r-full justify-center align-middle items-center flex" style={{ opacity: isHovered ? .70 : .30, color: 'white' }} onClick={toggleAside} onMouseEnter={() => setIsHovered(true)}
+        <div className="w-[2vw] h-[6vw] bg-primary rounded-r-full justify-center align-middle items-center flex z-10" style={{ opacity: isHovered ? .70 : .30, color: 'white' }} onClick={toggleAside} onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}>
           {isCollapsed ? (<ChevronRight color='white' size={24}/>) : (<ChevronLeft color='white' size={24}/>) }
         </div>
