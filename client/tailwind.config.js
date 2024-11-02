@@ -6,7 +6,10 @@ module.exports = {
   theme: {
     extend: {
       colors:{
-        primary: 'var(--primary-color)',
+        primary: {
+          DEFAULT: 'var(--primary-color)',
+          hover: 'var(--primary-hover)'
+        },
         secondary: 'var(--secondary-color)',
         accent: { //green and a lighter green (secondary, secondary-light)
           DEFAULT: '#4D4B30',
