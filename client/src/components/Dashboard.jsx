@@ -1,19 +1,19 @@
-import React, { useState, useEffect, useCallback } from 'react';
+// Dashboard.jsx
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useJsApiLoader } from '@react-google-maps/api';
 import { db } from '../firebase';
 import { doc, getDoc, setDoc, collection, getDocs } from 'firebase/firestore';
-import { Search, Fence, X } from 'lucide-react';
+import MapComponent from './MapComponent';
+import SearchBar from './SearchBar';
+import PlotNameInput from './PlotNameInput';
+import ControlButtons from './ControlButtons';
+import ErrorMessage from './ErrorMessage';
 import LeftDashboard from './LeftBar/LeftDashboard';
-import { GoogleMap, useJsApiLoader, Polygon } from '@react-google-maps/api';
-
-const containerStyle = {
-  width: '100%',
-  height: '100%'
-};
 
 const Dashboard = () => {
-  const { currentUser, logout } = useAuth();
+  const { currentUser } = useAuth();
   const navigate = useNavigate();
   const [coordinates, setCoordinates] = useState({ lat: 38.9517, lng: -92.3341 });
   const [farmName, setFarmName] = useState('');
@@ -21,7 +21,6 @@ const Dashboard = () => {
   const [currentStep, setCurrentStep] = useState('loading');
   const [error, setError] = useState('');
   const [points, setPoints] = useState([]);
-  const [map, setMap] = useState(null);
   const [existingPlots, setExistingPlots] = useState([]);
   const [isNamingPlot, setIsNamingPlot] = useState(false);
   const [newPlotName, setNewPlotName] = useState('');
@@ -71,14 +70,6 @@ const Dashboard = () => {
     };
     fetchData();
   }, [currentUser.uid]);
-
-  const onLoad = useCallback(function callback(map) {
-    setMap(map);
-  }, []);
-
-  const onUnmount = useCallback(function callback(map) {
-    setMap(null);
-  }, []);
 
   const handleMapClick = (e) => {
     if (!isDrawingMode) return;
@@ -136,13 +127,6 @@ const Dashboard = () => {
       console.error('Error saving plot:', error);
       setError('Error saving plot');
     }
-  };
-
-  const clearDrawing = () => {
-    setPoints([]);
-    setIsDrawingMode(false);
-    setIsNamingPlot(false);
-    setNewPlotName('');
   };
 
   const handlePolygonEdit = (e) => {
@@ -228,163 +212,58 @@ const Dashboard = () => {
     }
   };
 
-  const renderSearchBar = () => {
-    const isNameStep = currentStep === 'name';
-    const handleSubmit = isNameStep ? handleFarmNameSubmit : handleZipCodeSubmit;
-    const value = isNameStep ? farmName : zipCode;
-    const setValue = isNameStep ? setFarmName : setZipCode;
-    const placeholder = isNameStep ? "Enter your farm's name" : "Enter your farm's zip code";
-    const maxLength = isNameStep ? 50 : 5;
-
-    return (
-      <div className="absolute top-1/4 left-1/2 transform -translate-x-1/2 z-20">
-        <form onSubmit={handleSubmit} className="w-full">
-          <div className="relative">
-            <div className="flex items-center bg-white rounded-full shadow-lg hover:shadow-xl transition-shadow w-96 h-12 px-4">
-              {isNameStep ? (
-                <Fence className="text-gray-400 mr-2" size={20} />
-              ) : (
-                <Search className="text-gray-400 mr-2" size={20} />
-              )}
-              <input
-                type="text"
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-                className="w-full bg-transparent outline-none text-gray-700 placeholder-gray-400"
-                placeholder={placeholder}
-                maxLength={maxLength}
-              />
-            </div>
-            {error && (
-              <p className="absolute mt-2 text-sm text-red-600 text-center w-full">{error}</p>
-            )}
-          </div>
-        </form>
-      </div>
-    );
+  const clearDrawing = () => {
+    setPoints([]);
+    setIsDrawingMode(false);
+    setIsNamingPlot(false);
+    setNewPlotName('');
   };
 
   return (
     <div className="h-screen w-screen relative">
       <LeftDashboard />
       <div className="h-screen w-screen">
-        {isLoaded ? (
-          <GoogleMap
-            mapContainerStyle={containerStyle}
-            center={coordinates}
-            zoom={18}
-            onLoad={onLoad}
-            onUnmount={onUnmount}
-            onClick={handleMapClick}
-            options={{
-              mapTypeId: 'satellite',
-              mapTypeControl: false,
-              fullscreenControl: false
-            }}
-          >
-            {points.length > 0 && (
-              <Polygon
-                path={points}
-                options={{
-                  fillColor: "#FF0000",
-                  fillOpacity: 0.8,
-                  strokeColor: "#FF0000",
-                  strokeOpacity: 1,
-                  strokeWeight: 1,
-                  editable: true,
-                  draggable: false,
-                }}
-                onMouseUp={handlePolygonEdit}
-              />
-            )}
-            {existingPlots.map((plot) => (
-              <Polygon
-                key={plot.id}
-                path={plot.boundary}
-                options={{
-                  fillColor: "#4CAF50",
-                  fillOpacity: 0.8,
-                  strokeColor: "#4CAF50",
-                  strokeOpacity: 1,
-                  strokeWeight: 1,
-                  editable: false,
-                  draggable: false,
-                }}
-              />
-            ))}
-          </GoogleMap>
-        ) : (
-          <div>Loading...</div>
-        )}
+        <MapComponent
+          isLoaded={isLoaded}
+          coordinates={coordinates}
+          points={points}
+          existingPlots={existingPlots}
+          isDrawingMode={isDrawingMode}
+          onMapClick={handleMapClick}
+          onPolygonEdit={handlePolygonEdit}
+        />
       </div>
-      {currentStep !== 'complete' && renderSearchBar()}
+      
+      {currentStep !== 'complete' && (
+        <SearchBar
+          currentStep={currentStep}
+          value={currentStep === 'name' ? farmName : zipCode}
+          onChange={(e) => currentStep === 'name' ? setFarmName(e.target.value) : setZipCode(e.target.value)}
+          onSubmit={currentStep === 'name' ? handleFarmNameSubmit : handleZipCodeSubmit}
+          error={error}
+        />
+      )}
+      
       {isNamingPlot && (
-        <div className="absolute top-1/4 left-1/2 transform -translate-x-1/2 z-20">
-          <form onSubmit={handlePlotNameSubmit} className="w-full">
-            <div className="relative">
-              <div className="flex items-center bg-white rounded-full shadow-lg hover:shadow-xl transition-shadow w-96 h-12 px-4">
-                <Fence className="text-gray-400 mr-2" size={20} />
-                <input
-                  type="text"
-                  value={newPlotName}
-                  onChange={(e) => setNewPlotName(e.target.value)}
-                  className="w-full bg-transparent outline-none text-gray-700 placeholder-gray-400"
-                  placeholder="Enter plot name"
-                  maxLength={50}
-                  autoFocus
-                />
-              </div>
-            </div>
-          </form>
-        </div>
+        <PlotNameInput
+          value={newPlotName}
+          onChange={(e) => setNewPlotName(e.target.value)}
+          onSubmit={handlePlotNameSubmit}
+        />
       )}
+      
       {currentStep === 'complete' && (
-        <div className="absolute bottom-8 right-8 z-10 space-y-2">
-          <button
-            onClick={() => setCurrentStep('zipCode')}
-            className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all w-full"
-          >
-            Change Location
-          </button>
-          {!isDrawingMode ? (
-            <button
-              onClick={() => setIsDrawingMode(true)}
-              className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all w-full"
-            >
-              Draw New Plot
-            </button>
-          ) : (
-            <>
-              {points.length >= 3 ? (
-                <button
-                  onClick={() => setIsNamingPlot(true)}
-                  className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all w-full"
-                >
-                  Save Plot
-                </button>
-              ) : (
-                <button
-                  className="bg-gray-300 px-4 py-2 rounded-full shadow-lg w-full cursor-not-allowed"
-                  disabled
-                >
-                  Mark at least 3 points
-                </button>
-              )}
-              <button
-                onClick={clearDrawing}
-                className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all w-full"
-              >
-                Cancel Drawing
-              </button>
-            </>
-          )}
-        </div>
+        <ControlButtons
+          isDrawingMode={isDrawingMode}
+          points={points}
+          onLocationChange={() => setCurrentStep('zipCode')}
+          onDrawingStart={() => setIsDrawingMode(true)}
+          onSavePlot={() => setIsNamingPlot(true)}
+          onCancelDrawing={clearDrawing}
+        />
       )}
-      {error && (
-        <div className="absolute top-20 left-1/2 transform -translate-x-1/2 bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded-md">
-          {error}
-        </div>
-      )}
+      
+      <ErrorMessage error={error} />
     </div>
   );
 };
