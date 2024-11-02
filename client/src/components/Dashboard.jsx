@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useJsApiLoader } from '@react-google-maps/api';
 import { db } from '../firebase';
-import { doc, getDoc, setDoc, collection, getDocs } from 'firebase/firestore';
+import { doc, getDoc, setDoc, deleteDoc, collection, getDocs } from 'firebase/firestore';
 import MapComponent from './MapComponent';
 import SearchBar from './SearchBar';
 import PlotNameInput from './PlotNameInput';
@@ -212,6 +212,20 @@ const Dashboard = () => {
     }
   };
 
+  const handleDeletePlot = async (plotId) => {
+    try {
+      // Delete from Firestore
+      await deleteDoc(doc(db, 'farms', currentUser.uid, 'plots', plotId));
+      
+      // Update local state
+      setExistingPlots(prevPlots => prevPlots.filter(plot => plot.id !== plotId));
+      setSelectedPlot(null);
+    } catch (error) {
+      console.error('Error deleting plot:', error);
+      setError('Error deleting plot');
+    }
+  };
+
   const clearDrawing = () => {
     setPoints([]);
     setIsDrawingMode(false);
@@ -267,11 +281,13 @@ const Dashboard = () => {
       <ErrorMessage error={error} />
 
       {selectedPlot && (
-      <FieldInfo
-      plot={selectedPlot}
-      onClose={() => setSelectedPlot(null)}
+        <FieldInfo
+        plot={selectedPlot}
+        onClose={() => setSelectedPlot(null)}
+        onDelete={handleDeletePlot}
       />
 )}
+
     </div>
   );
 };

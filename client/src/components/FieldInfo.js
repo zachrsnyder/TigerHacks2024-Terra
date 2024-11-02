@@ -1,11 +1,11 @@
 import React from 'react';
-import { X } from 'lucide-react';
+import { X, Trash2 } from 'lucide-react';
 
-const FieldInfo = ({ plot, onClose }) => {
+const FieldInfo = ({ plot, onClose, onDelete }) => {
   if (!plot) return null;
 
   // Convert square meters to acres
-  const areaInAcres = (plot.area / 5546.86).toFixed(2);
+  const areaInAcres = (plot.area / 4046.86).toFixed(2);
 
   // Format date strings
   const formatDate = (dateString) => {
@@ -16,17 +16,33 @@ const FieldInfo = ({ plot, onClose }) => {
     });
   };
 
+  const handleDelete = async () => {
+    if (window.confirm(`Are you sure you want to delete ${plot.name}?`)) {
+      await onDelete(plot.id);
+      onClose();
+    }
+  };
+
   return (
-    <div className="fixed right-16 top-1/4 w-80 bg-white rounded-lg shadow-xl border border-gray-200 animate-fade-in">
+    <div className="fixed right-4 top-32 w-80 bg-white rounded-lg shadow-xl border border-gray-200 animate-fade-in">
       <div className="p-4">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-gray-900">{plot.name}</h2>
-          <button
-            onClick={onClose}
-            className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
-          >
-            <X className="h-4 w-4 text-gray-500" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleDelete}
+              className="p-1.5 hover:bg-red-50 rounded-full transition-colors group"
+              title="Delete field"
+            >
+              <Trash2 className="h-4 w-4 text-gray-500 group-hover:text-red-500" />
+            </button>
+            <button
+              onClick={onClose}
+              className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <X className="h-4 w-4 text-gray-500" />
+            </button>
+          </div>
         </div>
         
         <div className="space-y-4">
