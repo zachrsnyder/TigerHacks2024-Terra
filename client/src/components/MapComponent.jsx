@@ -40,7 +40,8 @@ const MapComponent = ({
         mapTypeId: 'satellite',
         mapTypeControl: false,
         fullscreenControl: false,
-        streetViewControl: false
+        streetViewControl: false,
+        zoomControl: false
       }}
     >
       {points.length > 0 && (
