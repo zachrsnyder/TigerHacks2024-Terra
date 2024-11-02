@@ -1,8 +1,6 @@
 import {React, useEffect, useState} from 'react'
 import EquipmentSection from './EquipmentSection'
 import {Check, ChevronRight, ChevronLeft} from 'lucide-react'
-import { transform } from 'lodash'
-import { color } from 'chart.js/helpers'
 import PlotSection from './PlotSection'
 
 

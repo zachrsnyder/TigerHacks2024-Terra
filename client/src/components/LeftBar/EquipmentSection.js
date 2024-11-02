@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import getEquipmentByUserUID from './queries'
 import {useAuth} from '../../contexts/AuthContext'
 import { Folder, FolderOpen, Plus } from 'lucide-react';
-import { size } from 'lodash';
 import EquipmentCard from './EquipmentCard';
 
 function EquipmentSection() {
