@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-import { MapPin, Search, X } from 'lucide-react';
+import { MapPin, Search, X, Trees  } from 'lucide-react';
 
 
 const Navbar = () => {
@@ -120,24 +120,25 @@ const Navbar = () => {
         <nav className="bg-primary backdrop-blur-sm shadow-lg">
           <div className="w-full px-0">
             <div className="flex justify-between items-center h-16">
-              {/* Logo/Brand section */}
-                <div className="ml-10 flex flex-col items-start">
-                    {farmName ? (
-                        <>
-                        <h1 className="text-text text-xl font-bold -mt-1">{farmName}</h1>
-                        <span className="text-text text-xs tracking-wide">Terra</span>
-                        </>
-                    ) : (
-                        <h1 className="text-white text-xl font-bold">Terra</h1>
-                    )}
+              <div className="flex items-center ml-4">
+                <Trees />
+                <div className="ml-4 flex flex-col items-start">
+                  {farmName ? (
+                    <>
+                      <h1 className="text-text text-xl font-bold -mt-1">{farmName}</h1>
+                      <span className="text-text text-xs tracking-wide">Terra</span>
+                    </>
+                  ) : (
+                    <h1 className="text-white text-xl font-bold">Terra</h1>
+                  )}
                 </div>
+              </div>
               {/* User section */}
               <div className="flex items-center mr-4 relative">
                 {/* User email */}
                 <span className="text-text text-sm mr-2">
                   {currentUser.email}
                 </span>
-
                 {/* Modal trigger button */}
                 <button
                   ref={buttonRef}
@@ -154,7 +155,6 @@ const Navbar = () => {
           </div>
         </nav>
       </div>
-
       {/* Modal/Dropdown */}
       {isModalOpen && (
         <>
