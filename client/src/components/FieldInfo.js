@@ -1,17 +1,37 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Trash2, Save, Edit2 } from 'lucide-react';
 
 const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedPlot, setEditedPlot] = useState(plot);
+  const [showColorPicker, setShowColorPicker] = useState(false);
+
+  // Predefined colors for the color picker
+  const colors = [
+    '#4CAF50', '#66BB6A', '#81C784', '#2196F3', '#42A5F5', 
+    '#F44336', '#EF5350', '#FFC107', '#FFCA28', '#9C27B0'
+  ];
+
+  // Close color picker when clicking outside - moved to top level
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (showColorPicker && !event.target.closest('.color-picker-container')) {
+        setShowColorPicker(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showColorPicker]);
 
   if (!plot) return null;
 
-  // Convert square meters to acres
+  // Rest of the component functionality
   const areaInAcres = (plot.area / 5446.86).toFixed(2);
 
-  // Format date strings
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -48,20 +68,63 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
     onClose();
   };
 
+  const handleColorChange = (color) => {
+    setEditedPlot({ ...editedPlot, color });
+    setShowColorPicker(false);
+    if (!isEditing) {
+      onUpdate(plot.id, {
+        ...plot,
+        color,
+        updatedAt: new Date().toISOString()
+      });
+    }
+  };
+
   return (
     <div className="fixed right-4 top-32 w-80 bg-white rounded-lg shadow-xl border border-gray-200 animate-fade-in">
       <div className="p-4">
         <div className="flex items-center justify-between mb-4">
-          {isEditing ? (
-            <input
-              type="text"
-              value={editedPlot.name}
-              onChange={(e) => setEditedPlot({ ...editedPlot, name: e.target.value })}
-              className="text-xl font-bold text-gray-900 border-b border-gray-300 focus:outline-none focus:border-blue-500"
-            />
-          ) : (
-            <h2 className="text-xl font-bold text-gray-900">{plot.name}</h2>
-          )}
+          <div className="flex items-center gap-2">
+            {isEditing ? (
+              <input
+                type="text"
+                value={editedPlot.name}
+                onChange={(e) => setEditedPlot({ ...editedPlot, name: e.target.value })}
+                className="text-xl font-bold text-gray-900 border-b border-gray-300 focus:outline-none focus:border-blue-500"
+              />
+            ) : (
+              <h2 className="text-xl font-bold text-gray-900">{plot.name}</h2>
+            )}
+            <div className="relative color-picker-container">
+              <button
+                onClick={() => setShowColorPicker(!showColorPicker)}
+                className="w-6 h-6 rounded border border-gray-300 shadow-sm hover:shadow-md transition-shadow"
+                style={{ backgroundColor: editedPlot.color || '#4CAF50' }}
+                aria-label="Change plot color"
+              />
+              {showColorPicker && (
+                <div className="absolute z-10 top-full left-0 mt-2 p-3 bg-white rounded-lg shadow-xl border border-gray-200">
+                  <div className="flex flex-col gap-2">
+                    <p className="text-sm text-gray-600 mb-1">Select plot color</p>
+                    <div className="grid grid-cols-5 gap-2">
+                      {colors.map((color) => (
+                        <button
+                          key={color}
+                          onClick={() => handleColorChange(color)}
+                          className="w-8 h-8 rounded-full hover:scale-110 transition-transform duration-200 shadow-sm hover:shadow-md"
+                          style={{ 
+                            backgroundColor: color,
+                            border: editedPlot.color === color ? '2px solid #000' : '1px solid #e5e7eb'
+                          }}
+                          aria-label={`Select color ${color}`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
           <div className="flex items-center gap-2">
             {!isEditing && (
               <div className="relative overflow-hidden">
