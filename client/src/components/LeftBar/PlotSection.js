@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Map } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { doc, collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase';
 import PlotCard from './PlotCard';
 import { SectionHeader, SectionContent } from './SectionComponents';

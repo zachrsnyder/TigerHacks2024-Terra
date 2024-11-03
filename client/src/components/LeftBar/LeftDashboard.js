@@ -1,6 +1,6 @@
-import {React, useEffect, useState} from 'react'
+import {React, useState} from 'react'
 import EquipmentSection from './EquipmentSection'
-import {Check, ChevronRight, ChevronLeft} from 'lucide-react'
+import {ChevronRight, ChevronLeft} from 'lucide-react'
 import PlotSection from './PlotSection'
 import VehicleSection from './VehicleSection'
 

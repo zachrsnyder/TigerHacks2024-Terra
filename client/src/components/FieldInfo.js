@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { X, Trash2, Save, Edit2, Loader } from 'lucide-react';
 import CropProfit from './CropProfit';
 import AssignCropModal from './AssignCropModal';
-import { useAuth } from '../contexts/AuthContext'; 
 
 const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);

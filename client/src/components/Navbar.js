@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { doc, getDoc, collection, query, where, getDocs, setDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, query, getDocs, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { MapPin, Search, X, Trees  } from 'lucide-react';
 import { useMap } from '../contexts/MapContext';

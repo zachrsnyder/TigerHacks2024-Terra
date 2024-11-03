@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import { X, Calendar, Clock, Car, Info, MapPin, Wrench, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { uid } from 'chart.js/helpers';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
-import ViewEquipmentModal from './ViewEquipmentModal';
 
 
 // documentation is bare here because it is the same logic as the ViewEquipmentModal component
