@@ -13,6 +13,7 @@ const PlotSection = ({ pointPlots, setSelectedPlot, selectedPlot }) => {
   const [showAddModal, setShowAddModal] = useState(false);
   const { currentUser } = useAuth();
 
+  // Fetch plots from Firestore
   useEffect(() => {
     const fetchPlots = async () => {
       try {
@@ -37,6 +38,7 @@ const PlotSection = ({ pointPlots, setSelectedPlot, selectedPlot }) => {
     }
   }, [currentUser, pointPlots]);
 
+  
   return (
     <div className="border-b border-white/10">
       <SectionHeader
