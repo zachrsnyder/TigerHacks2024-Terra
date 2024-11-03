@@ -67,14 +67,6 @@ const PlotSection = ({ pointPlots, setSelectedPlot, selectedPlot }) => {
           )}
         </SectionContent>
       )}
-
-      {/* Add your AddPlotModal component here when you have one */}
-      {/* {showAddModal && (
-        <AddPlotModal
-          isOpen={showAddModal}
-          onClose={() => setShowAddModal(false)}
-        />
-      )} */}
     </div>
   );
 };

@@ -53,7 +53,6 @@ const AddVehicleModal = ({ isOpen, onClose }) => {
     };
 
     const generateVehicleId = async (type) => {
-        // Similar ID generation logic as in your equipment example
         try {
             const equipmentCollectionRef = collection(db, 'farms', currentUser.uid, 'vehicles');
             const snapshot = await getDocs(equipmentCollectionRef);

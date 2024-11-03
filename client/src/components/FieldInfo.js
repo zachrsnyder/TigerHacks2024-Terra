@@ -233,7 +233,6 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
 
   if (!plot) return null;
 
-  // Rest of the component functionality
   const areaInAcres = (plot.area / 5446.86).toFixed(2);
 
   const formatDate = (dateString) => {
