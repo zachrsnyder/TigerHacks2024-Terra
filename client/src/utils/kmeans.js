@@ -1,7 +1,10 @@
 
 function kMeans(points, k, maxIterations = 100) {
   // Step 1: Initialize centroids by randomly selecting `k` points from the dataset
-  let centroids = points.slice(0, k).map(() => points[Math.floor(Math.random() * points.length)]);
+  let centroids = points.slice(0, k).map(() => {
+    const randomPoint = points[Math.floor(Math.random() * points.length)];
+    return [randomPoint[0], randomPoint[1]]; // Create new array instead of reference
+  });
   let assignments = new Array(points.length);
   
   for (let iteration = 0; iteration < maxIterations; iteration++) {
