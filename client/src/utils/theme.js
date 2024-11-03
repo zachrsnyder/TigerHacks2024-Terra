@@ -1,6 +1,7 @@
 export default function getTimeOfDayTheme() {
+    //test day
+    // return 'day'
     const hour = new Date().getHours();
-    if (hour > 10 && hour < 17) return 'day';
-    if(hour > 21 || hour < 6) return 'night';
-    return 'dawndusk';
+    if (hour > 6 && hour < 17) return 'day';
+    return 'night';
 }

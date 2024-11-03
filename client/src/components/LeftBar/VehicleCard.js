@@ -17,7 +17,7 @@ const VehicleCard = ({ vehicle, onDelete, onEdit }) => {
     <div className="flex justify-between items-start">
       <div className="flex items-center space-x-4">
         <div className="p-2 rounded-lg bg-secondary/20">
-          <Car className="text-secondary" size={20} />
+          <Car className="text-text" size={20} />
         </div>
         <div>
           <h4 className="font-medium text-text">{vehicle.Name}</h4>
