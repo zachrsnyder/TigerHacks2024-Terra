@@ -55,6 +55,7 @@ const Dashboard = () => {
     libraries: ['geometry']
   });
 
+  // Function to update plot data
   const handleUpdatePlot = async (plotId, updatedData) => {
     try {
       // Update in Firestore
@@ -218,7 +219,7 @@ const Dashboard = () => {
       return;
     }
   
-    // Calculate center of plot
+  // Calculate center of plot
   const calcualteCenter = (points) => {
     let lat = 0;
     let lng = 0;
@@ -282,7 +283,8 @@ const Dashboard = () => {
           }, { merge: true });
         }
       }
-  
+      
+      // Reset state
       setNewPlotName('');
       setPoints([]);
       setIsNamingPlot(false);

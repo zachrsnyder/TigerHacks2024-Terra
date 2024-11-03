@@ -4,11 +4,12 @@ import { collection, addDoc, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useAuth } from '../../contexts/AuthContext';
 
+// Pops up when successfully submitting a new equipment
 const SuccessModal = ({ message, onClose }) => {
     React.useEffect(() => {
         const timer = setTimeout(() => {
             onClose();
-        }, 3000);
+        }, 1500);
         return () => clearTimeout(timer);
     }, [onClose]);
 
@@ -24,6 +25,7 @@ const SuccessModal = ({ message, onClose }) => {
     );
 };
 
+// Modal for adding new equipment
 const AddEquipmentModal = ({ isOpen, onClose }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState('');
@@ -31,6 +33,7 @@ const AddEquipmentModal = ({ isOpen, onClose }) => {
     const [successMessage, setSuccessMessage] = useState('');
     const { currentUser } = useAuth();
     
+    // New equipment document
     const [newDocument, setDocument] = useState({
         Name: "",
         Manufacturer: "",
@@ -38,6 +41,7 @@ const AddEquipmentModal = ({ isOpen, onClose }) => {
         Notes: "",
     });
 
+    // Generate a new equipment ID based on the type
     const generateEquipmentId = async (type) => {
         try {
             const equipmentCollectionRef = collection(db, 'farms', currentUser.uid, 'equipment');
@@ -77,20 +81,24 @@ const AddEquipmentModal = ({ isOpen, onClose }) => {
         }
     };
 
+    // Handle form submission
     const handleSubmit = async () => {
         // Corrected validation check
         if (!newDocument.Name || !newDocument.Manufacturer || !newDocument.Type) {
             setError('Please fill in all required fields');
             return;
         }
-
+        
+        // Reset error and set submitting state
         setIsSubmitting(true);
         setError('');
 
         try {
+            // Generate equipment ID and add new equipment document
             const equipmentId = await generateEquipmentId(newDocument.Type);
             const equipmentCollectionRef = collection(db, 'farms', currentUser.uid, 'equipment');
 
+            // New equipment data
             const equipmentData = {
                 ...newDocument,
                 VehicleID: equipmentId,
@@ -102,11 +110,14 @@ const AddEquipmentModal = ({ isOpen, onClose }) => {
 
             };
 
+            // Add new equipment document to Firestore
             await addDoc(equipmentCollectionRef, equipmentData);
 
+            // Show success message and reset form
             setSuccessMessage(`${newDocument.Name} ${equipmentId} has been successfully added`);
             setShowSuccess(true);
 
+            // Reset form fields
             setDocument({
                 Name: "",
                 Manufacturer: "",
@@ -114,6 +125,7 @@ const AddEquipmentModal = ({ isOpen, onClose }) => {
                 Notes: "",
             });
             
+            // Close modal after 1.5 seconds
             onClose();
 
         } catch (err) {
@@ -123,7 +135,8 @@ const AddEquipmentModal = ({ isOpen, onClose }) => {
         }
     };
 
-    if (!isOpen && !showSuccess) return null;
+    // Close modal if not open
+    if (!isOpen && !showSuccess) return null; 
 
     return (
         <>

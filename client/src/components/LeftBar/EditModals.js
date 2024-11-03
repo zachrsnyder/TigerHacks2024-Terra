@@ -4,11 +4,12 @@ import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useAuth } from '../../contexts/AuthContext';
 
+// Success modal component that appears after successful form submission
 const SuccessModal = ({ message, onClose }) => {
   React.useEffect(() => {
     const timer = setTimeout(() => {
       onClose();
-    }, 3000);
+    }, 1500);
     return () => clearTimeout(timer);
   }, [onClose]);
 
@@ -24,6 +25,7 @@ const SuccessModal = ({ message, onClose }) => {
   );
 };
 
+// Modal to edit equipment details
 export const EditEquipmentModal = ({ isOpen, onClose, equipment }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -31,6 +33,7 @@ export const EditEquipmentModal = ({ isOpen, onClose, equipment }) => {
   const [successMessage, setSuccessMessage] = useState('');
   const { currentUser } = useAuth();
 
+  // Initialize edited equipment state
   const [editedEquipment, setEditedEquipment] = useState(equipment || {
     Name: "",
     Manufacturer: "",
@@ -38,23 +41,28 @@ export const EditEquipmentModal = ({ isOpen, onClose, equipment }) => {
     Notes: "",
   });
 
+  // Handle form submission
   const handleSubmit = async () => {
     if (!editedEquipment.Name || !editedEquipment.Manufacturer || !editedEquipment.Type) {
       setError('Please fill in all required fields');
       return;
     }
 
+    // Set loading state
     setIsSubmitting(true);
     setError('');
 
+    // Update equipment details in the database
     try {
       const equipmentRef = doc(db, 'farms', currentUser.uid, 'equipment', equipment.id);
       
+      // Update equipment details
       await updateDoc(equipmentRef, {
         ...editedEquipment,
         updatedAt: new Date().toISOString(),
       });
 
+      // Show success message and close modal after 1.5 seconds
       setSuccessMessage(`${editedEquipment.Name} has been successfully updated`);
       setShowSuccess(true);
       onClose();
@@ -65,6 +73,7 @@ export const EditEquipmentModal = ({ isOpen, onClose, equipment }) => {
     }
   };
 
+  // Return null if modal is not open and success message is not shown
   if (!isOpen && !showSuccess) return null;
 
   return (
