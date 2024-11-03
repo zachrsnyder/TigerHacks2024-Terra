@@ -31,7 +31,6 @@ const Navbar = () => {
       if (!currentUser) return;
   
       try {
-          // Query plots using the nested collection path
           const plotsQuery = query(
               collection(db, 'farms', currentUser.uid, 'plots')
           );
@@ -41,7 +40,6 @@ const Navbar = () => {
           const cropTotals = new Map();
           let calculatedTotalArea = 0;
   
-          // Conversion factor: 1 square meter = 0.000247105 acres
           const sqMetersToAcres = 0.000247105;
           
           plotsSnapshot.forEach((doc) => {
@@ -57,14 +55,13 @@ const Navbar = () => {
               cropTotals.set(cropType, currentTotal + areaInAcres);
           });
           
-          // Set total area (now in acres)
           setTotalArea(Math.round(calculatedTotalArea * 100) / 100); // Round to 2 decimal places
           
           // Convert to chart data format
           const labels = Array.from(cropTotals.keys()).filter(crop => cropTotals.get(crop) > 0);
           const values = labels.map(crop => {
               const acres = cropTotals.get(crop);
-              return Math.round(acres * 100) / 100; // Round to 2 decimal places
+              return Math.round(acres * 100) / 100;
           });
           
           setChartData({
@@ -74,7 +71,6 @@ const Navbar = () => {
           
       } catch (error) {
           console.error('Error fetching crop data:', error);
-          // Clear the data if there's an error
           setTotalArea(0);
           setChartData({
               labels: [],
