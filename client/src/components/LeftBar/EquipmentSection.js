@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Folder, FolderOpen, Plus } from 'lucide-react';
+import { Folder } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { collection, query, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import EquipmentCard from './EquipmentCard';
 import AddEquipmentModal from './AddEquipmentModal';
+import { SectionHeader, SectionContent } from './SectionComponents';
 
 const EquipmentSection = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,24 +14,17 @@ const EquipmentSection = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const { currentUser } = useAuth();
 
-  // State to track which types of equipment are expanded
-  const [expandedTypes, setExpandedTypes] = useState({});
-
   useEffect(() => {
     if (!currentUser) return;
 
     const equipmentRef = collection(db, 'farms', currentUser.uid, 'equipment');
-
     const unsubscribe = onSnapshot(
       query(equipmentRef),
       (snapshot) => {
-        const equipmentData = [];
-        snapshot.forEach((doc) => {
-          equipmentData.push({
-            id: doc.id,
-            ...doc.data()
-          });
-        });
+        const equipmentData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
         setEquipment(equipmentData);
         setIsLoading(false);
       },
@@ -51,67 +45,39 @@ const EquipmentSection = () => {
     }
   };
 
-  const toggleDropdown = () => setIsOpen(!isOpen);
-
-  // Group equipment by type
+  // Group equipment by type but maintain flat list
   const equipmentByType = equipment.reduce((acc, curr) => {
     acc[curr.Type] = acc[curr.Type] || [];
     acc[curr.Type].push(curr);
     return acc;
   }, {});
 
-  // Toggle the expanded state for a specific type
-  const toggleTypeExpansion = (type) => {
-    setExpandedTypes((prev) => ({
-      ...prev,
-      [type]: !prev[type]
-    }));
-  };
-
   return (
-    <div className="border-b border-gray-300">
-      <div className="flex justify-between items-center">
-        <div
-          className="flex items-center cursor-pointer p-4"
-          onClick={toggleDropdown}
-        >
-          {isOpen ? (
-            <FolderOpen size={24} className="text-text mr-3" />
-          ) : (
-            <Folder size={24} className="text-text mr-3" />
-          )}
-          <h3 className="text-lg font-semibold">Equipment</h3>
-        </div>
-        <div className="pr-4">
-          <Plus
-            size={24}
-            className="text-text cursor-pointer"
-            onClick={() => setShowAddModal(true)}
-          />
-        </div>
-      </div>
+    <div className="border-b border-white/10">
+      <SectionHeader
+        title="Equipment"
+        icon={Folder}
+        isOpen={isOpen}
+        onToggle={() => setIsOpen(!isOpen)}
+        onAdd={() => setShowAddModal(true)}
+      />
 
       {isOpen && (
-        <div className="p-4 space-y-4">
-          {isLoading ? (
-            <div className="text-text text-center">Loading...</div>
-          ) : Object.keys(equipmentByType).length > 0 ? (
-            Object.keys(equipmentByType).map((type) => (
-              <div key={type}>
-                <div
-                  className="flex justify-between items-center cursor-pointer"
-                  onClick={() => toggleTypeExpansion(type)}
-                >
-                  <h4 className="text-lg font-semibold text-text my-2">{type}</h4>
-                  {expandedTypes[type] ? (
-                    <FolderOpen size={20} className="text-text" />
-                  ) : (
-                    <Folder size={20} className="text-text" />
-                  )}
-                </div>
-                {expandedTypes[type] && (
-                  <div className="pl-4 space-y-2">
-                    {equipmentByType[type].map((item) => (
+        <SectionContent isLoading={isLoading}>
+          {equipment.length > 0 ? (
+            <div className="space-y-6 px-2">
+              {Object.entries(equipmentByType).map(([type, items]) => (
+                <div key={type} className="space-y-2">
+                  <div className="flex items-center justify-between py-1 px-2">
+                    <div className="flex items-center space-x-2">
+                      <h4 className="text-sm font-medium text-white/70">{type}</h4>
+                      <span className="text-xs text-white/50 px-2 py-0.5 bg-white/10 rounded-full">
+                        {items.length}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    {items.map(item => (
                       <EquipmentCard
                         key={item.id}
                         equipment={item}
@@ -119,13 +85,15 @@ const EquipmentSection = () => {
                       />
                     ))}
                   </div>
-                )}
-              </div>
-            ))
+                </div>
+              ))}
+            </div>
           ) : (
-            <div className="text-text/70 text-center">No equipment added yet</div>
+            <div className="text-white/50 text-center py-4">
+              No equipment added yet
+            </div>
           )}
-        </div>
+        </SectionContent>
       )}
 
       <AddEquipmentModal

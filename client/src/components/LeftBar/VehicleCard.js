@@ -1,26 +1,38 @@
 import React from 'react';
 import { Car, Trash2 } from 'lucide-react';
 
-const VehicleCard = ({ vehicle, onDelete }) => {
-  return (
-    <div className="bg-secondary/50 p-3 rounded-lg hover:bg-secondary/70 transition-colors">
-      <div className="flex justify-between items-start">
-        <div className="flex items-center space-x-3">
-          <Car className="text-text" size={20} />
-          <div>
-            <h3 className="text-text font-medium">{vehicle.Name}</h3>
-            <p className="text-text/70 text-sm">{vehicle.VehicleID}</p>
+const VehicleCard = ({ vehicle, onDelete }) => (
+  <div className="group relative overflow-hidden bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg p-4 transform transition-all duration-200 hover:bg-white/20 hover:scale-[1.02] hover:shadow-lg hover:border-white/30">
+    <div className="flex justify-between items-start">
+      <div className="flex items-center space-x-4">
+        <div className="p-2 rounded-lg bg-secondary/20">
+          <Car className="text-secondary" size={20} />
+        </div>
+        <div>
+          <h4 className="font-medium text-white">{vehicle.Name}</h4>
+          <div className="flex items-center space-x-2 mt-1">
+            <span className="px-2 py-0.5 rounded-full bg-white/10 text-xs text-white/70">
+              {vehicle.VehicleID}
+            </span>
+            {vehicle.fuelType && (
+              <span className="px-2 py-0.5 rounded-full bg-blue-500/20 text-xs text-blue-300">
+                {vehicle.fuelType}
+              </span>
+            )}
           </div>
         </div>
-        <button
-          onClick={() => onDelete(vehicle.id)}
-          className="text-red-400 hover:text-red-500 transition-colors"
-        >
-          <Trash2 size={18} />
-        </button>
       </div>
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onDelete(vehicle.id);
+        }}
+        className="opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-red-500/20 rounded-full"
+      >
+        <Trash2 className="text-red-400" size={16} />
+      </button>
     </div>
-  );
-};
+  </div>
+);
 
 export default VehicleCard;
