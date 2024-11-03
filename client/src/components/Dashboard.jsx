@@ -13,6 +13,8 @@ import LeftDashboard from './LeftBar/LeftDashboard';
 import FieldInfo from './FieldInfo';
 import { useMap } from '../contexts/MapContext';
 import returnLargestCentroid from '../utils/kmeans';
+import AddFieldGuide from './AddFieldGuide';
+
 
 
 const Dashboard = () => {
@@ -34,6 +36,7 @@ const Dashboard = () => {
   const [showFieldNames, setShowFieldNames] = useState(true);
   const [showPlotFill, setShowPlotFill] = useState(true);
   const {centerMap} = useMap()
+  const [hasAddedField, setHasAddedField] = useState(false);
 
   const handleStartShapeEdit = (plot) => {
     setEditingPlot(plot);
@@ -85,9 +88,16 @@ const Dashboard = () => {
           const farmData = farmDoc.data();
           setFarmName(farmData.farmName || '');
           setZipCode(farmData.zipCode || '');
+
+          // Check if they have any fields
+          const plotsSnap = await getDocs(collection(db, 'farms', currentUser.uid, 'plots'));
+          const hasFields = !plotsSnap.empty;
+          setHasAddedField(hasFields);
           
-          if (farmData.location || farmData.zipCode) {
+           if (hasFields) {
             setCurrentStep('complete');
+          } else if (farmData.location || farmData.zipCode) {
+            setCurrentStep('addField');
           } else if (farmData.farmName) {
             setCurrentStep('zipCode');
           } else {
@@ -96,7 +106,6 @@ const Dashboard = () => {
   
           // Fetch plots
           const plotsRef = collection(db, 'farms', currentUser.uid, 'plots');
-          const plotsSnap = await getDocs(plotsRef);
           const plotsData = [];
           plotsSnap.forEach(doc => {
             plotsData.push({
@@ -244,6 +253,15 @@ const Dashboard = () => {
   
         await setDoc(plotRef, newPlot);
         setExistingPlots(prev => [...prev, { id: plotRef.id, ...newPlot }]);
+
+        if (!hasAddedField) {
+          setHasAddedField(true);
+          setCurrentStep('complete');
+          await setDoc(doc(db, 'farms', currentUser.uid), {
+            setupStep: 'complete',
+            updatedAt: new Date().toISOString()
+          }, { merge: true });
+        }
       }
   
       setNewPlotName('');
@@ -305,12 +323,12 @@ const Dashboard = () => {
           await setDoc(doc(db, 'farms', currentUser.uid), {
             location: location,
             zipCode: zipCode,
-            setupStep: 'complete', // Mark setup as complete
+            setupStep: 'addField', // Changed from 'complete' to 'addField'
             updatedAt: new Date().toISOString()
           }, { merge: true });
   
           setCoordinates(location);
-          setCurrentStep('complete');
+          setCurrentStep('addField'); // Changed from 'complete' to 'addField'
           setError('');
         } catch (firestoreError) {
           console.error('Firestore save error:', firestoreError);
@@ -377,7 +395,7 @@ const Dashboard = () => {
         />
       </div>
       
-      {currentStep !== 'complete' && (
+      {currentStep !== 'complete' && currentStep !== 'addField' && (
         <SearchBar
           currentStep={currentStep}
           value={currentStep === 'name' ? farmName : zipCode}
@@ -386,6 +404,10 @@ const Dashboard = () => {
           error={error}
         />
       )}
+
+{currentStep === 'addField' && !isDrawingMode && (
+  <AddFieldGuide />
+)}
       
       {isNamingPlot && (
         <PlotNameInput
@@ -395,7 +417,7 @@ const Dashboard = () => {
         />
       )}
       
-      {currentStep === 'complete' && (
+      {(currentStep === 'complete' || currentStep === 'addField') && (
       <ControlButtons
         isDrawingMode={isDrawingMode}
         points={points}
