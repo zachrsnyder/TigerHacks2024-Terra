@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Loader2, CheckCircle } from 'lucide-react';
 import { collection, addDoc, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useAuth } from '../../contexts/AuthContext';
 
 const SuccessModal = ({ message, onClose }) => {
-    React.useEffect(() => {
+    useEffect(() => {
         const timer = setTimeout(() => {
             onClose();
         }, 3000);
@@ -35,47 +35,32 @@ const AddVehicleModal = ({ isOpen, onClose }) => {
         Name: "",
         Manufacturer: "",
         Type: "",
-        Model: "",
         Notes: "",
-        FuelType: "",
-        costPerAcre: 0, // Set costPerAcre to zero initially
+        VehicleID: "",
+        costPerAcre: 2.70,
+        fuelType: ""
     });
 
+    // Define a mapping for vehicle types and their respective fuel types
     const fuelTypeMap = {
-        'Tractor': { fuel: 'Diesel', cost: 3.00 },
-        'Combine Harvester': { fuel: 'Diesel', cost: 3.50 },
-        'Bale Wagon': { fuel: 'Gasoline', cost: 2.80 },
-        'Sprayer': { fuel: 'Diesel', cost: 3.20 },
-        'Seeder': { fuel: 'Gasoline', cost: 2.60 },
-        'Planter': { fuel: 'Diesel', cost: 3.00 },
-        'Grain Cart': { fuel: 'Diesel', cost: 3.10 },
+        'Tractor': 'Diesel',
+        'Combine Harvester': 'Diesel',
+        'Bale Wagon': 'Diesel',
+        'Sprayer': 'Diesel',
+        'Seeder': 'Diesel',
+        'Planter': 'Diesel',
+        'Grain Cart': 'Diesel',
     };
 
     const generateVehicleId = async (type) => {
+        // Similar ID generation logic as in your equipment example
         try {
-            const vehicleCollectionRef = collection(db, 'farms', currentUser.uid, 'vehicles');
-            const snapshot = await getDocs(vehicleCollectionRef);
+            const equipmentCollectionRef = collection(db, 'farms', currentUser.uid, 'vehicles');
+            const snapshot = await getDocs(equipmentCollectionRef);
             const count = snapshot.size + 1;
             const paddedNumber = String(count).padStart(3, '0');
-
-            switch(type) {
-                case 'Tractor':
-                    return `TRAC${paddedNumber}`;
-                case 'Combine Harvester':
-                    return `COMH${paddedNumber}`;
-                case 'Bale Wagon':
-                    return `BALW${paddedNumber}`;
-                case 'Sprayer':
-                    return `SPRY${paddedNumber}`;
-                case 'Seeder':
-                    return `SEED${paddedNumber}`;
-                case 'Planter':
-                    return `PLNT${paddedNumber}`;
-                case 'Grain Cart':
-                    return `GROC${paddedNumber}`;
-                default:
-                    return `VEH${paddedNumber}`;
-            }
+            
+            return `VEH${paddedNumber}`;
         } catch (error) {
             console.error('Error generating ID:', error);
             throw error;
@@ -83,8 +68,7 @@ const AddVehicleModal = ({ isOpen, onClose }) => {
     };
 
     const handleSubmit = async () => {
-        // Corrected validation check
-        if (!newDocument.Name || !newDocument.Manufacturer || !newDocument.Type || !newDocument.Model) {
+        if (!newDocument.Name || !newDocument.Manufacturer || !newDocument.Type) {
             setError('Please fill in all required fields');
             return;
         }
@@ -94,7 +78,7 @@ const AddVehicleModal = ({ isOpen, onClose }) => {
 
         try {
             const vehicleId = await generateVehicleId(newDocument.Type);
-            const vehicleCollectionRef = collection(db, 'farms', currentUser.uid, 'vehicles');
+            const equipmentCollectionRef = collection(db, 'farms', currentUser.uid, 'vehicles');
 
             const vehicleData = {
                 ...newDocument,
@@ -103,10 +87,11 @@ const AddVehicleModal = ({ isOpen, onClose }) => {
                 updatedAt: new Date().toISOString(),
                 owner: currentUser.uid,
                 ownerEmail: currentUser.email,
-                active: true
+                active: true,
+                fuelType: fuelTypeMap[newDocument.Type] || 'Unknown' // Set fuel type based on type
             };
 
-            await addDoc(vehicleCollectionRef, vehicleData);
+            await addDoc(equipmentCollectionRef, vehicleData);
 
             setSuccessMessage(`${newDocument.Name} ${vehicleId} has been successfully added`);
             setShowSuccess(true);
@@ -115,12 +100,12 @@ const AddVehicleModal = ({ isOpen, onClose }) => {
                 Name: "",
                 Manufacturer: "",
                 Type: "",
-                Model: "",
                 Notes: "",
-                FuelType: "",
-                costPerAcre: 0, // Reset costPerAcre
+                VehicleID: "",
+                costPerAcre: 2.70,
+                fuelType: ""
             });
-
+            
             onClose();
 
         } catch (err) {
@@ -128,17 +113,6 @@ const AddVehicleModal = ({ isOpen, onClose }) => {
         } finally {
             setIsSubmitting(false);
         }
-    };
-
-    const handleTypeChange = (e) => {
-        const selectedType = e.target.value;
-        const fuelInfo = fuelTypeMap[selectedType] || { fuel: "", cost: 0 };
-        setDocument({
-            ...newDocument,
-            Type: selectedType,
-            FuelType: fuelInfo.fuel, // Set fuel type based on selected vehicle type
-            costPerAcre: fuelInfo.cost, // Set costPerAcre based on selected vehicle type
-        });
     };
 
     if (!isOpen && !showSuccess) return null;
@@ -152,15 +126,12 @@ const AddVehicleModal = ({ isOpen, onClose }) => {
                 />
             ) : (
                 <div className="fixed inset-0 flex items-center justify-center z-50 overflow-hidden">
-                    {/* Backdrop */}
                     <div 
                         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
                         onClick={onClose}
                     />
                     
-                    {/* Modal Content */}
                     <div className="relative backdrop-blur-md bg-white/30 rounded-lg shadow-2xl w-full max-w-md mx-4 border border-white/20">
-                        {/* Header */}
                         <div className="flex justify-between items-center p-4 border-b border-white/20">
                             <h2 className="text-xl font-semibold text-white">Add Vehicle</h2>
                             <button 
@@ -171,48 +142,40 @@ const AddVehicleModal = ({ isOpen, onClose }) => {
                             </button>
                         </div>
 
-                        {/* Error Message */}
                         {error && (
                             <div className="mx-6 mt-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
                                 <p className="text-red-500 text-sm">{error}</p>
                             </div>
                         )}
 
-                        {/* Form Content */}
                         <div className="p-6 space-y-4">
                             <div>
-                                <label className="block text-white text-sm font-medium mb-1">
-                                    Type
-                                </label>
+                                <label className="block text-white text-sm font-medium mb-1">Type</label>
                                 <input
                                     list="vehicle-types"
                                     value={newDocument.Type}
-                                    onChange={handleTypeChange} // Update handler
+                                    onChange={(e) => setDocument({ ...newDocument, Type: e.target.value })}
                                     className="w-full px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm"
                                     placeholder="Search or select vehicle type"
                                     required
                                 />
-                                
-                                {/* datalist with searchable options */}
                                 <datalist id="vehicle-types">
-                                    <option value="Tractor">Tractor</option>
-                                    <option value="Combine Harvester">Combine Harvester</option>
-                                    <option value="Bale Wagon">Bale Wagon</option>
-                                    <option value="Sprayer">Sprayer</option>
-                                    <option value="Seeder">Seeder</option>
-                                    <option value="Planter">Planter</option>
-                                    <option value="Grain Cart">Grain Cart</option>
+                                    <option value="Tractor" />
+                                    <option value="Combine Harvester" />
+                                    <option value="Bale Wagon" />
+                                    <option value="Sprayer" />
+                                    <option value="Seeder" />
+                                    <option value="Planter" />
+                                    <option value="Grain Cart" />
                                 </datalist>
                             </div>
 
                             <div>
-                                <label className="block text-white text-sm font-medium mb-1">
-                                    Name
-                                </label>
+                                <label className="block text-white text-sm font-medium mb-1">Name</label>
                                 <input
                                     type="text"
                                     value={newDocument.Name}
-                                    onChange={(e) => setDocument({...newDocument, Name: e.target.value})}
+                                    onChange={(e) => setDocument({ ...newDocument, Name: e.target.value })}
                                     className="w-full px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm"
                                     placeholder="Enter vehicle name"
                                     required
@@ -220,53 +183,43 @@ const AddVehicleModal = ({ isOpen, onClose }) => {
                             </div>
 
                             <div>
-                                <label className="block text-white text-sm font-medium mb-1">
-                                    Manufacturer
-                                </label>
+                                <label className="block text-white text-sm font-medium mb-1">Manufacturer</label>
                                 <input
                                     type="text"
                                     value={newDocument.Manufacturer}
-                                    onChange={(e) => setDocument({...newDocument, Manufacturer: e.target.value})}
+                                    onChange={(e) => setDocument({ ...newDocument, Manufacturer: e.target.value })}
                                     className="w-full px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm"
-                                    placeholder="Enter manufacturer"
+                                    placeholder="Enter vehicle manufacturer"
                                     required
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-white text-sm font-medium mb-1">
-                                    Model
-                                </label>
-                                <input
-                                    type="text"
-                                    value={newDocument.Model}
-                                    onChange={(e) => setDocument({...newDocument, Model: e.target.value})}
-                                    className="w-full px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm"
-                                    placeholder="Enter model"
-                                    required
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-white text-sm font-medium mb-1">
-                                    Notes
-                                </label>
+                                <label className="block text-white text-sm font-medium mb-1">Notes</label>
                                 <textarea
-                                    rows="4"
                                     value={newDocument.Notes}
-                                    onChange={(e) => setDocument({...newDocument, Notes: e.target.value})}
-                                    className="w-full px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm"
-                                    placeholder="Add any notes"
+                                    onChange={(e) => setDocument({ ...newDocument, Notes: e.target.value })}
+                                    className="w-full h-20 px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm resize-none"
+                                    placeholder="Enter any additional notes (optional)"
                                 />
                             </div>
+                        </div>
 
-                            {/* Submit Button */}
+                        <div className="flex justify-end gap-3 p-4 border-t border-white/20">
                             <button
-                                onClick={handleSubmit}
-                                className="w-full mt-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg focus:outline-none"
+                                onClick={onClose}
+                                className="px-4 py-2 text-white hover:bg-white/10 rounded-lg transition-colors"
                                 disabled={isSubmitting}
                             >
-                                {isSubmitting ? <Loader2 className="animate-spin" size={20} /> : 'Add Vehicle'}
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleSubmit}
+                                className={`flex items-center px-4 py-2 text-white rounded-lg transition-colors ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-white/10'}`}
+                                disabled={isSubmitting}
+                            >
+                                {isSubmitting && <Loader2 className="animate-spin mr-2" />}
+                                Add Vehicle
                             </button>
                         </div>
                     </div>
