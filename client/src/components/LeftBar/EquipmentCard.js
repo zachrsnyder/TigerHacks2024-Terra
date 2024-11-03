@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tractor, Trash2 } from 'lucide-react'; // Import appropriate icons
+import { Tractor, Trash2 } from 'lucide-react';
 
 const EquipmentCard = ({ equipment, onDelete }) => {
   return (
@@ -8,8 +8,7 @@ const EquipmentCard = ({ equipment, onDelete }) => {
         <div className="flex items-center space-x-3">
           <Tractor className="text-text" size={20} />
           <div>
-            {/* Displaying Name and Type */}
-            <h3 className="text-text font-medium">{equipment.Name} ({equipment.Type})</h3>
+            <h3 className="text-text font-medium">{equipment.Name}</h3>
             <p className="text-text/70 text-sm">{equipment.VehicleID}</p>
           </div>
         </div>
@@ -20,8 +19,8 @@ const EquipmentCard = ({ equipment, onDelete }) => {
           <Trash2 size={18} />
         </button>
       </div>
-      {equipment.Description && (
-        <p className="text-text/70 text-sm mt-2">{equipment.Description}</p>
+      {equipment.Notes && (
+        <p className="text-text/70 text-sm mt-2">{equipment.Notes}</p>
       )}
     </div>
   );
