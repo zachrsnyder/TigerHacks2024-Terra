@@ -3,7 +3,7 @@ import getEquipmentByUserUID from './queries';
 import { useAuth } from '../../contexts/AuthContext';
 import { Folder, FolderOpen, Plus } from 'lucide-react';
 import EquipmentCard from './EquipmentCard';
-import AddEquipmentModal from './AddEquipmentModal';
+import AddVehicleModal from './AddVehicleModal'; // Change to import AddVehicleModal
 
 function VehicleSection() {
   const [isOpen, setIsOpen] = useState(false);
@@ -15,10 +15,10 @@ function VehicleSection() {
   useEffect(() => {
     const setEquipmentList = async () => {
       setEquipment(await getEquipmentByUserUID(currentUser));
+      setIsLoading(false); // Move this inside the async function
     };
 
     setEquipmentList();
-    setIsLoading(false);
   }, [currentUser]);
 
   const toggleDropdown = () => setIsOpen(!isOpen);
@@ -57,8 +57,8 @@ function VehicleSection() {
         </div>
       ))}
 
-      {/* Render the AddEquipmentModal component */}
-      <AddEquipmentModal isOpen={showAddModal} onClose={() => setShowAddModal(false)} />
+      {/* Render the AddVehicleModal component */}
+      <AddVehicleModal isOpen={showAddModal} onClose={() => setShowAddModal(false)} />
     </div>
   );
 }
