@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { X, Loader2, CheckCircle } from 'lucide-react';
 import { collection, addDoc } from 'firebase/firestore';
-import { db } from '../../firebase';
-import { useAuth } from '../../contexts/AuthContext';
+import { db } from '../firebase';
+import { useAuth } from '../contexts/AuthContext';
 
 const AssignCropModal = ({ isOpen, onClose, plotId }) => {
     const [selectedCrop, setSelectedCrop] = useState('');
