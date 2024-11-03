@@ -1,6 +1,7 @@
 import React from 'react';
 import { Plus } from 'lucide-react';
 
+// SectionHeader component
 export const SectionHeader = ({ title, icon: Icon, isOpen, onToggle, onAdd }) => (
   <div className="flex items-center justify-between p-4 border-b border-white/10">
     <div 
@@ -25,6 +26,7 @@ export const SectionHeader = ({ title, icon: Icon, isOpen, onToggle, onAdd }) =>
   </div>
 );
 
+// SectionContent component
 export const SectionContent = ({ children, isLoading }) => (
   <div className="p-4 space-y-4">
     {isLoading ? (
