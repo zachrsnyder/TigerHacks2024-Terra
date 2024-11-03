@@ -1,8 +1,70 @@
-import React from 'react';
-import { X, Calendar, Clock, Info, MapPin, Wrench, Tractor } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, Calendar, Clock, Info, MapPin, Wrench, Tractor, AlertTriangle } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '../../firebase';
 
 const ViewEquipmentModal = ({ isOpen, onClose, equipment }) => {
+    const [showUnassignModal, setShowUnassignModal] = useState(false);
+  const { currentUser } = useAuth();
   if (!isOpen || !equipment) return null;
+
+  const handleUnassign = async () => {
+    try {
+      const equipmentRef = doc(db, 'farms', currentUser.uid, 'equipment', equipment.id);
+      await updateDoc(equipmentRef, {
+        assignedPlotId: null,
+        active: false,
+        updatedAt: new Date().toISOString()
+      });
+
+      // Close both modals
+      setShowUnassignModal(false);
+      onClose();
+    } catch (err) {
+      console.error('Error unassigning equipment:', err);
+    }
+  }
+
+  const UnassignModal = () => (
+    <div className="fixed inset-0 flex items-center justify-center z-[200] overflow-hidden">
+      <div 
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={() => setShowUnassignModal(false)}
+      />
+      
+      <div className="relative backdrop-blur-md bg-white/30 rounded-lg shadow-2xl w-full max-w-sm mx-4 border border-white/20">
+        <div className="p-6 space-y-6">
+          <div className="flex flex-col items-center gap-4">
+            <div className="p-3 rounded-full bg-red-500/20">
+              <AlertTriangle className="text-red-500" size={32} />
+            </div>
+            <h3 className="text-xl font-semibold text-white text-center">
+              Unassign Equipment?
+            </h3>
+            <p className="text-white/70 text-center">
+              Are you sure you want to unassign this equipment from its current plot?
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-3 mt-6">
+            <button
+              onClick={() => setShowUnassignModal(false)}
+              className="py-2 px-4 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleUnassign}
+              className="py-2 px-4 rounded-lg bg-red-500 hover:bg-red-600 text-white transition-colors"
+            >
+              Unassign
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -15,6 +77,7 @@ const ViewEquipmentModal = ({ isOpen, onClose, equipment }) => {
 
 
   return (
+    <>
     <div className="fixed inset-0 flex items-center justify-center z-[150] overflow-hidden">
       <div 
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
@@ -47,7 +110,7 @@ const ViewEquipmentModal = ({ isOpen, onClose, equipment }) => {
 
             <div className="flex items-center space-x-2">
               <span className="px-2 py-1 rounded-full bg-white/10 text-sm text-white/70">
-                {equipment.VehicleID}
+                {equipment.equipmentID}
               </span>
               <span className="px-2 py-1 rounded-full bg-white/10 text-sm text-white/70">
                 {equipment.Type}
@@ -67,8 +130,8 @@ const ViewEquipmentModal = ({ isOpen, onClose, equipment }) => {
           </div>
 
           {/* Status Section */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="p-4 bg-white/10 rounded-lg">
+          <div className="grid grid-cols-2 gap-4" >
+            <div className={`p-4 ${equipment.assignedPlotId ? 'bg-[#4CAF50]/20'  : 'bg-[#ffffff]/10'} rounded-lg`}>
               <div className="flex items-center gap-2 mb-2">
                 <Clock className="text-white/70" size={16} />
                 <span className="text-sm font-medium text-white">Status</span>
@@ -78,7 +141,12 @@ const ViewEquipmentModal = ({ isOpen, onClose, equipment }) => {
               </p>
             </div>
             
-            <div className="p-4 bg-white/10 rounded-lg">
+            <div className={`p-4 ${equipment.assignedPlotId ? 'bg-[#4CAF50]/20 hover:bg-red-500/20'  : 'bg-[#ffffff]/10'} rounded-lg`}
+                onClick={() => {
+                    if(equipment.assignedPlotId)
+                        setShowUnassignModal(true)
+                }}
+            >
               <div className="flex items-center gap-2 mb-2">
                 <MapPin className="text-white/70" size={16} />
                 <span className="text-sm font-medium text-white">Assignment</span>
@@ -139,6 +207,8 @@ const ViewEquipmentModal = ({ isOpen, onClose, equipment }) => {
         </div>
       </div>
     </div>
+    {showUnassignModal && <UnassignModal />}
+    </>
   );
 };
 
