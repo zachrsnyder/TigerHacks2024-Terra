@@ -104,7 +104,7 @@ const CropProfit = ({ cropName, acreage }) => {
             
             <div className="space-y-1">
                 <p className="text-xs text-gray-600">
-                    Yield: {result.totalYield.toLocaleString()} {result.unit}
+                    Estimated Yield: {result.totalYield.toLocaleString()} {result.unit}
                     <span className="text-gray-400"> ({result.yieldPerAcre} per acre)</span>
                 </p>
                 <p className="text-xs text-gray-600">
