@@ -13,7 +13,6 @@ import LeftDashboard from './LeftBar/LeftDashboard';
 import FieldInfo from './FieldInfo';
 import { useMap } from '../contexts/MapContext';
 import returnLargestCentroid from '../utils/kmeans';
-import { merge, uid } from 'chart.js/helpers';
 
 
 const Dashboard = () => {
@@ -342,7 +341,10 @@ const Dashboard = () => {
           isDrawingMode={isDrawingMode}
           onMapClick={handleMapClick}
           onPolygonEdit={handlePolygonEdit}
-          onPlotClick={(plot) => setSelectedPlot(plot)}
+          onPlotClick={(plot) => {
+            setSelectedPlot(plot);
+            centerMap({ lng: plot.center[1], lat: plot.center[0] }, plot.area)
+          }}
           onMapClickOutside={() => setSelectedPlot(null)}
           showFieldNames={showFieldNames}  
           showPlotFill={showPlotFill}
