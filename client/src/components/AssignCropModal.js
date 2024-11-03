@@ -5,6 +5,7 @@ import { db } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
 
 const AssignCropModal = ({ isOpen, onClose, plotId, onAssign }) => {
+    // Use state variables
     const { currentUser } = useAuth();
     const [selectedCrop, setSelectedCrop] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
@@ -31,6 +32,7 @@ const AssignCropModal = ({ isOpen, onClose, plotId, onAssign }) => {
         'hay'
     ];
 
+    // Filter crops based on search term
     const filteredCrops = crops.filter(crop => 
         crop.toLowerCase().includes(searchTerm.toLowerCase())
     );

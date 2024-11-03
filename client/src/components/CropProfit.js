@@ -61,6 +61,7 @@ const CropProfit = ({ cropName, acreage }) => {
         hay: 'tons'
     };
 
+    // Calculate profit based on crop name and acreage
     const calculateProfit = () => {
         if (!cropName || !acreage) return null;
 
@@ -87,6 +88,7 @@ const CropProfit = ({ cropName, acreage }) => {
 
     const result = calculateProfit();
 
+    // Display error message if unable to calculate profit
     if (!result) {
         return (
             <div className="bg-gray-50 p-3 rounded-md">
