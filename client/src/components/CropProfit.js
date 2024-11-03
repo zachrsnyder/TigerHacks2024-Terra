@@ -1,96 +1,116 @@
-import React, { useEffect, useState } from 'react';
-import { db } from '../firebase';
-import axios from 'axios';
-import { useAuth } from '../contexts/AuthContext';
+import React from 'react';
 
-const CropProfit = ({ cropName, areaInAcres }) => {
-    const [profit, setProfit] = useState(null);
-    const [error, setError] = useState('');
-    const { currentUser } = useAuth();
+const CropProfit = ({ cropName, acreage }) => {
+    // Market prices in USD
+    const cropPrices = {
+        corn: 4.50,          // per bushel
+        wheat: 5.75,         // per bushel
+        rice: 0.15,          // per pound
+        barley: 5.20,        // per bushel
+        oats: 3.80,          // per bushel
+        sorghum: 4.00,       // per bushel
+        soybeans: 12.50,     // per bushel
+        canola: 15.00,       // per bushel
+        rapeseed: 15.00,     // per bushel
+        'sunflower seeds': 0.25, // per pound
+        sugarcane: 25.00,    // per ton
+        cotton: 0.80,        // per pound
+        potatoes: 12.00,     // per hundredweight
+        alfalfa: 200.00,     // per ton
+        hay: 180.00          // per ton
+    };
 
-    useEffect(() => {
-        const fetchCropPrice = async () => {
-            if (!cropName || !areaInAcres) {
-                setError('Missing crop or area information');
-                return;
-            }
+    // Average yields per acre
+    const cropYields = {
+        corn: 180,        // bushels per acre
+        wheat: 50,        // bushels per acre
+        rice: 7500,       // pounds per acre
+        barley: 70,       // bushels per acre
+        oats: 65,         // bushels per acre
+        sorghum: 75,      // bushels per acre
+        soybeans: 50,     // bushels per acre
+        canola: 40,       // bushels per acre
+        rapeseed: 40,     // bushels per acre
+        'sunflower seeds': 1500, // pounds per acre
+        sugarcane: 30,    // tons per acre
+        cotton: 850,      // pounds per acre
+        potatoes: 400,    // hundredweight per acre
+        alfalfa: 8,       // tons per acre
+        hay: 4            // tons per acre
+    };
 
-            try {
-                // Get the crop's API identifier from Firebase
-                const cropRef = db.collection('farms').doc(currentUser.uid).collection('crops').doc(cropName);
-                const cropDoc = await cropRef.get();
-                
-                if (!cropDoc.exists) {
-                    setError('Crop not found');
-                    return;
-                }
+    // Units for display
+    const cropUnits = {
+        corn: 'bushels',
+        wheat: 'bushels',
+        rice: 'pounds',
+        barley: 'bushels',
+        oats: 'bushels',
+        sorghum: 'bushels',
+        soybeans: 'bushels',
+        canola: 'bushels',
+        rapeseed: 'bushels',
+        'sunflower seeds': 'pounds',
+        sugarcane: 'tons',
+        cotton: 'pounds',
+        potatoes: 'cwt',
+        alfalfa: 'tons',
+        hay: 'tons'
+    };
 
-                const cropData = cropDoc.data();
-                const apiCode = cropData.apiCode;
-                const yieldPerAcre = cropData.yieldPerAcre || 0; // Get yield from Firebase
+    const calculateProfit = () => {
+        if (!cropName || !acreage) return null;
 
-                // Make the API call to Quandl
-                const response = await axios.get(`https://www.quandl.com/api/v3/datasets/${apiCode}.json`, {
-                    params: {
-                        api_key: process.env.REACT_APP_QUANDL_API_KEY,
-                    },
-                });
+        const normalizedCropName = cropName.toLowerCase();
+        const price = cropPrices[normalizedCropName];
+        const yieldPerAcre = cropYields[normalizedCropName];
 
-                const currentPrice = response.data.dataset.data[0][1]; // Price per unit
-                
-                // Calculate profit using actual area
-                const profitValue = currentPrice * yieldPerAcre * areaInAcres;
-                setProfit(profitValue);
-                
-                // Log the calculation details
-                console.log('Profit Calculation:', {
-                    cropName,
-                    areaInAcres,
-                    currentPrice,
-                    yieldPerAcre,
-                    totalProfit: profitValue
-                });
+        if (!price || !yieldPerAcre) return null;
 
-            } catch (err) {
-                console.error('Error fetching crop price:', err);
-                setError('Failed to fetch crop price');
-            }
+        // Calculate total yield and profit
+        const totalYield = yieldPerAcre * acreage;
+        const totalProfit = price * totalYield;
+
+        return {
+            profit: totalProfit,
+            yieldPerAcre,
+            totalYield,
+            pricePerUnit: price,
+            unit: cropUnits[normalizedCropName]
         };
+    };
 
-        if (cropName && areaInAcres) {
-            fetchCropPrice();
-        }
-    }, [cropName, areaInAcres, currentUser.uid]);
+    const result = calculateProfit();
 
-    if (error) {
-        return <p className="text-red-500 text-sm">{error}</p>;
+    if (!result) {
+        return (
+            <div className="bg-gray-50 p-3 rounded-md">
+                <p className="text-sm text-gray-500">Unable to calculate value</p>
+            </div>
+        );
     }
 
     return (
-        <div className="space-y-2">
-            {profit !== null ? (
-                <>
-                    <div className="bg-green-50 p-3 rounded-md">
-                        <p className="text-sm text-gray-600">Estimated Profit</p>
-                        <p className="text-lg font-semibold text-gray-900">
-                            ${profit.toLocaleString(undefined, {
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2
-                            })}
-                        </p>
-                    </div>
-                    <p className="text-xs text-gray-500">
-                        Based on current market prices and {areaInAcres.toFixed(2)} acres
-                    </p>
-                </>
-            ) : (
-                <div className="animate-pulse flex space-x-4">
-                    <div className="flex-1 space-y-4 py-1">
-                        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                    </div>
-                </div>
-            )}
+        <div className="bg-gray-50 p-3 rounded-md space-y-2">
+            <div>
+                <h3 className="text-sm font-medium text-gray-900">Market Value:</h3>
+                <p className="text-lg font-semibold text-green-600">
+                    ${result.profit.toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    })}
+                </p>
+            </div>
+            
+            <div className="space-y-1">
+                <p className="text-xs text-gray-600">
+                    Yield: {result.totalYield.toLocaleString()} {result.unit}
+                    <span className="text-gray-400"> ({result.yieldPerAcre} per acre)</span>
+                </p>
+                <p className="text-xs text-gray-600">
+                    Price: ${result.pricePerUnit} per {result.unit}
+                </p>
+            </div>
         </div>
     );
 };
