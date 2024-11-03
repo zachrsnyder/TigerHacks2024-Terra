@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
-import backgroundVideo from '../assets/videos/fieldlogin.mp4';
+import backgroundVideo from '../assets/videos/fieldlogin.gif';
+import farmLogo from '../assets/farm t.png'; // Import the logo
 
 function Register() {
   const [name, setName] = useState('');
@@ -72,21 +73,18 @@ function Register() {
   return (
     <div className="relative flex items-center justify-center min-h-screen">
       {/* Video Background */}
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
+      <img
+        src={backgroundVideo}
+        alt="Field background"
         className="absolute top-0 left-0 w-full h-full object-cover -z-10"
-      >
-        <source src={backgroundVideo} type="video/mp4" />
-      </video>
+      />
       
       {/* Overlay to make the form more visible */}
       <div className="absolute top-0 left-0 w-full h-full bg-black/30 -z-5" />
       
       {/* Register Form */}
       <div className="backdrop-blur-md bg-white/30 p-8 rounded-lg shadow-2xl w-full max-w-md mx-4 border border-white/20">
+      <img src={farmLogo} alt="Farm Logo" className="w-20 h-20 mx-auto mb-5 mt-2" />
         <h2 className="text-3xl font-semibold text-center mb-6 text-white">Register</h2>
         
         {error && (
