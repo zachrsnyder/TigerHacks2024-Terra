@@ -15,13 +15,14 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
   const [isAssignCropModalOpen, setAssignCropModalOpen] = useState(false);
   const [currentCrop, setCurrentCrop] = useState(plot.crop);
   
-
+  //Grabs the current plot and sets the edited plot to the current plot
   useEffect(() => {
     setEditedPlot(plot);
     setCurrentCrop(plot.crop);
     fetchSoilData();
   }, [plot]);
 
+  //fetches soil data using the plot center and isric api
   const fetchSoilData = async () => {
     if (!plot.center) return;
     
@@ -68,6 +69,7 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
   
       console.log('Processed Data:', processedData);
       
+      // Analyze the soil data using the processed values
       const analysis = analyzeSoilData(processedData);
       setSoilData(analysis);
     } catch (error) {
@@ -78,9 +80,11 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
     }
   };
 
+  //Analyzes the soil data and returns the score and interpretations
   const analyzeSoilData = (soilData) => {
     console.log('Raw soil data for analysis:', soilData);
     
+    // Define score ranges for each component
     const scoreRanges = {
         organicCarbon: {
           5: [40, 100],   
@@ -111,7 +115,8 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
           1: [0, 14.9]
         }
       };
-  
+
+    // Map a value to a score based on the ranges
     const mapToScore = (value, ranges) => {
       for (let score = 5; score >= 1; score--) {
         const [min, max] = ranges[score];
@@ -119,7 +124,8 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
       }
       return 1; // Default to lowest score if out of all ranges
     };
-  
+    
+    // Calculate individual scores
     const scores = {
       organicCarbon: mapToScore(soilData.organicCarbon, scoreRanges.organicCarbon),
       pH: mapToScore(soilData.pH, scoreRanges.pH),
@@ -128,19 +134,21 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
     };
   
     console.log('Individual scores:', scores);
-  
+    
     const weights = {
       organicCarbon: 0.35,
       pH: 0.25,
       clay: 0.20,
       sand: 0.20
     };
-  
+    
     console.log('Calculating weighted scores:');
+    // Calculate weighted scores
     Object.entries(scores).forEach(([key, score]) => {
       console.log(`${key}: ${score} * ${weights[key]} * 20 = ${score * weights[key] * 20}`);
     });
-  
+    
+    // Calculate overall score
     const overallScore = Math.round(
       Object.entries(scores).reduce((total, [key, score]) => {
         return total + (score * weights[key] * 20);
@@ -168,6 +176,7 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
     };
   };
   
+  // Interpretation functions for cabron
   const getOrganicCarbonInterpretation = (value) => {
     if (value >= 400) return "Very high - Excellent soil fertility";
     if (value >= 300) return "High - Good soil fertility";
@@ -176,6 +185,7 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
     return "Very low - Needs organic matter amendment";
   };
   
+  // Interpretation functions for pH
   const getPHInterpretation = (value) => {
     if (value >= 7.5) return "Alkaline - May restrict nutrient availability";
     if (value >= 7.0) return "Slightly alkaline - Generally good for most crops";
@@ -185,6 +195,7 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
     return "Very acidic - Needs lime amendment";
   };
   
+  // Interpretation functions for clay
   const getClayInterpretation = (value) => {
     if (value >= 150) return "Very high - May have drainage issues";
     if (value >= 100) return "High - Good water retention";
@@ -193,6 +204,7 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
     return "Very low - Poor water retention";
   };
   
+  // Interpretation functions for sand
   const getSandInterpretation = (value) => {
     if (value >= 150) return "Very high - May have water retention issues";
     if (value >= 100) return "High - Good drainage";
@@ -201,6 +213,7 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
     return "Very low - May have drainage issues";
   };
   
+  // Interpretation functions for overall quality
   const getOverallQuality = (score) => {
     if (score >= 90) return "Excellent";
     if (score >= 80) return "Very Good";
@@ -216,7 +229,7 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
     '#F44336', '#EF5350', '#FFC107', '#FFCA28', '#9C27B0'
   ];
 
-  // Close color picker when clicking outside - moved to top level
+  // Close color picker when clicking outside, moved to top level
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (showColorPicker && !event.target.closest('.color-picker-container')) {
@@ -230,10 +243,13 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
     };
   }, [showColorPicker]);
 
+  // Check if plot data is available
   if (!plot) return null;
 
+  // Calculate area in acres
   const areaInAcres = (plot.area / 5446.86).toFixed(2);
 
+  // Format date string to readable format
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -242,6 +258,7 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
     });
   };
 
+  // Handler for delete confirmation
   const handleDelete = async () => {
     if (!isConfirmingDelete) {
       setIsConfirmingDelete(true);
@@ -252,6 +269,7 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
     onClose();
   };
 
+  // Handler for updating plot info
   const handleUpdate = async () => {
     await onUpdate(plot.id, {
       ...editedPlot,
@@ -260,16 +278,19 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
     setIsEditing(false);
   };
 
+  // Handler for canceling edit
   const handleCancel = () => {
     setEditedPlot(plot);
     setIsEditing(false);
   };
 
+  // Handler for editing shape
   const handleEditShape = () => {
     onStartShapeEdit(plot);
     onClose();
   };
 
+  // Handler for changing plot color
   const handleColorChange = (color) => {
     setEditedPlot({ ...editedPlot, color });
     setShowColorPicker(false);
@@ -395,7 +416,7 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
                           focus:ring-blue-500 transition-colors 
                           flex items-center justify-center gap-1"
               >
-                <Edit2 className="h-4 w-4" />
+              <Edit2 className="h-4 w-4" />
                 Edit Info
               </button>
               <button

@@ -15,6 +15,7 @@ function Register() {
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+  // Validate form fields
   const validateForm = () => {
     setError('');
 
@@ -36,6 +37,7 @@ function Register() {
     return true;
   };
 
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -51,6 +53,7 @@ function Register() {
     }
   };
 
+  // Handle error messages
   const handleError = (error) => {
     switch (error.code) {
       case 'auth/invalid-email':

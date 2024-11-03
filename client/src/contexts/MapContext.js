@@ -1,9 +1,10 @@
-// src/contexts/MapContext.js
 import React, { createContext, useContext, useState } from 'react';
 import calculateZoomFromArea from '../utils/zoomCalc';
 
+// Create a context to manage the map state
 const MapContext = createContext();
 
+// Custom hook to use the MapContext
 export const useMap = () => {
   const context = useContext(MapContext);
   if (!context) {
@@ -12,6 +13,7 @@ export const useMap = () => {
   return context;
 };
 
+// MapProvider component to wrap the application with the MapContext
 export const MapProvider = ({ children }) => {
   const [mapInstance, setMapInstance] = useState(null);
   const [coordinates, setCoordinates] = useState();
