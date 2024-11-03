@@ -15,7 +15,7 @@ const ViewEquipmentModal = ({ isOpen, onClose, equipment }) => {
 
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 overflow-hidden">
+    <div className="fixed inset-0 flex items-center justify-center z-[150] overflow-hidden">
       <div 
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
