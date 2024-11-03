@@ -13,6 +13,8 @@ import LeftDashboard from './LeftBar/LeftDashboard';
 import FieldInfo from './FieldInfo';
 import { useMap } from '../contexts/MapContext';
 import returnLargestCentroid from '../utils/kmeans';
+import AddFieldGuide from './AddFieldGuide';
+
 
 
 const Dashboard = () => {
@@ -34,6 +36,7 @@ const Dashboard = () => {
   const [showFieldNames, setShowFieldNames] = useState(true);
   const [showPlotFill, setShowPlotFill] = useState(true);
   const {centerMap} = useMap()
+  const [hasAddedField, setHasAddedField] = useState(false);
 
   const handleStartShapeEdit = (plot) => {
     setEditingPlot(plot);
@@ -79,53 +82,83 @@ const Dashboard = () => {
     const fetchData = async () => {
       try {
         const farmDocRef = doc(db, 'farms', currentUser.uid);
-        const farmDoc = await getDoc(doc(db, 'farms', currentUser.uid));
+        const farmDoc = await getDoc(farmDocRef);
+        
         if (farmDoc.exists()) {
           const farmData = farmDoc.data();
-          if (farmData.farmName && farmData.location) {
-            setFarmName(farmData.farmName); 
-            
-            setZipCode(farmData.zipCode || '');
+          setFarmName(farmData.farmName || '');
+          setZipCode(farmData.zipCode || '');
+
+          // Check if they have any fields
+          const plotsSnap = await getDocs(collection(db, 'farms', currentUser.uid, 'plots'));
+          const hasFields = !plotsSnap.empty;
+          setHasAddedField(hasFields);
+          
+           if (hasFields) {
             setCurrentStep('complete');
-            
-            const plotsRef = collection(db, 'farms', currentUser.uid, 'plots');
-            const plotsSnap = await getDocs(plotsRef);
-            const plotsData = [];
-            plotsSnap.forEach(doc => {
-              plotsData.push({
-                id: doc.id,
-                ...doc.data()
-              });
-            });
-
-            const allPlotCenters = plotsData.map(plot => plot.center)
-            console.log("Center", allPlotCenters)
-
-            const centerLoco = returnLargestCentroid(allPlotCenters, 4)
-            console.log(centerLoco)
-
-            await setDoc(farmDocRef, {
-              location: centerLoco
-            }, { merge: true });
-
-            const lat = centerLoco[0]
-            const lng = centerLoco[1]
-            centerMap({lat, lng}, null);
-            
-
-
-
-
-
-            setExistingPlots(plotsData);
+          } else if (farmData.location || farmData.zipCode) {
+            setCurrentStep('addField');
           } else if (farmData.farmName) {
-            setFarmName(farmData.farmName);
             setCurrentStep('zipCode');
           } else {
             setCurrentStep('name');
           }
+  
+          // Fetch plots
+          const plotsRef = collection(db, 'farms', currentUser.uid, 'plots');
+          const plotsData = [];
+          plotsSnap.forEach(doc => {
+            plotsData.push({
+              id: doc.id,
+              ...doc.data()
+            });
+          });
+          setExistingPlots(plotsData);
+          
+          // Only do k-means if we have enough plot centers
+          if (plotsData.length > 0) {
+            const allPlotCenters = plotsData.map(plot => plot.center).filter(center => 
+              // Filter out any invalid centers
+              Array.isArray(center) && 
+              center.length === 2 && 
+              !isNaN(center[0]) && 
+              !isNaN(center[1])
+            );
+            
+            if (allPlotCenters.length > 0) {
+              // Use minimum between number of points and requested k
+              const effectiveK = Math.min(4, allPlotCenters.length);
+              const centerLoco = returnLargestCentroid(allPlotCenters, effectiveK);
+              
+              await setDoc(farmDocRef, {
+                location: centerLoco
+              }, { merge: true });
+              
+              const lat = centerLoco[0];
+              const lng = centerLoco[1];
+              centerMap({lat, lng}, null);
+            } else if (farmData.location) {
+              // Fallback to existing location if no valid plot centers
+              centerMap({
+                lat: farmData.location.lat || farmData.location[0],
+                lng: farmData.location.lng || farmData.location[1]
+              }, null);
+            }
+          } else if (farmData.location) {
+            // If no plots, use existing location
+            centerMap({
+              lat: farmData.location.lat || farmData.location[0],
+              lng: farmData.location.lng || farmData.location[1]
+            }, null);
+          }
         } else {
           setCurrentStep('name');
+          await setDoc(farmDocRef, {
+            owner: currentUser.uid,
+            ownerEmail: currentUser.email,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          });
         }
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -220,6 +253,15 @@ const Dashboard = () => {
   
         await setDoc(plotRef, newPlot);
         setExistingPlots(prev => [...prev, { id: plotRef.id, ...newPlot }]);
+
+        if (!hasAddedField) {
+          setHasAddedField(true);
+          setCurrentStep('complete');
+          await setDoc(doc(db, 'farms', currentUser.uid), {
+            setupStep: 'complete',
+            updatedAt: new Date().toISOString()
+          }, { merge: true });
+        }
       }
   
       setNewPlotName('');
@@ -241,16 +283,17 @@ const Dashboard = () => {
       setError('Please enter a farm name');
       return;
     }
-
+  
     try {
       await setDoc(doc(db, 'farms', currentUser.uid), {
         owner: currentUser.uid,
         ownerEmail: currentUser.email,
         farmName: farmName.trim(),
+        setupStep: 'zipCode', // Save the next step
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       }, { merge: true });
-
+  
       setError('');
       setCurrentStep('zipCode');
     } catch (error) {
@@ -265,13 +308,13 @@ const Dashboard = () => {
       setError('Please enter a valid 5-digit zip code');
       return;
     }
-
+  
     try {
       const response = await fetch(
         `https://maps.googleapis.com/maps/api/geocode/json?address=${zipCode}&key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY}`
       );
       const data = await response.json();
-
+  
       if (data.results && data.results[0]) {
         const { lat, lng } = data.results[0].geometry.location;
         const location = { lat, lng };
@@ -280,11 +323,12 @@ const Dashboard = () => {
           await setDoc(doc(db, 'farms', currentUser.uid), {
             location: location,
             zipCode: zipCode,
+            setupStep: 'addField', // Changed from 'complete' to 'addField'
             updatedAt: new Date().toISOString()
           }, { merge: true });
-
+  
           setCoordinates(location);
-          setCurrentStep('complete');
+          setCurrentStep('addField'); // Changed from 'complete' to 'addField'
           setError('');
         } catch (firestoreError) {
           console.error('Firestore save error:', firestoreError);
@@ -351,7 +395,7 @@ const Dashboard = () => {
         />
       </div>
       
-      {currentStep !== 'complete' && (
+      {currentStep !== 'complete' && currentStep !== 'addField' && (
         <SearchBar
           currentStep={currentStep}
           value={currentStep === 'name' ? farmName : zipCode}
@@ -360,6 +404,10 @@ const Dashboard = () => {
           error={error}
         />
       )}
+
+{currentStep === 'addField' && !isDrawingMode && (
+  <AddFieldGuide />
+)}
       
       {isNamingPlot && (
         <PlotNameInput
@@ -369,7 +417,7 @@ const Dashboard = () => {
         />
       )}
       
-      {currentStep === 'complete' && (
+      {(currentStep === 'complete' || currentStep === 'addField') && (
       <ControlButtons
         isDrawingMode={isDrawingMode}
         points={points}
