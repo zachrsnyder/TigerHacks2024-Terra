@@ -61,13 +61,9 @@ A modern web application for precision agriculture that helps farmers map, manag
 7. Monitor revenue projections and optimize crop selection
 
 ### Crop Yield Analysis
-
 The crop yield analysis feature helps farmers make data-driven decisions by:
 - Accessing historical USDA yield data for their region
-- Comparing potential crops based on soil type and climate
-- Calculating expected yield based on field size and conditions
 - Providing revenue projections using current market prices
-- Offering risk assessment based on historical weather patterns
 
 ## Contributing
 
@@ -79,13 +75,12 @@ The crop yield analysis feature helps farmers make data-driven decisions by:
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License
 
 ## Acknowledgments
 
 - Created during TigerHacks 2024
-- Built with support from the agriculture technology community
-- Special thanks to all contributors and mentors
+- Claude and Chat-GPT were used in the creation of this project
 - USDA for providing comprehensive crop yield data
 
 ## Contact
