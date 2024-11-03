@@ -114,7 +114,7 @@ export const EditEquipmentModal = ({ isOpen, onClose, equipment }) => {
                   list="equipment-types"
                   value={editedEquipment.Type}
                   onChange={(e) => setEditedEquipment({ ...editedEquipment, Type: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm"
+                  className="text-black w-full px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm"
                   placeholder="Search or select equipment type"
                   required
                 />
@@ -139,7 +139,7 @@ export const EditEquipmentModal = ({ isOpen, onClose, equipment }) => {
                   type="text"
                   value={editedEquipment.Name}
                   onChange={(e) => setEditedEquipment({ ...editedEquipment, Name: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm"
+                  className="text-black w-full px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm"
                   placeholder="Enter equipment name"
                   required
                 />
@@ -151,7 +151,7 @@ export const EditEquipmentModal = ({ isOpen, onClose, equipment }) => {
                   type="text"
                   value={editedEquipment.Manufacturer}
                   onChange={(e) => setEditedEquipment({ ...editedEquipment, Manufacturer: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm"
+                  className="text-black w-full px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm"
                   placeholder="Enter manufacturer"
                   required
                 />
@@ -162,7 +162,7 @@ export const EditEquipmentModal = ({ isOpen, onClose, equipment }) => {
                 <textarea
                   value={editedEquipment.Notes}
                   onChange={(e) => setEditedEquipment({ ...editedEquipment, Notes: e.target.value })}
-                  className="w-full h-20 px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm resize-none"
+                  className="text-black w-full h-20 px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm resize-none"
                   placeholder="Enter any additional notes (optional)"
                 />
               </div>
@@ -276,7 +276,7 @@ export const EditVehicleModal = ({ isOpen, onClose, vehicle }) => {
                   list="vehicle-types"
                   value={editedVehicle.Type}
                   onChange={(e) => setEditedVehicle({ ...editedVehicle, Type: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm"
+                  className="text-black w-full px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm"
                   placeholder="Search or select vehicle type"
                   required
                 />
@@ -297,7 +297,7 @@ export const EditVehicleModal = ({ isOpen, onClose, vehicle }) => {
                   type="text"
                   value={editedVehicle.Name}
                   onChange={(e) => setEditedVehicle({ ...editedVehicle, Name: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm"
+                  className="text-black w-full px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm"
                   placeholder="Enter vehicle name"
                   required
                 />
@@ -309,7 +309,7 @@ export const EditVehicleModal = ({ isOpen, onClose, vehicle }) => {
                   type="text"
                   value={editedVehicle.Manufacturer}
                   onChange={(e) => setEditedVehicle({ ...editedVehicle, Manufacturer: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm"
+                  className="text-black w-full px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm"
                   placeholder="Enter manufacturer"
                   required
                 />
@@ -320,7 +320,7 @@ export const EditVehicleModal = ({ isOpen, onClose, vehicle }) => {
                 <textarea
                   value={editedVehicle.Notes}
                   onChange={(e) => setEditedVehicle({ ...editedVehicle, Notes: e.target.value })}
-                  className="w-full h-20 px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm resize-none"
+                  className="text-black w-full h-20 px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm resize-none"
                   placeholder="Enter any additional notes (optional)"
                 />
               </div>
