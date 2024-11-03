@@ -72,7 +72,6 @@ const AssignCropModal = ({ isOpen, onClose, plotId, onAssign }) => {
         onClose();
     };
 
-    // Rest of your component remains the same...
     if (!isOpen) return null;
 
     // Check for required data
