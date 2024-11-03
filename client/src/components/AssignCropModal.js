@@ -4,7 +4,7 @@ import { setDoc, doc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
 
-const AssignCropModal = ({ isOpen, onClose, plotId }) => {
+const AssignCropModal = ({ isOpen, onClose, plotId, onAssign }) => {
     const { currentUser } = useAuth();
     const [selectedCrop, setSelectedCrop] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
@@ -22,7 +22,7 @@ const AssignCropModal = ({ isOpen, onClose, plotId }) => {
         'soybeans',
         'canola',
         'rapeseed',
-        'sunflower_seeds',
+        'sunflower seeds',
         'sugarcane',
         'cotton',
         'potatoes',
@@ -49,6 +49,9 @@ const AssignCropModal = ({ isOpen, onClose, plotId }) => {
                 updatedAt: new Date().toISOString()
             }, { merge: true });
 
+            // Call onAssign with the selected crop after successful database update
+            onAssign(selectedCrop);
+            
             setSuccess(true);
             setTimeout(() => {
                 handleClose();
@@ -69,6 +72,7 @@ const AssignCropModal = ({ isOpen, onClose, plotId }) => {
         onClose();
     };
 
+    // Rest of your component remains the same...
     if (!isOpen) return null;
 
     // Check for required data
