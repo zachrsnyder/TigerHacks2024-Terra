@@ -32,17 +32,20 @@ const Navbar = () => {
       if (!currentUser) return;
   
       try {
+        // Query all plots for the current user
           const plotsQuery = query(
               collection(db, 'farms', currentUser.uid, 'plots')
           );
           
-          const plotsSnapshot = await getDocs(plotsQuery);
+          // Fetch all plots
+          const plotsSnapshot = await getDocs(plotsQuery);  
           
           const cropTotals = new Map();
           let calculatedTotalArea = 0;
   
           const sqMetersToAcres = 0.000247105;
           
+          // Iterate over each plot and calculate total area and crop distribution
           plotsSnapshot.forEach((doc) => {
               const plotData = doc.data();
               // Convert area from square meters to acres
@@ -56,6 +59,7 @@ const Navbar = () => {
               cropTotals.set(cropType, currentTotal + areaInAcres);
           });
           
+          // Set total area state
           setTotalArea(Math.round(calculatedTotalArea * 100) / 100);
           
           // Convert to chart data format
@@ -65,6 +69,7 @@ const Navbar = () => {
               return Math.round(acres * 100) / 100;
           });
           
+          // Set chart data state
           setChartData({
               labels: labels,
               values: values
@@ -104,9 +109,10 @@ const Navbar = () => {
     };
 
     // Open My Farm modal
+    // Fetch crop data before opening the modal
     const handleMyFarm = async (e) => {
       e.preventDefault();
-      await fetchCropData(); // Fetch crop data before opening modal
+      await fetchCropData();
       setIsMyFarmModalOpen(true);
       setIsModalOpen(false);
     };
@@ -116,6 +122,7 @@ const Navbar = () => {
       const getFarmData = async () => {
         if (currentUser) {
           try {
+            // Fetch farm data from Firestore
             const farmDoc = await getDoc(doc(db, 'farms', currentUser.uid));
             if (farmDoc.exists()) {
               const farmData = farmDoc.data();
@@ -136,6 +143,7 @@ const Navbar = () => {
       e.preventDefault();
       setError('');
     
+      // Validate zip code
       if (newZipCode.length !== 5 || !/^\d+$/.test(newZipCode)) {
         setError('Please enter a valid 5-digit zip code');
         return;
@@ -200,6 +208,7 @@ const Navbar = () => {
       }
     };
 
+    // Return null if user is not logged in
     if (!currentUser) return null;
 
   return (

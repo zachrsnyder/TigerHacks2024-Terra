@@ -1,6 +1,6 @@
 import React from 'react';
 
-
+//unused component
 const StateSelecter = ({ selectedState, setSelectedState }) => {
     const states = [
         "AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY",

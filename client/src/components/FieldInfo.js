@@ -26,21 +26,25 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
   const fetchSoilData = async () => {
     if (!plot.center) return;
     
+    // Set loading state and clear any previous errors
     setIsLoadingSoil(true);
     setSoilError(null);
     
     try {
+      // Fetch soil data from ISRIC API
       const lon = parseFloat(plot.center[1]).toFixed(6);
       const lat = parseFloat(plot.center[0]).toFixed(6);
       
       const url = `https://rest.isric.org/soilgrids/v2.0/properties/query?lat=${lat}&lon=${lon}`;
       
+      // Fetch the data from the API
       const response = await fetch(url, {
         headers: {
           'Accept': 'application/json',
         }
       });
-  
+      
+      // Parse the JSON response
       const data = await response.json();
       
       // Find the relevant layers by name
@@ -122,7 +126,7 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
         const [min, max] = ranges[score];
         if (value >= min && value <= max) return score;
       }
-      return 1; // Default to lowest score if out of all ranges
+      return 1;
     };
     
     // Calculate individual scores
