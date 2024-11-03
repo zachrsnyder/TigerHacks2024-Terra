@@ -6,6 +6,7 @@ const PlotCard = ({ data, setSelectedPlot, selectedPlot }) => {
   const { centerMap } = useMap();
   const isSelected = selectedPlot?.id === data.id;
 
+  // Handle click event on plot card
   const handleClick = () => {
     if (selectedPlot?.id !== data.id) {
       setSelectedPlot(data);
@@ -14,7 +15,8 @@ const PlotCard = ({ data, setSelectedPlot, selectedPlot }) => {
       setSelectedPlot(null);
     }
   };
-
+  
+  // Return the plot card component
   return (
     <div
       onClick={handleClick}

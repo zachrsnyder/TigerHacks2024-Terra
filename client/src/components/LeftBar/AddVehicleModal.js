@@ -4,11 +4,12 @@ import { collection, addDoc, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useAuth } from '../../contexts/AuthContext';
 
+// Pops up when successfully submitting a new vehicle
 const SuccessModal = ({ message, onClose }) => {
     useEffect(() => {
         const timer = setTimeout(() => {
             onClose();
-        }, 3000);
+        }, 1500);
         return () => clearTimeout(timer);
     }, [onClose]);
 
@@ -24,6 +25,7 @@ const SuccessModal = ({ message, onClose }) => {
     );
 };
 
+// Modal for adding a new vehicle
 const AddVehicleModal = ({ isOpen, onClose }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState('');
@@ -31,6 +33,7 @@ const AddVehicleModal = ({ isOpen, onClose }) => {
     const [successMessage, setSuccessMessage] = useState('');
     const { currentUser } = useAuth();
 
+    // Define vehicle types
     const vehicleTypes = [
         'Tractor',
         'Combine Harvester',
@@ -41,6 +44,7 @@ const AddVehicleModal = ({ isOpen, onClose }) => {
         'Grain Cart'
     ];
 
+    // Define state for new vehicle document
     const [newDocument, setDocument] = useState({
         Name: "",
         Manufacturer: "",
@@ -62,6 +66,7 @@ const AddVehicleModal = ({ isOpen, onClose }) => {
         'Grain Cart': 'Diesel',
     };
 
+    // Generate a unique vehicle ID
     const generateVehicleId = async (type) => {
         try {
             const equipmentCollectionRef = collection(db, 'farms', currentUser.uid, 'vehicles');
@@ -76,19 +81,22 @@ const AddVehicleModal = ({ isOpen, onClose }) => {
         }
     };
 
-    const handleSubmit = async () => {
+    // Handle form submission
+    const handleSubmit = async () => { 
         if (!newDocument.Name || !newDocument.Manufacturer || !newDocument.Type) {
             setError('Please fill in all required fields');
             return;
         }
-
+        // Reset error and set submitting state
         setIsSubmitting(true);
         setError('');
 
         try {
+            // Generate a unique vehicle ID
             const vehicleId = await generateVehicleId(newDocument.Type);
             const equipmentCollectionRef = collection(db, 'farms', currentUser.uid, 'vehicles');
 
+            // Add new vehicle document to Firestore
             const vehicleData = {
                 ...newDocument,
                 VehicleID: vehicleId,
@@ -100,11 +108,14 @@ const AddVehicleModal = ({ isOpen, onClose }) => {
                 fuelType: fuelTypeMap[newDocument.Type] || 'Unknown' // Set fuel type based on type
             };
 
+            // Add the new vehicle document to the Firestore collection
             await addDoc(equipmentCollectionRef, vehicleData);
 
+            // Set success message and show success modal
             setSuccessMessage(`${newDocument.Name} ${vehicleId} has been successfully added`);
             setShowSuccess(true);
 
+            // Reset form fields and close modal
             setDocument({
                 Name: "",
                 Manufacturer: "",
@@ -114,7 +125,8 @@ const AddVehicleModal = ({ isOpen, onClose }) => {
                 costPerAcre: 2.70,
                 fuelType: ""
             });
-            
+
+            // Close the modal after 1.5 seconds
             onClose();
 
         } catch (err) {
@@ -124,6 +136,7 @@ const AddVehicleModal = ({ isOpen, onClose }) => {
         }
     };
 
+    // Close the modal if it's not open
     if (!isOpen && !showSuccess) return null;
 
     return (

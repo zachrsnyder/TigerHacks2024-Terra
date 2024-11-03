@@ -21,7 +21,7 @@ const PieChart = ({ data }) => {
             activeOuterRadiusOffset={8}
             borderWidth={2}
             borderColor={{ from: 'color', modifiers: [['darker', 0.2]] }}
-            enableArcLinkLabels={false} // Removes the arrows/link labels
+            enableArcLinkLabels={false}
             arcLabelsSkipAngle={10}
             arcLabelsTextColor="white"
             valueFormat={value => `${value.toLocaleString()} acres`}
