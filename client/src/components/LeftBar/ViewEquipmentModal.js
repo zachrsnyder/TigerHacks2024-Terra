@@ -7,8 +7,12 @@ import { db } from '../../firebase';
 const ViewEquipmentModal = ({ isOpen, onClose, equipment }) => {
     const [showUnassignModal, setShowUnassignModal] = useState(false);
   const { currentUser } = useAuth();
+
+  //if it isn't opened or the passed equipment doesnt exist dont render anything.
   if (!isOpen || !equipment) return null;
 
+  //handles functionality for when the user chooses to unassign the equipment from it's plot
+  //main idea is to unassigned the plot id associated with the equipment reference to cut the tie
   const handleUnassign = async () => {
     try {
       const equipmentRef = doc(db, 'farms', currentUser.uid, 'equipment', equipment.id);
@@ -26,6 +30,7 @@ const ViewEquipmentModal = ({ isOpen, onClose, equipment }) => {
     }
   }
 
+  //nested component for the modal that shows up when the user is asked if they are sure they want to unassign the equipment. nested makes it so I props arent passed and logic is straightfoward.
   const UnassignModal = () => (
     <div className="fixed inset-0 flex items-center justify-center z-[200] overflow-hidden">
       <div 
@@ -66,6 +71,7 @@ const ViewEquipmentModal = ({ isOpen, onClose, equipment }) => {
     </div>
   );
 
+  //makes the date styling constant
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',

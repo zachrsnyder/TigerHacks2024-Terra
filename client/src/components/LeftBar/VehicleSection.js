@@ -8,6 +8,9 @@ import AddVehicleModal from './AddVehicleModal';
 import { EditVehicleModal } from './EditModals';
 import { SectionHeader, SectionContent } from './SectionComponents';
 
+// section of left dashboard that contains vehicles information. Includes a header and a map of all 
+// vehicles specific to the context user in little cards
+
 const VehicleSection = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [vehicles, setVehicles] = useState([]);
@@ -17,6 +20,9 @@ const VehicleSection = () => {
   const [selectedVehicle, setSelectedVehicle] = useState(null);
   const { currentUser } = useAuth();
 
+  // occurs on mount of the component or when the current user changes, which shouldn't happen in this components lifetime
+  // fetchs the collection of all vehicles and adds a listener (onSnapshot) for when the collection is altered. Returns on dismount 
+  // and unsubscribes to the listener
   useEffect(() => {
     if (!currentUser) return;
 
@@ -40,6 +46,7 @@ const VehicleSection = () => {
     return () => unsubscribe();
   }, [currentUser]);
 
+  //deletes a vehicledoc from the collection given an id
   const handleDeleteVehicle = async (vehicleId) => {
     try {
       await deleteDoc(doc(db, 'farms', currentUser.uid, 'vehicles', vehicleId));
@@ -48,11 +55,13 @@ const VehicleSection = () => {
     }
   };
 
+  //opens up edit modal
   const handleEditVehicle = (vehicle) => {
     setSelectedVehicle(vehicle);
     setShowEditModal(true);
   };
 
+  // used to sort vehicles by type
   const vehiclesByType = vehicles.reduce((acc, curr) => {
     acc[curr.Type] = acc[curr.Type] || [];
     acc[curr.Type].push(curr);

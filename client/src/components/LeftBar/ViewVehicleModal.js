@@ -4,7 +4,10 @@ import { useAuth } from '../../contexts/AuthContext';
 import { uid } from 'chart.js/helpers';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
+import ViewEquipmentModal from './ViewEquipmentModal';
 
+
+// documentation is bare here because it is the same logic as the ViewEquipmentModal component
 
 
 
@@ -14,6 +17,7 @@ const ViewVehicleModal = ({ isOpen, onClose, vehicle }) => {
     if (!isOpen || !vehicle) return null;
   
 
+    //same as ViewEquipmentModal but in the vehicle context.
   const handleUnassign = async () => {
     try {
       const vehicleRef = doc(db, 'farms', currentUser.uid, 'vehicles', vehicle.id);
@@ -31,6 +35,7 @@ const ViewVehicleModal = ({ isOpen, onClose, vehicle }) => {
     }
   }
 
+  //same as equipment context
   const UnassignModal = () => (
     <div className="fixed inset-0 flex items-center justify-center z-[200] overflow-hidden">
       <div 
