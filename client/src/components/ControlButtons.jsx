@@ -63,7 +63,7 @@ const ControlButtons = ({
               onClick={onDrawingStart}
               className="bg-primary backdrop-blur-sm px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all w-40"
             >
-              <div className="flex items-center gap-2 justify-center">
+              <div className="flex items-center gap-2 justify-center text-text">
                 <Plus className="h-5 w-5" />
                 Add Field
               </div>
