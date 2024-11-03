@@ -98,7 +98,8 @@ const AddEquipmentModal = ({ isOpen, onClose }) => {
                 updatedAt: new Date().toISOString(),
                 owner: currentUser.uid,
                 ownerEmail: currentUser.email,
-                active: true
+                assignedPlotId: ""
+
             };
 
             await addDoc(equipmentCollectionRef, equipmentData);

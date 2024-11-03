@@ -18,7 +18,7 @@ const ControlButtons = ({
     <>
       {/* Points notification in top middle */}
       {isDrawingMode && points.length < 3 && (
-        <div className="absolute top-20 left-1/2 transform -translate-x-1/2 z-10">
+        <div className="absolute top-20 left-1/2 transform -translate-x-1/2 z-[5]">
           <div className="bg-white/60 backdrop-blur-sm px-4 py-2 rounded shadow-lg text-red-600 h-10 flex items-center justify-center font-small">
             <span className="flex items-center gap-1">
               <span className="leading-none">Mark at least 3 points</span>
@@ -28,7 +28,7 @@ const ControlButtons = ({
       )}
 
       {/* Control buttons */}
-      <div className="absolute top-20 right-8 z-10 flex flex-col gap-2">
+      <div className="absolute top-20 right-8 z-[5] flex flex-col gap-2">
         <div className="flex gap-2 justify-end">
           <button
             onClick={onTogglePlotFill}
@@ -46,7 +46,7 @@ const ControlButtons = ({
 
           <button
             onClick={onToggleFieldNames}
-            className={`flex items-center gap-2 justify-center px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all ${
+            className={`flex items-center gap-2 z-[5] justify-center px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all ${
               showFieldNames ? 'bg-primary text-white' : 'bg-white/80 text-gray-700'
             }`}
           >

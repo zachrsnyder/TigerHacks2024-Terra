@@ -119,6 +119,8 @@ const VehicleSection = () => {
           vehicle={selectedVehicle}
         />
       )}
+
+      
     </div>
   );
 };

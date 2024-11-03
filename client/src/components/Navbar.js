@@ -29,36 +29,40 @@ const Navbar = () => {
 
     const fetchCropData = async () => {
       if (!currentUser) return;
-      
+  
       try {
-          // Query plots using the nested collection path
           const plotsQuery = query(
-              collection(db, 'farms', currentUser.uid, 'plots')  // Use nested collection path
+              collection(db, 'farms', currentUser.uid, 'plots')
           );
           
           const plotsSnapshot = await getDocs(plotsQuery);
           
           const cropTotals = new Map();
           let calculatedTotalArea = 0;
+  
+          const sqMetersToAcres = 0.000247105;
           
           plotsSnapshot.forEach((doc) => {
               const plotData = doc.data();
-              const area = plotData.area || 0;
-              calculatedTotalArea += area;
+              // Convert area from square meters to acres
+              const areaInAcres = (plotData.area || 0) * sqMetersToAcres;
+              calculatedTotalArea += areaInAcres;
               
               // If crop is missing, undefined, null, or empty string, count as "Unset"
               const cropType = (!plotData.crop || plotData.crop.trim() === '') ? 'Unset' : plotData.crop;
               
               const currentTotal = cropTotals.get(cropType) || 0;
-              cropTotals.set(cropType, currentTotal + area);
+              cropTotals.set(cropType, currentTotal + areaInAcres);
           });
           
-          // Set total area
-          setTotalArea(calculatedTotalArea);
+          setTotalArea(Math.round(calculatedTotalArea * 100) / 100); // Round to 2 decimal places
           
           // Convert to chart data format
           const labels = Array.from(cropTotals.keys()).filter(crop => cropTotals.get(crop) > 0);
-          const values = labels.map(crop => cropTotals.get(crop));
+          const values = labels.map(crop => {
+              const acres = cropTotals.get(crop);
+              return Math.round(acres * 100) / 100;
+          });
           
           setChartData({
               labels: labels,
@@ -67,7 +71,6 @@ const Navbar = () => {
           
       } catch (error) {
           console.error('Error fetching crop data:', error);
-          // Clear the data if there's an error
           setTotalArea(0);
           setChartData({
               labels: [],
@@ -75,7 +78,6 @@ const Navbar = () => {
           });
       }
     };
-
     
 
     useEffect(() => {
