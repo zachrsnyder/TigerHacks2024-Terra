@@ -13,9 +13,12 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
   const [isLoadingSoil, setIsLoadingSoil] = useState(false);
   const [soilError, setSoilError] = useState(null);
   const [isAssignCropModalOpen, setAssignCropModalOpen] = useState(false);
+  const [currentCrop, setCurrentCrop] = useState(plot.crop);
+  
 
   useEffect(() => {
     setEditedPlot(plot);
+    setCurrentCrop(plot.crop);
     fetchSoilData();
   }, [plot]);
 
@@ -280,264 +283,260 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
       });
     }
   };
-  
+
+  // Handler for crop assignment
+  const handleCropAssignment = async (newCrop) => {
+    try {
+      // Update the plot with the new crop
+      const updatedPlot = {
+        ...plot,
+        crop: newCrop,
+        updatedAt: new Date().toISOString()
+      };
+      
+      // Call the onUpdate prop to persist changes
+      await onUpdate(plot.id, updatedPlot);
+      
+      // Update local state
+      setCurrentCrop(newCrop);
+      setEditedPlot(updatedPlot);
+      
+      // Close the modal
+      setAssignCropModalOpen(false);
+    } catch (error) {
+      console.error('Error updating crop:', error);
+    }
+  };
 
   return (
     <div className="fixed right-4 top-32 w-80 bg-white rounded-lg shadow-xl border border-gray-200 animate-fade-in">
-      <div className="p-4">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            {isEditing ? (
-              <input
-                type="text"
-                value={editedPlot.name}
-                onChange={(e) => setEditedPlot({ ...editedPlot, name: e.target.value })}
-                className="text-xl font-bold text-gray-900 border-b border-gray-300 focus:outline-none focus:border-blue-500"
-              />
-            ) : (
-              <h2 className="text-xl font-bold text-gray-900">{plot.name}</h2>
-            )}
-            <div className="relative color-picker-container">
-              <button
-                onClick={() => setShowColorPicker(!showColorPicker)}
-                className="w-6 h-6 rounded border border-gray-300 shadow-sm hover:shadow-md transition-shadow"
-                style={{ backgroundColor: editedPlot.color || '#4CAF50' }}
-                aria-label="Change plot color"
-              />
-              {showColorPicker && (
-                <div className="absolute z-10 top-full -left-20 mt-2 p-4 bg-white rounded-lg shadow-xl border border-gray-200 min-w-[200px]">
-                  <div className="flex flex-col gap-3">
-                    <p className="text-sm text-gray-600">Select plot color</p>
-                    <div className="grid grid-cols-4 gap-3">
-                      {colors.map((color) => (
-                        <button
-                          key={color}
-                          onClick={() => handleColorChange(color)}
-                          className="w-10 h-10 rounded hover:scale-105 transition-transform duration-200 shadow-sm hover:shadow-md"
-                          style={{ 
-                            backgroundColor: color,
-                            border: editedPlot.color === color ? '2px solid #000' : '1px solid #e5e7eb'
-                          }}
-                          aria-label={`Select color ${color}`}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            {!isEditing && (
-              <div className="relative overflow-hidden">
-                <button
-                  onClick={handleDelete}
-                  className={`flex items-center gap-1 py-1.5 px-2 rounded-full transition-all duration-200 ${
-                    isConfirmingDelete 
-                      ? 'bg-red-50 text-red-500 pr-20' 
-                      : 'hover:bg-red-50 text-gray-500 hover:text-red-500'
-                  }`}
-                >
-                  <Trash2 className="h-4 w-4" />
-                  <span className={`text-sm whitespace-nowrap absolute left-7 transition-opacity duration-200 ${
-                    isConfirmingDelete ? 'opacity-100' : 'opacity-0'
-                  }`}>
-                    Confirm?
-                  </span>
-                </button>
-              </div>
-            )}
-            <button
-              onClick={onClose}
-              className="p-1.5 hover:bg-gray-100 rounded-full transition-colors"
-            >
-              <X className="h-4 w-4 text-gray-500" />
-            </button>
-          </div>
-        </div>
-        
-        <div className="space-y-4">
-          <div className="bg-gray-50 p-3 rounded-md">
-            <h3 className="text-sm font-medium text-gray-500">Area</h3>
-            <p className="mt-1 text-lg font-semibold text-gray-900">{areaInAcres} acres</p>
-          </div>
-          
-          <div className="bg-gray-50 p-3 rounded-md">
-          <h3 className="text-sm font-medium text-gray-500 mb-2">Soil Composition</h3>
-          {isLoadingSoil ? (
-            <div className="flex items-center justify-center py-2">
-              <Loader className="h-5 w-5 text-gray-400 animate-spin" />
-            </div>
-          ) : soilError ? (
-            <div>
-              <p className="text-sm text-red-500">{soilError}</p>
-              <button 
-                onClick={fetchSoilData}
-                className="text-xs text-blue-500 hover:text-blue-600 mt-2"
-              >
-                Try Again
-              </button>
-            </div>
-          ) : soilData ? (
-            <div className="space-y-2">
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <p className="text-xs text-gray-500">Clay Content</p>
-                  <p className="text-sm font-medium">{soilData.clay}</p>
-                  <p className="text-xs text-gray-400">{soilData.interpretations?.clay || ''}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">Sand Content</p>
-                  <p className="text-sm font-medium">{soilData.sand}</p>
-                  <p className="text-xs text-gray-400">{soilData.interpretations?.sand || ''}</p>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <p className="text-xs text-gray-500">Organic Carbon</p>
-                  <p className="text-sm font-medium">{soilData.organicCarbon}</p>
-                  <p className="text-xs text-gray-400">{soilData.interpretations?.organicCarbon || ''}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-gray-500">pH Level</p>
-                  <p className="text-sm font-medium">{soilData.pH}</p>
-                  <p className="text-xs text-gray-400">{soilData.interpretations?.pH || ''}</p>
-                </div>
-              </div>
-              <button 
-                onClick={fetchSoilData}
-                className="text-xs text-blue-500 hover:text-blue-600 mt-2"
-              >
-                Refresh Soil Data
-              </button>
-            </div>
-          ) : (
-            <p className="text-sm text-gray-500">No soil data available</p>
-          )}
-        </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <h3 className="text-sm font-medium text-gray-500">Created</h3>
-              <p className="mt-1 text-sm text-gray-900">
-                {plot.createdAt ? formatDate(plot.createdAt) : 'N/A'}
-              </p>
-            </div>
-
-            <div>
-              <h3 className="text-sm font-medium text-gray-500">Last Updated</h3>
-              <p className="mt-1 text-sm text-gray-900">
-                {plot.updatedAt ? formatDate(plot.updatedAt) : 'N/A'}
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between py-2">
-            <div className="flex items-center">
+      <div className="p-3">
+        <div className="space-y-3">
+          {/* Header Section with Name and Close Button */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
               {isEditing ? (
-                <button
-                  onClick={() => setEditedPlot({ ...editedPlot, active: !editedPlot.active })}
-                  className="flex items-center gap-2"
-                >
-                  <div
-                    className={`h-2.5 w-2.5 rounded-full ${
-                      editedPlot.active ? 'bg-green-500' : 'bg-gray-400'
-                    }`}
-                  />
-                  <span className="text-sm font-medium text-gray-700">
-                    {editedPlot.active ? 'Active' : 'Inactive'}
-                  </span>
-                </button>
+                <input
+                  type="text"
+                  value={editedPlot.name}
+                  onChange={(e) => setEditedPlot({ ...editedPlot, name: e.target.value })}
+                  className="text-xl font-bold text-gray-900 border-b border-gray-300 focus:outline-none focus:border-blue-500"
+                />
               ) : (
-                <>
-                  <div
-                    className={`h-2.5 w-2.5 rounded-full mr-2 ${
-                      plot.active ? 'bg-green-500' : 'bg-gray-400'
-                    }`}
-                  />
-                  <span className="text-sm font-medium text-gray-700">
-                    {plot.active ? 'Active' : 'Inactive'}
-                  </span>
-                </>
+                <h2 className="text-xl font-bold text-gray-900">{plot.name}</h2>
               )}
-            </div>
-              <div className="flex flex-col gap-3 mt-4">
-                {isEditing ? (
-                  <div className="flex gap-2 justify-end">
-                    <button
-                      onClick={handleCancel}
-                      className="px-3 py-1.5 text-sm font-medium text-gray-700 
-                                bg-white border border-gray-300 rounded-md
-                                hover:bg-gray-50 focus:outline-none focus:ring-2 
-                                focus:ring-offset-1 focus:ring-blue-500
-                                transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleUpdate}
-                      className="px-3 py-1.5 text-sm font-medium text-white
-                                bg-blue-500 rounded-md hover:bg-blue-600 
-                                focus:outline-none focus:ring-2 focus:ring-offset-1 
-                                focus:ring-blue-500 transition-colors"
-                    >
-                      Save
-                    </button>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      onClick={() => setIsEditing(true)}
-                      className="px-3 py-1.5 text-sm font-medium text-gray-700 
-                                bg-white border border-gray-300 rounded-md
-                                hover:bg-gray-50 focus:outline-none focus:ring-2 
-                                focus:ring-offset-1 focus:ring-blue-500
-                                transition-colors flex items-center justify-center gap-1"
-                    >
-                      <Edit2 className="h-4 w-4" />
-                      Edit Info
-                    </button>
-                    <button
-                      onClick={handleEditShape}
-                      className="px-3 py-1.5 text-sm font-medium text-gray-700 
-                                bg-white border border-gray-300 rounded-md
-                                hover:bg-gray-50 focus:outline-none focus:ring-2 
-                                focus:ring-offset-1 focus:ring-blue-500
-                                transition-colors"
-                    >
-                      Edit Shape
-                    </button>
-                    <button
-                      onClick={() => setAssignCropModalOpen(true)}
-                      className="px-3 py-1.5 text-sm font-medium text-white
-                                bg-green-500 rounded-md hover:bg-green-600 
-                                focus:outline-none focus:ring-2 focus:ring-offset-1 
-                                focus:ring-green-500 transition-colors col-span-2"
-                    >
-                      Assign Crop
-                    </button>
+              <div className="relative color-picker-container">
+                <button
+                  onClick={() => setShowColorPicker(!showColorPicker)}
+                  className="w-6 h-6 rounded border border-gray-300 shadow-sm hover:shadow-md transition-shadow"
+                  style={{ backgroundColor: editedPlot.color || '#4CAF50' }}
+                  aria-label="Change plot color"
+                />
+                {showColorPicker && (
+                  <div className="absolute z-10 top-full -left-20 mt-2 p-4 bg-white rounded-lg shadow-xl border border-gray-200 min-w-[200px]">
+                    <div className="flex flex-col gap-3">
+                      <p className="text-sm text-gray-600">Select plot color</p>
+                      <div className="grid grid-cols-4 gap-3">
+                        {colors.map((color) => (
+                          <button
+                            key={color}
+                            onClick={() => handleColorChange(color)}
+                            className="w-10 h-10 rounded hover:scale-105 transition-transform duration-200 shadow-sm hover:shadow-md"
+                            style={{ 
+                              backgroundColor: color,
+                              border: editedPlot.color === color ? '2px solid #000' : '1px solid #e5e7eb'
+                            }}
+                            aria-label={`Select color ${color}`}
+                          />
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>
+            </div>
+            <div className="flex items-center gap-2">
+              {!isEditing && (
+                <div className="relative overflow-hidden">
+                  <button
+                    onClick={handleDelete}
+                    className={`flex items-center gap-1 py-1 px-2 rounded-full transition-all duration-200 ${
+                      isConfirmingDelete 
+                        ? 'bg-red-50 text-red-500 pr-20' 
+                        : 'hover:bg-red-50 text-gray-500 hover:text-red-500'
+                    }`}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    <span className={`text-sm whitespace-nowrap absolute left-7 transition-opacity duration-200 ${
+                      isConfirmingDelete ? 'opacity-100' : 'opacity-0'
+                    }`}>
+                      Confirm?
+                    </span>
+                  </button>
+                </div>
+              )}
+              <button
+                onClick={onClose}
+                className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <X className="h-4 w-4 text-gray-500" />
+              </button>
+            </div>
+          </div>
+
+          {/* Edit Buttons Section */}
+          {!isEditing && (
+            <div className="flex gap-2">
+              <button
+                onClick={() => setIsEditing(true)}
+                className="flex-1 px-2 py-1 text-sm font-medium text-gray-700 
+                          bg-white border border-gray-300 rounded-md
+                          hover:bg-gray-50 focus:outline-none focus:ring-1 
+                          focus:ring-blue-500 transition-colors 
+                          flex items-center justify-center gap-1"
+              >
+                <Edit2 className="h-4 w-4" />
+                Edit Info
+              </button>
+              <button
+                onClick={handleEditShape}
+                className="flex-1 px-2 py-1 text-sm font-medium text-gray-700 
+                          bg-white border border-gray-300 rounded-md
+                          hover:bg-gray-50 focus:outline-none focus:ring-1 
+                          focus:ring-blue-500 transition-colors"
+              >
+                Edit Shape
+              </button>
+            </div>
+          )}
+
+          {/* Area and Crop Section */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-gray-50 p-2 rounded-md">
+              <h3 className="text-sm font-medium text-gray-500">Area</h3>
+              <p className="text-lg font-semibold text-gray-900">{areaInAcres} acres</p>
+            </div>
+            <div className="bg-gray-50 p-2 rounded-md">
+              <h3 className="text-sm font-medium text-gray-500">Crop</h3>
+              <p className="text-lg font-semibold text-gray-900">
+                {plot.crop ? plot.crop.charAt(0).toUpperCase() + plot.crop.slice(1) : 'None'}
+              </p>
+            </div>
+          </div>
+
+          {/* Assign Crop Button */}
+          <button
+            onClick={() => setAssignCropModalOpen(true)}
+            className="w-full px-3 py-1.5 text-sm font-medium text-white
+                      bg-green-500 rounded-md hover:bg-green-600 
+                      focus:outline-none focus:ring-1 focus:ring-offset-1 
+                      focus:ring-green-500 transition-colors"
+          >
+            Assign Crop
+          </button>
+
+          {/* Soil Composition Section */}
+          <div className="bg-gray-50 p-2 rounded-md">
+            <h3 className="text-sm font-medium text-gray-500 mb-2">Soil Composition</h3>
+            {isLoadingSoil ? (
+              <div className="flex items-center justify-center py-2">
+                <Loader className="h-5 w-5 text-gray-400 animate-spin" />
+              </div>
+            ) : soilError ? (
+              <div>
+                <p className="text-sm text-red-500">{soilError}</p>
+                <button 
+                  onClick={fetchSoilData}
+                  className="text-xs text-blue-500 hover:text-blue-600 mt-2"
+                >
+                  Try Again
+                </button>
+              </div>
+            ) : soilData ? (
+              <div className="space-y-2">
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <p className="text-xs text-gray-500">Clay Content</p>
+                    <p className="text-sm font-medium">{soilData.clay}</p>
+                    <p className="text-xs text-gray-400">{soilData.interpretations?.clay || ''}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">Sand Content</p>
+                    <p className="text-sm font-medium">{soilData.sand}</p>
+                    <p className="text-xs text-gray-400">{soilData.interpretations?.sand || ''}</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <p className="text-xs text-gray-500">Organic Carbon</p>
+                    <p className="text-sm font-medium">{soilData.organicCarbon}</p>
+                    <p className="text-xs text-gray-400">{soilData.interpretations?.organicCarbon || ''}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500">pH Level</p>
+                    <p className="text-sm font-medium">{soilData.pH}</p>
+                    <p className="text-xs text-gray-400">{soilData.interpretations?.pH || ''}</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={fetchSoilData}
+                  className="text-xs text-blue-500 hover:text-blue-600 mt-2"
+                >
+                  Refresh Soil Data
+                </button>
+              </div>
+            ) : (
+              <p className="text-sm text-gray-500">No soil data available</p>
+            )}
+          </div>
+
+          {/* Market Analysis Section */}
+          {plot.crop && (
+            <div className="bg-gray-50 p-2 rounded-md">
+              <h3 className="text-sm font-medium text-gray-500 mb-2">Market Analysis</h3>
+              <CropProfit
+                cropName={plot.crop}
+                acreage={Number(areaInAcres) || 0}
+              />
+            </div>
+          )}
+
+          <div className="flex items-center justify-between py-1">
+            {/* Save/Cancel buttons for edit mode */}
+            {isEditing && (
+              <div className="flex gap-2">
+                <button
+                  onClick={handleCancel}
+                  className="px-3 py-1 text-sm font-medium text-gray-700 
+                            bg-white border border-gray-300 rounded-md
+                            hover:bg-gray-50 focus:outline-none focus:ring-1 
+                            focus:ring-blue-500 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleUpdate}
+                  className="px-3 py-1 text-sm font-medium text-white
+                            bg-blue-500 rounded-md hover:bg-blue-600 
+                            focus:outline-none focus:ring-1 focus:ring-blue-500 
+                            transition-colors"
+                >
+                  Save
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
-      {plot.crop && (
-        <div className="bg-gray-50 p-3 rounded-md">
-          <h3 className="text-sm font-medium text-gray-500 mb-2">Market Analysis</h3>
-          <CropProfit 
-            cropName={plot.crop} 
-            areaInAcres={parseFloat(areaInAcres)}
-          />
-        </div>
-      )}
+
       <AssignCropModal
         isOpen={isAssignCropModalOpen}
         onClose={() => setAssignCropModalOpen(false)}
         plotId={plot.id}
+        onAssign={handleCropAssignment}
       />
     </div>
-  );
+  )
 };
 
 export default FieldInfo;
