@@ -48,7 +48,7 @@ A modern web application for precision agriculture that helps farmers map, manag
 - **Styling**: Tailwind CSS
 - **Icons**: Lucide React
 - **State Management**: React Context API
-- **Data Sources**: USDA Crop Yield Database
+- **Data Sources**: USDA Crop Yield Database, ISRIC API
 
 ## Usage
 
