@@ -87,7 +87,7 @@ const AddVehicleModal = ({ isOpen, onClose }) => {
                 updatedAt: new Date().toISOString(),
                 owner: currentUser.uid,
                 ownerEmail: currentUser.email,
-                active: true,
+                assignedPlotId: "",
                 fuelType: fuelTypeMap[newDocument.Type] || 'Unknown' // Set fuel type based on type
             };
 
