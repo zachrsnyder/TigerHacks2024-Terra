@@ -86,38 +86,41 @@ const Dashboard = () => {
           setFarmName(farmData.farmName || '');
           setZipCode(farmData.zipCode || '');
           
-          // Use the stored setupStep or determine it based on data
-          if (farmData.setupStep) {
-            setCurrentStep(farmData.setupStep);
+          if (farmData.location || farmData.zipCode) {
+            setCurrentStep('complete');
+          } else if (farmData.farmName) {
+            setCurrentStep('zipCode');
           } else {
-            // Fallback logic if setupStep isn't set
-            if (farmData.location) {
-              setCurrentStep('complete');
-            } else if (farmData.zipCode) {
-              setCurrentStep('complete');
-            } else if (farmData.farmName) {
-              setCurrentStep('zipCode');
-            } else {
-              setCurrentStep('name');
-            }
+            setCurrentStep('name');
           }
   
-          if (farmData.setupStep === 'complete') {
-            // Fetch plots only if setup is complete
-            const plotsRef = collection(db, 'farms', currentUser.uid, 'plots');
-            const plotsSnap = await getDocs(plotsRef);
-            const plotsData = [];
-            plotsSnap.forEach(doc => {
-              plotsData.push({
-                id: doc.id,
-                ...doc.data()
-              });
+          // Fetch plots
+          const plotsRef = collection(db, 'farms', currentUser.uid, 'plots');
+          const plotsSnap = await getDocs(plotsRef);
+          const plotsData = [];
+          plotsSnap.forEach(doc => {
+            plotsData.push({
+              id: doc.id,
+              ...doc.data()
             });
-            setExistingPlots(plotsData);
+          });
+          setExistingPlots(plotsData);
+          
+          // Only do k-means if we have enough plot centers
+          if (plotsData.length > 0) {
+            const allPlotCenters = plotsData.map(plot => plot.center).filter(center => 
+              // Filter out any invalid centers
+              Array.isArray(center) && 
+              center.length === 2 && 
+              !isNaN(center[0]) && 
+              !isNaN(center[1])
+            );
             
-            if (plotsData.length > 0) {
-              const allPlotCenters = plotsData.map(plot => plot.center);
-              const centerLoco = returnLargestCentroid(allPlotCenters, 4);
+            if (allPlotCenters.length > 0) {
+              // Use minimum between number of points and requested k
+              const effectiveK = Math.min(4, allPlotCenters.length);
+              const centerLoco = returnLargestCentroid(allPlotCenters, effectiveK);
+              
               await setDoc(farmDocRef, {
                 location: centerLoco
               }, { merge: true });
@@ -125,15 +128,25 @@ const Dashboard = () => {
               const lat = centerLoco[0];
               const lng = centerLoco[1];
               centerMap({lat, lng}, null);
+            } else if (farmData.location) {
+              // Fallback to existing location if no valid plot centers
+              centerMap({
+                lat: farmData.location.lat || farmData.location[0],
+                lng: farmData.location.lng || farmData.location[1]
+              }, null);
             }
+          } else if (farmData.location) {
+            // If no plots, use existing location
+            centerMap({
+              lat: farmData.location.lat || farmData.location[0],
+              lng: farmData.location.lng || farmData.location[1]
+            }, null);
           }
         } else {
           setCurrentStep('name');
-          // Create initial farm document with setup step
           await setDoc(farmDocRef, {
             owner: currentUser.uid,
             ownerEmail: currentUser.email,
-            setupStep: 'name',
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
           });
