@@ -52,7 +52,6 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
       // Convert values to proper units
       // Clay and sand are given in g/kg, convert to percentage (divide by 10)
       // pH is given in pH * 10, so divide by 10
-      // Organic carbon is in g/kg
       const processedData = {
         clay: (clayLayer?.depths?.[0]?.values?.mean || 0) / 10,
         sand: (sandLayer?.depths?.[0]?.values?.mean || 0) / 10,
@@ -84,27 +83,27 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
     
     const scoreRanges = {
         organicCarbon: {
-          5: [40, 100],    // g/kg
+          5: [40, 100],   
           4: [30, 39.9],
           3: [20, 29.9],
           2: [10, 19.9],
           1: [0, 9.9]
         },
         pH: {
-          5: [6.0, 7.0],   // pH scale
+          5: [6.0, 7.0],   
           4: [5.5, 5.9],
           3: [7.1, 7.5],
           2: [5.0, 5.4],
           1: [0, 4.9]
         },
-        clay: {            // Now in percentage
+        clay: {        
           5: [30, 35],
           4: [25, 29.9],
           3: [20, 24.9],
           2: [15, 19.9],
           1: [0, 14.9]
         },
-        sand: {            // Now in percentage
+        sand: {       
           5: [30, 35],
           4: [25, 29.9],
           3: [20, 24.9],
