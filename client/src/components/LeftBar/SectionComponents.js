@@ -13,12 +13,16 @@ export const SectionHeader = ({ title, icon: Icon, isOpen, onToggle, onAdd }) =>
       </div>
       <h3 className="text-lg font-medium text-white">{title}</h3>
     </div>
-    <button 
-      onClick={onAdd}
-      className="p-2 rounded-full hover:bg-white/10 transition-colors group"
-    >
-      <Plus className="text-white/70 group-hover:text-white transition-colors" size={20} />
-    </button>
+    {title != "Plots" && (
+      <button 
+        onClick={onAdd}
+        className="p-2 rounded-full hover:bg-white/10 transition-colors group"
+      >
+        <Plus className="text-white/70 group-hover:text-white transition-colors" size={20} />
+      </button>
+    )}
+    
+      
   </div>
 );
 

@@ -16,7 +16,7 @@ const LeftDashboard = ({pointPlots, setPointPlots, selectedPlot, setSelectedPlot
     return (
     <div className='absolute left-0 top-16 h-screen flex'>
       <aside className={`h-screen z-10 text-text transition-all duration-300 bg-primary ${
-          isCollapsed ? 'w-0 p-0' : 'w-[20vw]'} overflow-y-scroll`}>
+          isCollapsed ? 'w-0 p-0' : 'w-[20vw]'} overflow-auto`}>
         <VehicleSection />
         <EquipmentSection />
         <PlotSection pointPlots={pointPlots} setSelectedPlot={setSelectedPlot} selectedPlot={selectedPlot}/>
