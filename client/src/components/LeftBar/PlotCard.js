@@ -1,31 +1,53 @@
 import React from 'react';
+import { Map } from 'lucide-react';
 import { useMap } from '../../contexts/MapContext';
 
-const PlotCard = ({data, setSelectedPlot, selectedPlot}) => {
-    const { centerMap } = useMap();
+const PlotCard = ({ data, setSelectedPlot, selectedPlot }) => {
+  const { centerMap } = useMap();
+  const isSelected = selectedPlot?.id === data.id;
 
-    const handleClick = () => {
-        console.log(selectedPlot)
-        console.log(data)
-        if(selectedPlot == null || selectedPlot.id != data.id){
-          setSelectedPlot(data)
-          let lat = data.center[0]
-          let lng = data.center[1]
-          console.log(lat, lng)
-          centerMap({ lng , lat }) 
-        }else if(selectedPlot.id == data.id){
-          setSelectedPlot(null)
-        }
+  const handleClick = () => {
+    if (selectedPlot?.id !== data.id) {
+      setSelectedPlot(data);
+      centerMap({ lng: data.center[1], lat: data.center[0] });
+    } else {
+      setSelectedPlot(null);
     }
-
+  };
 
   return (
-    <>
-    <div className=' rounded-md shadow-md hover:bg-primary-hover mx-2 my-[.1rem] bg-primary hover:cursor-pointer' onClick={handleClick}>
-        <p className='text-xl'>{data.name}</p>
+    <div
+      onClick={handleClick}
+      className={`
+        group relative overflow-hidden
+        bg-white/10 backdrop-blur-lg
+        border ${isSelected ? 'border-primary' : 'border-white/20'}
+        rounded-lg p-4 mx-2 my-1
+        transform transition-all duration-200
+        hover:bg-white/20 hover:scale-[1.02] hover:shadow-lg hover:border-white/30
+        cursor-pointer
+      `}
+    >
+      <div className="flex items-center space-x-4">
+        <div className={`
+          p-2 rounded-lg
+          ${isSelected ? 'bg-primary/20' : 'bg-white/10'}
+        `}>
+          <Map className={`
+            ${isSelected ? 'text-primary' : 'text-white/70'}
+          `} size={20} />
+        </div>
+        <div>
+          <h4 className="font-medium text-white">{data.name}</h4>
+          <div className="flex items-center space-x-2 mt-1">
+            <span className="text-xs text-white/50">
+              {`${data.center[0].toFixed(6)}, ${data.center[1].toFixed(6)}`}
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
-    </>
-  )
-}
+  );
+};
 
-export default PlotCard
+export default PlotCard;
