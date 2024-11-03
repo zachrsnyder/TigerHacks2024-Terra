@@ -16,7 +16,6 @@ const ControlButtons = ({
 }) => {
   return (
     <>
-      {/* Points notification in top middle */}
       {isDrawingMode && points.length < 3 && (
         <div className="absolute top-20 left-1/2 transform -translate-x-1/2 z-[5]">
           <div className="bg-white/60 backdrop-blur-sm px-4 py-2 rounded shadow-lg text-red-600 h-10 flex items-center justify-center font-small">
