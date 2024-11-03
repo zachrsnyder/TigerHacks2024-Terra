@@ -97,6 +97,7 @@ const MapComponent = ({
     };
   }, [polygon, handleVertexEdit]);
 
+  // Unset the map instance when the component disappears
   useEffect(() => {
     return () => {
       setMapInstance(null);
@@ -106,6 +107,7 @@ const MapComponent = ({
   // Return loading message if the Google Maps api is not loaded
   if (!isLoaded) return <div>Loading...</div>;
 
+  // Function to get the pixel position offset
   const getPixelPositionOffset = (width, height) => ({
     x: -(width / 2),
     y: -(height / 2)

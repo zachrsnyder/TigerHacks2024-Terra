@@ -15,6 +15,7 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // Call the login function from the AuthContext
       await login(username, password);
       navigate('/');
     } catch (error) {

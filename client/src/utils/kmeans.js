@@ -15,6 +15,7 @@ function kMeans(points, k, maxIterations = 100) {
       let minDistance = Infinity;
       let closestCentroid = 0;
       
+      // Find the closest centroid
       for (let j = 0; j < k; j++) {
         const centroid = centroids[j];
         const distance = Math.hypot(point[0] - centroid[0], point[1] - centroid[1]);
@@ -24,7 +25,7 @@ function kMeans(points, k, maxIterations = 100) {
           closestCentroid = j;
         }
       }
-
+      
       if (assignments[i] !== closestCentroid) {
         assignments[i] = closestCentroid;
         isChanged = true;

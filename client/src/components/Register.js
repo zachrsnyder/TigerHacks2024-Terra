@@ -19,16 +19,19 @@ function Register() {
   const validateForm = () => {
     setError('');
 
+    // Check if any field is empty
     if (!emailRegex.test(email)) {
       setError('Please enter a valid email address');
       return false;
     }
 
+    // Check if password and confirm password match
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return false;
     }
 
+    // Check if password is at least 6 characters
     if (password.length < 6) {
       setError('Password should be at least 6 characters');
       return false;
