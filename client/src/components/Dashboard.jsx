@@ -79,15 +79,31 @@ const Dashboard = () => {
     const fetchData = async () => {
       try {
         const farmDocRef = doc(db, 'farms', currentUser.uid);
-        const farmDoc = await getDoc(doc(db, 'farms', currentUser.uid));
+        const farmDoc = await getDoc(farmDocRef);
+        
         if (farmDoc.exists()) {
           const farmData = farmDoc.data();
-          if (farmData.farmName && farmData.location) {
-            setFarmName(farmData.farmName); 
-            
-            setZipCode(farmData.zipCode || '');
-            setCurrentStep('complete');
-            
+          setFarmName(farmData.farmName || '');
+          setZipCode(farmData.zipCode || '');
+          
+          // Use the stored setupStep or determine it based on data
+          if (farmData.setupStep) {
+            setCurrentStep(farmData.setupStep);
+          } else {
+            // Fallback logic if setupStep isn't set
+            if (farmData.location) {
+              setCurrentStep('complete');
+            } else if (farmData.zipCode) {
+              setCurrentStep('complete');
+            } else if (farmData.farmName) {
+              setCurrentStep('zipCode');
+            } else {
+              setCurrentStep('name');
+            }
+          }
+  
+          if (farmData.setupStep === 'complete') {
+            // Fetch plots only if setup is complete
             const plotsRef = collection(db, 'farms', currentUser.uid, 'plots');
             const plotsSnap = await getDocs(plotsRef);
             const plotsData = [];
@@ -97,35 +113,30 @@ const Dashboard = () => {
                 ...doc.data()
               });
             });
-
-            const allPlotCenters = plotsData.map(plot => plot.center)
-            console.log("Center", allPlotCenters)
-
-            const centerLoco = returnLargestCentroid(allPlotCenters, 4)
-            console.log(centerLoco)
-
-            await setDoc(farmDocRef, {
-              location: centerLoco
-            }, { merge: true });
-
-            const lat = centerLoco[0]
-            const lng = centerLoco[1]
-            centerMap({lat, lng}, null);
-            
-
-
-
-
-
             setExistingPlots(plotsData);
-          } else if (farmData.farmName) {
-            setFarmName(farmData.farmName);
-            setCurrentStep('zipCode');
-          } else {
-            setCurrentStep('name');
+            
+            if (plotsData.length > 0) {
+              const allPlotCenters = plotsData.map(plot => plot.center);
+              const centerLoco = returnLargestCentroid(allPlotCenters, 4);
+              await setDoc(farmDocRef, {
+                location: centerLoco
+              }, { merge: true });
+              
+              const lat = centerLoco[0];
+              const lng = centerLoco[1];
+              centerMap({lat, lng}, null);
+            }
           }
         } else {
           setCurrentStep('name');
+          // Create initial farm document with setup step
+          await setDoc(farmDocRef, {
+            owner: currentUser.uid,
+            ownerEmail: currentUser.email,
+            setupStep: 'name',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          });
         }
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -241,16 +252,17 @@ const Dashboard = () => {
       setError('Please enter a farm name');
       return;
     }
-
+  
     try {
       await setDoc(doc(db, 'farms', currentUser.uid), {
         owner: currentUser.uid,
         ownerEmail: currentUser.email,
         farmName: farmName.trim(),
+        setupStep: 'zipCode', // Save the next step
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       }, { merge: true });
-
+  
       setError('');
       setCurrentStep('zipCode');
     } catch (error) {
@@ -265,13 +277,13 @@ const Dashboard = () => {
       setError('Please enter a valid 5-digit zip code');
       return;
     }
-
+  
     try {
       const response = await fetch(
         `https://maps.googleapis.com/maps/api/geocode/json?address=${zipCode}&key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY}`
       );
       const data = await response.json();
-
+  
       if (data.results && data.results[0]) {
         const { lat, lng } = data.results[0].geometry.location;
         const location = { lat, lng };
@@ -280,9 +292,10 @@ const Dashboard = () => {
           await setDoc(doc(db, 'farms', currentUser.uid), {
             location: location,
             zipCode: zipCode,
+            setupStep: 'complete', // Mark setup as complete
             updatedAt: new Date().toISOString()
           }, { merge: true });
-
+  
           setCoordinates(location);
           setCurrentStep('complete');
           setError('');
