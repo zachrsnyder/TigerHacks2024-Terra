@@ -14,6 +14,7 @@ import FieldInfo from './FieldInfo';
 import { useMap } from '../contexts/MapContext';
 import returnLargestCentroid from '../utils/kmeans';
 import AddFieldGuide from './AddFieldGuide';
+import SidebarGuide from './SidebarGuide';
 
 
 
@@ -37,6 +38,7 @@ const Dashboard = () => {
   const [showPlotFill, setShowPlotFill] = useState(true);
   const {centerMap} = useMap()
   const [hasAddedField, setHasAddedField] = useState(false);
+  const [showSidebarGuide, setShowSidebarGuide] = useState(false);
 
   const handleStartShapeEdit = (plot) => {
     setEditingPlot(plot);
@@ -257,6 +259,7 @@ const Dashboard = () => {
         if (!hasAddedField) {
           setHasAddedField(true);
           setCurrentStep('complete');
+          setShowSidebarGuide(true);
           await setDoc(doc(db, 'farms', currentUser.uid), {
             setupStep: 'complete',
             updatedAt: new Date().toISOString()
@@ -373,6 +376,7 @@ const Dashboard = () => {
         setPointPlots={setExistingPlots} 
         selectedPlot={selectedPlot} 
         setSelectedPlot={setSelectedPlot}
+        setShowSidebarGuide={setShowSidebarGuide} 
       />
       <div className="h-screen w-screen">
         <MapComponent
@@ -451,6 +455,10 @@ const Dashboard = () => {
         onUpdate={handleUpdatePlot}
         onStartShapeEdit={handleStartShapeEdit}
       />
+    )}
+
+    {showSidebarGuide && !isDrawingMode && (
+      <SidebarGuide />
     )}
 
     </div>
