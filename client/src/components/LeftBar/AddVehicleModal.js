@@ -155,7 +155,7 @@ const AddVehicleModal = ({ isOpen, onClose }) => {
                                     list="vehicle-types"
                                     value={newDocument.Type}
                                     onChange={(e) => setDocument({ ...newDocument, Type: e.target.value })}
-                                    className="w-full px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm"
+                                    className="w-full px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm text-black"
                                     placeholder="Search or select vehicle type"
                                     required
                                 />
@@ -176,7 +176,7 @@ const AddVehicleModal = ({ isOpen, onClose }) => {
                                     type="text"
                                     value={newDocument.Name}
                                     onChange={(e) => setDocument({ ...newDocument, Name: e.target.value })}
-                                    className="w-full px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm"
+                                    className="w-full px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm text-black"
                                     placeholder="Enter vehicle name"
                                     required
                                 />
@@ -188,7 +188,7 @@ const AddVehicleModal = ({ isOpen, onClose }) => {
                                     type="text"
                                     value={newDocument.Manufacturer}
                                     onChange={(e) => setDocument({ ...newDocument, Manufacturer: e.target.value })}
-                                    className="w-full px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm"
+                                    className="w-full px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm text-black"
                                     placeholder="Enter vehicle manufacturer"
                                     required
                                 />
@@ -199,7 +199,7 @@ const AddVehicleModal = ({ isOpen, onClose }) => {
                                 <textarea
                                     value={newDocument.Notes}
                                     onChange={(e) => setDocument({ ...newDocument, Notes: e.target.value })}
-                                    className="w-full h-20 px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm resize-none"
+                                    className="w-full h-20 px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm resize-none text-black"
                                     placeholder="Enter any additional notes (optional)"
                                 />
                             </div>

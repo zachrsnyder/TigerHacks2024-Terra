@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import backgroundVideo from '../assets/videos/fieldlogin.gif';
+import farmLogo from '../assets/farm t.png'; // Import the logo
 
 function Login() {
   const [username, setUsername] = useState('');
@@ -34,6 +35,7 @@ function Login() {
       
       {/* Login Form */}
       <div className="backdrop-blur-md bg-white/30 p-10 rounded-lg shadow-2xl w-full max-w-sm mx-4 py-5 px-5 border border-white/20">
+        <img src={farmLogo} alt="Farm Logo" className="w-20 h-20 mx-auto mb-5 mt-5" />
         <h2 className="text-3xl font-semibold text-center mb-5 text-white">Login</h2>
         {error && <div className="mb-6 text-red-500 text-center bg-white/80 rounded-md py-2">{error}</div>}
         
