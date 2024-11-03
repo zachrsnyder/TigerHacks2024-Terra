@@ -229,7 +229,7 @@ const Navbar = () => {
                       <span className="text-text text-xs tracking-wide">Terra</span>
                     </>
                   ) : (
-                    <h1 className="text-white text-xl font-bold">Terra</h1>
+                    <h1 className="text-text text-xl font-bold">Terra</h1>
                   )}
                 </div>
               </div>
@@ -244,7 +244,7 @@ const Navbar = () => {
                   ref={buttonRef}
                   type="button"
                   onClick={() => setIsModalOpen(true)}
-                  className="text-white focus:outline-none cursor-pointer"
+                  className="text-text focus:outline-none cursor-pointer"
                 >
                   <div className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center hover:bg-gray-500">
                     <span className="text-sm">{currentUser.email[0].toUpperCase()}</span>
@@ -353,7 +353,7 @@ const Navbar = () => {
             {/* User info section */}
             <div className="flex items-center space-x-3 p-3 bg-white rounded-lg">
                 <div className="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center">
-                <span className="text-white text-lg">
+                <span className="text-text text-lg">
                     {currentUser.email[0].toUpperCase()}
                 </span>
                 </div>

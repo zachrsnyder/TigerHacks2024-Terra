@@ -20,15 +20,15 @@ const EquipmentCard = ({ equipment, onDelete, onEdit }) => {
           <div className="flex justify-between items-start w-full">
             <div className="flex items-center space-x-4">
               <div className="p-2 rounded-lg bg-primary/20">
-                <Tractor className="text-primary" size={20} />
+                <Tractor className="text-text" size={20} />
               </div>
               <div>
-                <h4 className="font-medium text-white">{equipment.Name}</h4>
+                <h4 className="font-medium text-text">{equipment.Name}</h4>
                 <div className="flex items-center space-x-2 mt-1">
-                  <span className="px-2 py-0.5 rounded-full bg-white/10 text-xs text-white/70">
+                  <span className="px-2 py-0.5 rounded-full bg-white/10 text-xs text-text/70">
                     {equipment.VehicleID}
                   </span>
-                  <span className="text-xs text-white/50">{equipment.Type}</span>
+                  <span className="text-xs text-text/50">{equipment.Type}</span>
                 </div>
               </div>
             </div>
@@ -40,7 +40,7 @@ const EquipmentCard = ({ equipment, onDelete, onEdit }) => {
                 }}
                 className="absolute top-0 left-0 p-1 hover:bg-white/10 rounded-full transition-colors"
               >
-                <Eye className="text-white/70 hover:text-white" size={16}/>
+                <Eye className="text-text/70 hover:text-text" size={16}/>
               </button>
               <button
                 onClick={(e) => {
@@ -49,7 +49,7 @@ const EquipmentCard = ({ equipment, onDelete, onEdit }) => {
                 }}
                 className="absolute top-0 right-0 p-1 hover:bg-white/10 rounded-full transition-colors"
               >
-                <Edit2 className="text-white/70 hover:text-white" size={16} />
+                <Edit2 className="text-text/70 hover:text-text" size={16} />
               </button>
               <button
                 onClick={(e) => {
@@ -63,7 +63,7 @@ const EquipmentCard = ({ equipment, onDelete, onEdit }) => {
             </div>
           </div>
           {equipment.Notes && (
-            <p className="mt-3 text-sm text-white/70 border-t border-white/10 pt-3">
+            <p className="mt-3 text-sm text-text/70 border-t border-white/10 pt-3">
               {equipment.Notes}
             </p>
           )}

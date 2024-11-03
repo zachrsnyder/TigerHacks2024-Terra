@@ -451,7 +451,7 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
           {/* Assign Crop Button */}
           <button
             onClick={() => setAssignCropModalOpen(true)}
-            className="w-full px-3 py-1.5 text-sm font-medium text-white
+            className="w-full px-3 py-1.5 text-sm font-medium text-text
                       bg-green-500 rounded-md hover:bg-green-600 
                       focus:outline-none focus:ring-1 focus:ring-offset-1 
                       focus:ring-green-500 transition-colors"
@@ -540,7 +540,7 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
                 </button>
                 <button
                   onClick={handleUpdate}
-                  className="px-3 py-1 text-sm font-medium text-white
+                  className="px-3 py-1 text-sm font-medium text-text
                             bg-blue-500 rounded-md hover:bg-blue-600 
                             focus:outline-none focus:ring-1 focus:ring-blue-500 
                             transition-colors"

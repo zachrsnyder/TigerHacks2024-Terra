@@ -86,8 +86,8 @@ const VehicleSection = () => {
                 <div key={type} className="space-y-2">
                   <div className="flex items-center justify-between py-1 px-2">
                     <div className="flex items-center space-x-2">
-                      <h4 className="text-sm font-medium text-white/70">{type}</h4>
-                      <span className="text-xs text-white/50 px-2 py-0.5 bg-white/10 rounded-full">
+                      <h4 className="text-sm font-medium text-text/70">{type}</h4>
+                      <span className="text-xs text-text/50 px-2 py-0.5 bg-white/10 rounded-full">
                         {items.length}
                       </span>
                     </div>

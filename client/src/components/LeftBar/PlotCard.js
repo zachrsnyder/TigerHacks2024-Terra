@@ -36,13 +36,13 @@ const PlotCard = ({ data, setSelectedPlot, selectedPlot }) => {
           ${isSelected ? 'bg-primary/20' : 'bg-white/10'}
         `}>
           <Map className={`
-            ${isSelected ? 'text-primary' : 'text-white/70'}
+            ${isSelected ? 'text-primary' : 'text-text/70'}
           `} size={20} />
         </div>
         <div>
-          <h4 className="font-medium text-white">{data.name}</h4>
+          <h4 className="font-medium text-text">{data.name}</h4>
           <div className="flex items-center space-x-2 mt-1">
-            <span className="text-xs text-white/50">
+            <span className="text-xs text-text/50">
               {`${data.center[0].toFixed(6)}, ${data.center[1].toFixed(6)}`}
             </span>
           </div>

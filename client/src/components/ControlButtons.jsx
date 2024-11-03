@@ -32,7 +32,7 @@ const ControlButtons = ({
           <button
             onClick={onTogglePlotFill}
             className={`flex items-center gap-2 justify-center px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all ${
-              showPlotFill ? 'bg-primary text-white' : 'bg-white/80 text-gray-700'
+              showPlotFill ? 'bg-primary text-text' : 'bg-white/80 text-gray-700'
             }`}
           >
             Plot Fill
@@ -46,7 +46,7 @@ const ControlButtons = ({
           <button
             onClick={onToggleFieldNames}
             className={`flex items-center gap-2 z-[5] justify-center px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all ${
-              showFieldNames ? 'bg-primary text-white' : 'bg-white/80 text-gray-700'
+              showFieldNames ? 'bg-primary text-text' : 'bg-white/80 text-gray-700'
             }`}
           >
             <Tag className="h-5 w-5" />
@@ -79,7 +79,7 @@ const ControlButtons = ({
               )}
               <button
                 onClick={onCancelDrawing}
-                className="bg-red-600 text-white px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all hover:bg-red-500 w-40"
+                className="bg-red-600 text-text px-4 py-2 rounded-full shadow-lg hover:shadow-xl transition-all hover:bg-red-500 w-40"
               >
                 Cancel Drawing
               </button>

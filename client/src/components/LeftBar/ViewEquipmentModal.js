@@ -101,7 +101,7 @@ const ViewEquipmentModal = ({ isOpen, onClose, equipment }) => {
           </button>
         </div>
 
-        <div className="p-6 space-y-6">
+        <div className="p-6 space-y-2">
           {/* Basic Info Section */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
