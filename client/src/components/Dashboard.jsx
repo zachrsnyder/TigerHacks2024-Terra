@@ -13,6 +13,7 @@ import LeftDashboard from './LeftBar/LeftDashboard';
 import FieldInfo from './FieldInfo';
 import { useMap } from '../contexts/MapContext';
 
+
 const Dashboard = () => {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
@@ -30,6 +31,7 @@ const Dashboard = () => {
   const [editingPlot, setEditingPlot] = useState(null);
   const [isEditingShape, setIsEditingShape] = useState(false);
   const [showFieldNames, setShowFieldNames] = useState(true);
+  const [showPlotFill, setShowPlotFill] = useState(true);
 
   const handleStartShapeEdit = (plot) => {
     setEditingPlot(plot);
@@ -314,6 +316,7 @@ const Dashboard = () => {
           onPlotClick={(plot) => setSelectedPlot(plot)}
           onMapClickOutside={() => setSelectedPlot(null)}
           showFieldNames={showFieldNames}  
+          showPlotFill={showPlotFill}
         />
       </div>
       
@@ -353,7 +356,9 @@ const Dashboard = () => {
         onCancelDrawing={clearDrawing}
         isEditing={isEditingShape}
         showFieldNames={showFieldNames}
-        onToggleFieldNames={() => setShowFieldNames(!showFieldNames)}  
+        onToggleFieldNames={() => setShowFieldNames(!showFieldNames)}
+        showPlotFill={showPlotFill}
+        onTogglePlotFill={() => setShowPlotFill(!showPlotFill)} 
       />
       )}
       

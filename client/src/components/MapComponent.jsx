@@ -16,7 +16,8 @@ const MapComponent = ({
   onPolygonEdit,
   onPlotClick,
   onMapClickOutside,
-  showFieldNames
+  showFieldNames,
+  showPlotFill  
 }) => {
   const { mapInstance, setMapInstance, coordinates } = useMap();
   const [hoveredPlotId, setHoveredPlotId] = useState(null);
@@ -140,10 +141,10 @@ const MapComponent = ({
             path={plot.boundary}
             options={{
               fillColor: hoveredPlotId === plot.id ? plot.color || "#66BB6A" : plot.color || "#4CAF50",
-              fillOpacity: hoveredPlotId === plot.id ? 0.9 : 0.8,
+              fillOpacity: showPlotFill ? (hoveredPlotId === plot.id ? 0.9 : 0.8) : 0,
               strokeColor: hoveredPlotId === plot.id ? plot.color || "#66BB6A" : plot.color || "#4CAF50",
               strokeOpacity: 1,
-              strokeWeight: hoveredPlotId === plot.id ? 2 : 1,
+              strokeWeight: hoveredPlotId === plot.id ? 3 : 2,
               editable: false,
               draggable: false,
               cursor: 'pointer'
