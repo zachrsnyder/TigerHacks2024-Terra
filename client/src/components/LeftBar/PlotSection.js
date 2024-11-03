@@ -24,7 +24,7 @@ const PlotSection = ({ pointPlots, setSelectedPlot, selectedPlot }) => {
           id: doc.id,
           ...doc.data()
         }));
-        
+        // Set plots state
         setPlots(plotsData);
       } catch (error) {
         console.error("Error fetching plots:", error);
