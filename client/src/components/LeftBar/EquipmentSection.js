@@ -5,6 +5,7 @@ import { collection, query, onSnapshot, deleteDoc, doc } from 'firebase/firestor
 import { db } from '../../firebase';
 import EquipmentCard from './EquipmentCard';
 import AddEquipmentModal from './AddEquipmentModal';
+import { EditEquipmentModal } from './EditModals';
 import { SectionHeader, SectionContent } from './SectionComponents';
 
 const EquipmentSection = () => {
@@ -12,6 +13,8 @@ const EquipmentSection = () => {
   const [equipment, setEquipment] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedEquipment, setSelectedEquipment] = useState(null);
   const { currentUser } = useAuth();
 
   useEffect(() => {
@@ -45,7 +48,11 @@ const EquipmentSection = () => {
     }
   };
 
-  // Group equipment by type but maintain flat list
+  const handleEditEquipment = (equipment) => {
+    setSelectedEquipment(equipment);
+    setShowEditModal(true);
+  };
+
   const equipmentByType = equipment.reduce((acc, curr) => {
     acc[curr.Type] = acc[curr.Type] || [];
     acc[curr.Type].push(curr);
@@ -82,6 +89,7 @@ const EquipmentSection = () => {
                         key={item.id}
                         equipment={item}
                         onDelete={handleDeleteEquipment}
+                        onEdit={handleEditEquipment}
                       />
                     ))}
                   </div>
@@ -100,6 +108,17 @@ const EquipmentSection = () => {
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
       />
+
+      {selectedEquipment && (
+        <EditEquipmentModal
+          isOpen={showEditModal}
+          onClose={() => {
+            setShowEditModal(false);
+            setSelectedEquipment(null);
+          }}
+          equipment={selectedEquipment}
+        />
+      )}
     </div>
   );
 };

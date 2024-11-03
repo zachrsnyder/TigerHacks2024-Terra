@@ -5,6 +5,7 @@ import { collection, query, onSnapshot, deleteDoc, doc } from 'firebase/firestor
 import { db } from '../../firebase';
 import VehicleCard from './VehicleCard';
 import AddVehicleModal from './AddVehicleModal';
+import { EditVehicleModal } from './EditModals';
 import { SectionHeader, SectionContent } from './SectionComponents';
 
 const VehicleSection = () => {
@@ -12,6 +13,8 @@ const VehicleSection = () => {
   const [vehicles, setVehicles] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedVehicle, setSelectedVehicle] = useState(null);
   const { currentUser } = useAuth();
 
   useEffect(() => {
@@ -45,7 +48,11 @@ const VehicleSection = () => {
     }
   };
 
-  // Group vehicles by type but maintain flat list
+  const handleEditVehicle = (vehicle) => {
+    setSelectedVehicle(vehicle);
+    setShowEditModal(true);
+  };
+
   const vehiclesByType = vehicles.reduce((acc, curr) => {
     acc[curr.Type] = acc[curr.Type] || [];
     acc[curr.Type].push(curr);
@@ -82,6 +89,7 @@ const VehicleSection = () => {
                         key={item.id}
                         vehicle={item}
                         onDelete={handleDeleteVehicle}
+                        onEdit={handleEditVehicle}
                       />
                     ))}
                   </div>
@@ -100,6 +108,17 @@ const VehicleSection = () => {
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
       />
+
+      {selectedVehicle && (
+        <EditVehicleModal
+          isOpen={showEditModal}
+          onClose={() => {
+            setShowEditModal(false);
+            setSelectedVehicle(null);
+          }}
+          vehicle={selectedVehicle}
+        />
+      )}
     </div>
   );
 };

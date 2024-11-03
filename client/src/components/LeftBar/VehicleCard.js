@@ -1,7 +1,7 @@
 import React from 'react';
-import { Car, Trash2 } from 'lucide-react';
+import { Car, Trash2, Edit2 } from 'lucide-react';
 
-const VehicleCard = ({ vehicle, onDelete }) => (
+const VehicleCard = ({ vehicle, onDelete, onEdit }) => (
   <div className="group relative overflow-hidden bg-white/10 backdrop-blur-lg border border-white/20 rounded-lg p-4 transform transition-all duration-200 hover:bg-white/20 hover:scale-[1.02] hover:shadow-lg hover:border-white/30">
     <div className="flex justify-between items-start">
       <div className="flex items-center space-x-4">
@@ -22,15 +22,26 @@ const VehicleCard = ({ vehicle, onDelete }) => (
           </div>
         </div>
       </div>
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onDelete(vehicle.id);
-        }}
-        className="opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-red-500/20 rounded-full"
-      >
-        <Trash2 className="text-red-400" size={16} />
-      </button>
+      <div className="flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit(vehicle);
+          }}
+          className="p-2 hover:bg-white/10 rounded-full transition-colors"
+        >
+          <Edit2 className="text-white/70 hover:text-white" size={16} />
+        </button>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(vehicle.id);
+          }}
+          className="p-2 hover:bg-red-500/20 rounded-full transition-colors"
+        >
+          <Trash2 className="text-red-400" size={16} />
+        </button>
+      </div>
     </div>
   </div>
 );
