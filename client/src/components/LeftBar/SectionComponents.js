@@ -1,4 +1,3 @@
-// Create a new file called SectionComponents.js
 import React from 'react';
 import { Plus } from 'lucide-react';
 

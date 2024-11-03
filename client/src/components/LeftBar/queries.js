@@ -15,7 +15,7 @@ export default async function getEquipmentByUserUID(userUID) {
     const equipmentList = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
     console.log("Equipment List:", equipmentList);
-    return equipmentList; // Return the list if needed
+    return equipmentList; 
   } catch (error) {
     console.error("Error retrieving equipment by UserUID:", error);
     return [];

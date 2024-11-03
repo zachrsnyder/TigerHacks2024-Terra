@@ -5,13 +5,14 @@ import PlotSection from './PlotSection'
 import VehicleSection from './VehicleSection'
 
 
-const LeftDashboard = ({pointPlots, setPointPlots, selectedPlot, setSelectedPlot}) => {
+const LeftDashboard = ({pointPlots, setPointPlots, selectedPlot, setSelectedPlot, setShowSidebarGuide}) => {
     const [isCollapsed, setIsCollapsed] = useState(true);
     const [isHovered, setIsHovered] = useState(false);
 
     const toggleAside = () => {
       setIsCollapsed(!isCollapsed);
-    };  
+      setShowSidebarGuide(false); // Add this line
+    };
 
     return (
     <div className='absolute left-0 top-16 bottom-0 flex'>
