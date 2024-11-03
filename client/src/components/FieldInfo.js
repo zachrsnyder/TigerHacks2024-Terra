@@ -308,81 +308,83 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
   };
 
   return (
-    <div className="fixed right-4 top-32 w-80 max-h-[80vh] bg-white rounded-lg shadow-xl border border-gray-200 animate-fade-in overflow-y-auto">
-      <div className="p-3">
-        <div className="space-y-3">
-          {/* Header Section with Name and Close Button */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              {isEditing ? (
-                <input
-                  type="text"
-                  value={editedPlot.name}
-                  onChange={(e) => setEditedPlot({ ...editedPlot, name: e.target.value })}
-                  className="text-xl font-bold text-gray-900 border-b border-gray-300 focus:outline-none focus:border-blue-500"
-                />
-              ) : (
-                <h2 className="text-xl font-bold text-gray-900">{plot.name}</h2>
-              )}
-              <div className="relative color-picker-container">
-                <button
-                  onClick={() => setShowColorPicker(!showColorPicker)}
-                  className="w-6 h-6 rounded border border-gray-300 shadow-sm hover:shadow-md transition-shadow"
-                  style={{ backgroundColor: editedPlot.color || '#4CAF50' }}
-                  aria-label="Change plot color"
-                />
-                {showColorPicker && (
-                  <div className="absolute z-10 top-full -left-20 mt-2 p-4 bg-white rounded-lg shadow-xl border border-gray-200 min-w-[200px]">
-                    <div className="flex flex-col gap-3">
-                      <p className="text-sm text-gray-600">Select plot color</p>
-                      <div className="grid grid-cols-4 gap-3">
-                        {colors.map((color) => (
-                          <button
-                            key={color}
-                            onClick={() => handleColorChange(color)}
-                            className="w-10 h-10 rounded hover:scale-105 transition-transform duration-200 shadow-sm hover:shadow-md"
-                            style={{ 
-                              backgroundColor: color,
-                              border: editedPlot.color === color ? '2px solid #000' : '1px solid #e5e7eb'
-                            }}
-                            aria-label={`Select color ${color}`}
-                          />
-                        ))}
-                      </div>
+    <div className="fixed right-4 top-32 w-80 max-h-[80vh] bg-white rounded-lg shadow-xl border border-gray-200 animate-fade-in flex flex-col">
+      <div className="sticky top-0 bg-white border-b border-gray-200 p-3 rounded-t-lg z-10">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {isEditing ? (
+              <input
+                type="text"
+                value={editedPlot.name}
+                onChange={(e) => setEditedPlot({ ...editedPlot, name: e.target.value })}
+                className="text-xl font-bold text-gray-900 border-b border-gray-300 focus:outline-none focus:border-blue-500"
+              />
+            ) : (
+              <h2 className="text-xl font-bold text-gray-900">{plot.name}</h2>
+            )}
+            <div className="relative color-picker-container">
+              <button
+                onClick={() => setShowColorPicker(!showColorPicker)}
+                className="w-6 h-6 rounded border border-gray-300 shadow-sm hover:shadow-md transition-shadow"
+                style={{ backgroundColor: editedPlot.color || '#4CAF50' }}
+                aria-label="Change plot color"
+              />
+              {showColorPicker && (
+                <div className="absolute z-20 top-full -left-20 mt-2 p-4 bg-white rounded-lg shadow-xl border border-gray-200 min-w-[200px]">
+                  <div className="flex flex-col gap-3">
+                    <p className="text-sm text-gray-600">Select plot color</p>
+                    <div className="grid grid-cols-4 gap-3">
+                      {colors.map((color) => (
+                        <button
+                          key={color}
+                          onClick={() => handleColorChange(color)}
+                          className="w-10 h-10 rounded hover:scale-105 transition-transform duration-200 shadow-sm hover:shadow-md"
+                          style={{ 
+                            backgroundColor: color,
+                            border: editedPlot.color === color ? '2px solid #000' : '1px solid #e5e7eb'
+                          }}
+                          aria-label={`Select color ${color}`}
+                        />
+                      ))}
                     </div>
                   </div>
-                )}
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              {!isEditing && (
-                <div className="relative overflow-hidden">
-                  <button
-                    onClick={handleDelete}
-                    className={`flex items-center gap-1 py-1 px-2 rounded-full transition-all duration-200 ${
-                      isConfirmingDelete 
-                        ? 'bg-red-50 text-red-500 pr-20' 
-                        : 'hover:bg-red-50 text-gray-500 hover:text-red-500'
-                    }`}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    <span className={`text-sm whitespace-nowrap absolute left-7 transition-opacity duration-200 ${
-                      isConfirmingDelete ? 'opacity-100' : 'opacity-0'
-                    }`}>
-                      Confirm?
-                    </span>
-                  </button>
                 </div>
               )}
-              <button
-                onClick={onClose}
-                className="p-1 hover:bg-gray-100 rounded-full transition-colors"
-              >
-                <X className="h-4 w-4 text-gray-500" />
-              </button>
             </div>
           </div>
+          <div className="flex items-center gap-2">
+            {!isEditing && (
+              <div className="relative overflow-hidden">
+                <button
+                  onClick={handleDelete}
+                  className={`flex items-center gap-1 py-1 px-2 rounded-full transition-all duration-200 ${
+                    isConfirmingDelete 
+                      ? 'bg-red-50 text-red-500 pr-20' 
+                      : 'hover:bg-red-50 text-gray-500 hover:text-red-500'
+                  }`}
+                >
+                  <Trash2 className="h-4 w-4" />
+                  <span className={`text-sm whitespace-nowrap absolute left-7 transition-opacity duration-200 ${
+                    isConfirmingDelete ? 'opacity-100' : 'opacity-0'
+                  }`}>
+                    Confirm?
+                  </span>
+                </button>
+              </div>
+            )}
+            <button
+              onClick={onClose}
+              className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <X className="h-4 w-4 text-gray-500" />
+            </button>
+          </div>
+        </div>
+      </div>
 
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="p-3 space-y-3">
           {/* Edit Buttons Section */}
           {!isEditing && (
             <div className="flex gap-2">
