@@ -9,7 +9,7 @@ const PlotCard = ({ data, setSelectedPlot, selectedPlot }) => {
   const handleClick = () => {
     if (selectedPlot?.id !== data.id) {
       setSelectedPlot(data);
-      centerMap({ lng: data.center[1], lat: data.center[0] });
+      centerMap({ lng: data.center[1], lat: data.center[0] }, data.area);
     } else {
       setSelectedPlot(null);
     }

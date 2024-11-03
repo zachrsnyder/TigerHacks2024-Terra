@@ -1,5 +1,6 @@
 // src/contexts/MapContext.js
 import React, { createContext, useContext, useState } from 'react';
+import calculateZoomFromArea from '../utils/zoomCalc';
 
 const MapContext = createContext();
 
@@ -15,10 +16,16 @@ export const MapProvider = ({ children }) => {
   const [mapInstance, setMapInstance] = useState(null);
   const [coordinates, setCoordinates] = useState();
 
-  const centerMap = (coords) => {
+  const centerMap = (coords, area) => {
     if (mapInstance) {
       mapInstance.panTo(coords);
-      mapInstance.setZoom(14);
+      if(area == null){
+        mapInstance.setZoom(14)
+      }else{
+        console.log("Area of clicked icon: ", area)
+        mapInstance.setZoom(calculateZoomFromArea(area));
+      }
+      
     }
     setCoordinates(coords);
   };

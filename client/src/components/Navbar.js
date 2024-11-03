@@ -126,7 +126,7 @@ const Navbar = () => {
 
         if (data.results && data.results[0]) {
           const { lat, lng } = data.results[0].geometry.location;
-          centerMap({ lat, lng });
+          centerMap({ lat, lng }, null);
         }
       } catch (error) {
         console.error('Error getting coordinates:', error);

@@ -111,7 +111,7 @@ const Dashboard = () => {
 
             const lat = centerLoco[0]
             const lng = centerLoco[1]
-            centerMap({lat, lng});
+            centerMap({lat, lng}, null);
             
 
 
