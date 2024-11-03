@@ -4,11 +4,12 @@ import { doc, updateDoc, collection, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { useAuth } from '../../contexts/AuthContext';
 
+// Success modal component that appears when an item is successfully assigned to a plot
 const SuccessModal = ({ message, onClose }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       onClose();
-    }, 3000);
+    }, 1500);
     return () => clearTimeout(timer);
   }, [onClose]);
 
@@ -24,6 +25,7 @@ const SuccessModal = ({ message, onClose }) => {
   );
 };
 
+// Modal component for assigning a vehicle or equipment item to a plot
 const AssignToPlotModal = ({ isOpen, onClose, item, type }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -40,11 +42,14 @@ const AssignToPlotModal = ({ isOpen, onClose, item, type }) => {
     const fetchPlots = async () => {
       if (!isOpen || !currentUser) return;
       
+      // Fetch plots from Firestore
       setIsLoading(true);
       try {
+        // Get plots collection reference
         const plotsCollectionRef = collection(db, 'farms', currentUser.uid, 'plots');
         const plotsSnapshot = await getDocs(plotsCollectionRef);
-        
+
+        // Map plots data and add assignedVehicles and assignedEquipment fields
         const plotsData = plotsSnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
@@ -52,6 +57,7 @@ const AssignToPlotModal = ({ isOpen, onClose, item, type }) => {
           assignedEquipment: doc.data().assignedEquipment || []
         }));
         
+        // Set plots and filteredPlots state
         setPlots(plotsData);
         setFilteredPlots(plotsData);
       } catch (err) {
@@ -61,7 +67,6 @@ const AssignToPlotModal = ({ isOpen, onClose, item, type }) => {
         setIsLoading(false);
       }
     };
-
     fetchPlots();
   }, [currentUser, isOpen]);
 
@@ -72,6 +77,7 @@ const AssignToPlotModal = ({ isOpen, onClose, item, type }) => {
       return;
     }
 
+    // Filter plots based on search term
     const filtered = plots.filter(plot => {
       const searchLower = searchTerm.toLowerCase();
       return (
@@ -84,6 +90,7 @@ const AssignToPlotModal = ({ isOpen, onClose, item, type }) => {
     setFilteredPlots(filtered);
   }, [searchTerm, plots]);
 
+  // Assign the item to the selected plot
   const handleAssign = async (plot) => {
     setIsSubmitting(true);
     setError('');
@@ -97,12 +104,12 @@ const AssignToPlotModal = ({ isOpen, onClose, item, type }) => {
         updatedAt: new Date().toISOString()
       });
 
-      // Update the plot's assigned items array
+      // Update the plots assigned items array
       const plotRef = doc(db, 'farms', currentUser.uid, 'plots', plot.id);
       const assignmentField = type === 'vehicles' ? 'assignedVehicles' : 'assignedEquipment';
       const currentAssignments = plot[assignmentField] || [];
       
-      // Add the item if it's not already in the array
+      // Add the item if its not already in the array
       if (!currentAssignments.includes(item.id)) {
         await updateDoc(plotRef, {
           [assignmentField]: [...currentAssignments, item.id],
@@ -110,6 +117,7 @@ const AssignToPlotModal = ({ isOpen, onClose, item, type }) => {
         });
       }
 
+      // Show success message and close the modal after 1.5 seconds
       setSuccessMessage(`${item.Name} has been assigned to ${plot.name}`);
       setShowSuccess(true);
       setTimeout(() => {
@@ -122,10 +130,12 @@ const AssignToPlotModal = ({ isOpen, onClose, item, type }) => {
     }
   };
 
+  // Check if the item is already assigned to the selected plot
   const isItemAssignedToPlot = (plotId) => {
     return item.assignedPlotId === plotId;
   };
 
+  // Close the modal if its not open
   if (!isOpen && !showSuccess) return null;
 
   return (
