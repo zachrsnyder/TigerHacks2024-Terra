@@ -20,9 +20,9 @@ const VehicleCard = ({ vehicle, onDelete, onEdit }) => {
           <Car className="text-secondary" size={20} />
         </div>
         <div>
-          <h4 className="font-medium text-white">{vehicle.Name}</h4>
+          <h4 className="font-medium text-text">{vehicle.Name}</h4>
           <div className="flex items-center space-x-2 mt-1">
-            <span className="px-2 py-0.5 rounded-full bg-white/10 text-xs text-white/70">
+            <span className="px-2 py-0.5 rounded-full bg-white/10 text-xs text-text/70">
               {vehicle.VehicleID}
             </span>
             {vehicle.fuelType && (
@@ -40,7 +40,7 @@ const VehicleCard = ({ vehicle, onDelete, onEdit }) => {
               setShowView(true)
             }}
             className="absolute top-0 left-0 p-1 hover:bg-white/10 rounded-full transition-colors">
-            <Eye className="text-white/70 hover:text-white" size={16}/>
+            <Eye className="text-text/70 hover:text-text" size={16}/>
         </button>
         <button
           onClick={(e) => {
@@ -49,7 +49,7 @@ const VehicleCard = ({ vehicle, onDelete, onEdit }) => {
           }}
           className="absolute top-0 right-0 p-1 hover:bg-white/10 rounded-full transition-colors"
         >
-          <Edit2 className="text-white/70 hover:text-white" size={16} />
+          <Edit2 className="text-text/70 hover:text-text" size={16} />
         </button>
         <button
           onClick={(e) => {

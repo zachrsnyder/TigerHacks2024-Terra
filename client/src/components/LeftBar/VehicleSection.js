@@ -69,7 +69,7 @@ const VehicleSection = () => {
   }, {});
 
   return (
-    <div className="border-b border-white/10">
+    <div className="border-b border-white/10 text-text">
       <SectionHeader
         title="Vehicles"
         icon={Car}
