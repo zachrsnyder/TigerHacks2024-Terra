@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { Slider } from "./Slider";
 
 const CropProfit = ({ cropName, acreage }) => {
+    const [yieldPercentage, setYieldPercentage] = useState(100);
+
     // Market prices in USD
     const cropPrices = {
         corn: 4.50,          // per bushel
@@ -63,17 +66,19 @@ const CropProfit = ({ cropName, acreage }) => {
 
         const normalizedCropName = cropName.toLowerCase();
         const price = cropPrices[normalizedCropName];
-        const yieldPerAcre = cropYields[normalizedCropName];
+        const baseYieldPerAcre = cropYields[normalizedCropName];
 
-        if (!price || !yieldPerAcre) return null;
+        if (!price || !baseYieldPerAcre) return null;
 
-        // Calculate total yield and profit
-        const totalYield = yieldPerAcre * acreage;
+        // Apply yield percentage adjustment
+        const adjustedYieldPerAcre = (baseYieldPerAcre * yieldPercentage) / 100;
+        const totalYield = adjustedYieldPerAcre * acreage;
         const totalProfit = price * totalYield;
 
         return {
             profit: totalProfit,
-            yieldPerAcre,
+            yieldPerAcre: adjustedYieldPerAcre,
+            baseYieldPerAcre,
             totalYield,
             pricePerUnit: price,
             unit: cropUnits[normalizedCropName]
@@ -91,25 +96,51 @@ const CropProfit = ({ cropName, acreage }) => {
     }
 
     return (
-        <div className="bg-gray-50 p-3 rounded-md space-y-2">
-            <div>
-                <h3 className="text-sm font-medium text-gray-900">Market Value:</h3>
-                <p className="text-lg font-semibold text-green-600">
-                    ${result.profit.toLocaleString(undefined, {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2
-                    })}
-                </p>
-            </div>
-            
-            <div className="space-y-1">
-                <p className="text-xs text-gray-600">
-                    Yield: {result.totalYield.toLocaleString()} {result.unit}
-                    <span className="text-gray-400"> ({result.yieldPerAcre} per acre)</span>
-                </p>
-                <p className="text-xs text-gray-600">
-                    Price: ${result.pricePerUnit} per {result.unit}
-                </p>
+        <div className="bg-gray-50 p-4 rounded-md space-y-4">
+            <div className="space-y-4">
+                <div>
+                    <label className="text-sm font-medium text-gray-700">
+                        Expected Yield: {yieldPercentage}%
+                    </label>
+                    <div className="mt-2">
+                        <Slider
+                            value={[yieldPercentage]}
+                            onValueChange={(value) => setYieldPercentage(value[0])}
+                            max={130}
+                            min={70}
+                            step={1}
+                            className="w-full"
+                        />
+                    </div>
+                    <div className="mt-1 flex justify-between text-xs text-gray-500">
+                        <span>70%</span>
+                        <span>100%</span>
+                        <span>130%</span>
+                    </div>
+                </div>
+
+                <div className="pt-2">
+                    <h3 className="text-sm font-medium text-gray-900">Market Value:</h3>
+                    <p className="text-lg font-semibold text-green-600">
+                        ${result.profit.toLocaleString(undefined, {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        })}
+                    </p>
+                </div>
+                
+                <div className="space-y-1">
+                    <p className="text-xs text-gray-600">
+                        Expected Yield: {result.totalYield.toLocaleString()} {result.unit}
+                        <span className="text-gray-400"> ({result.yieldPerAcre.toFixed(1)} per acre)</span>
+                    </p>
+                    <p className="text-xs text-gray-600">
+                        Base Yield: {result.baseYieldPerAcre} {result.unit} per acre
+                    </p>
+                    <p className="text-xs text-gray-600">
+                        Price: ${result.pricePerUnit} per {result.unit}
+                    </p>
+                </div>
             </div>
         </div>
     );
