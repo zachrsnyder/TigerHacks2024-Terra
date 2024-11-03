@@ -1,7 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { GoogleMap, Polygon, useJsApiLoader } from '@react-google-maps/api';
+import { GoogleMap, Polygon, OverlayView } from '@react-google-maps/api';
 import { useMap } from '../contexts/MapContext';
-import { loaderOptions } from './JsApiLoaderConfig';
 
 const containerStyle = {
   width: '100%',
@@ -16,7 +15,8 @@ const MapComponent = ({
   onMapClick, 
   onPolygonEdit,
   onPlotClick,
-  onMapClickOutside  // Add new prop
+  onMapClickOutside,
+  showFieldNames
 }) => {
   const { mapInstance, setMapInstance, coordinates } = useMap();
   const [hoveredPlotId, setHoveredPlotId] = useState(null);
@@ -40,12 +40,10 @@ const MapComponent = ({
   }, [onPlotClick]);
 
   const handleMapClick = useCallback((event) => {
-    // Call the regular onMapClick handler first (for drawing mode)
     if (onMapClick) {
       onMapClick(event);
     }
     
-    // If we're not in drawing mode, trigger the outside click handler
     if (!isDrawingMode && onMapClickOutside) {
       onMapClickOutside();
     }
@@ -96,6 +94,11 @@ const MapComponent = ({
 
   if (!isLoaded) return <div>Loading...</div>;
 
+  const getPixelPositionOffset = (width, height) => ({
+    x: -(width / 2),
+    y: -(height / 2)
+  });
+
   return (
     <GoogleMap
       mapContainerStyle={{ width: '100%', height: '100%' }}
@@ -132,23 +135,51 @@ const MapComponent = ({
         />
       )}
       {existingPlots.map((plot) => (
-        <Polygon
-          key={plot.id}
-          path={plot.boundary}
-          options={{
-            fillColor: hoveredPlotId === plot.id ? plot.color || "#66BB6A" : plot.color || "#4CAF50",
-            fillOpacity: hoveredPlotId === plot.id ? 0.9 : 0.8,
-            strokeColor: hoveredPlotId === plot.id ? plot.color || "#66BB6A" : plot.color || "#4CAF50",
-            strokeOpacity: 1,
-            strokeWeight: hoveredPlotId === plot.id ? 2 : 1,
-            editable: false,
-            draggable: false,
-            cursor: 'pointer'
-    }}
-          onClick={(e) => handlePlotClick(plot, e)}
-          onMouseOver={() => setHoveredPlotId(plot.id)}
-          onMouseOut={() => setHoveredPlotId(null)}
-        />
+        <React.Fragment key={plot.id}>
+          <Polygon
+            path={plot.boundary}
+            options={{
+              fillColor: hoveredPlotId === plot.id ? plot.color || "#66BB6A" : plot.color || "#4CAF50",
+              fillOpacity: hoveredPlotId === plot.id ? 0.9 : 0.8,
+              strokeColor: hoveredPlotId === plot.id ? plot.color || "#66BB6A" : plot.color || "#4CAF50",
+              strokeOpacity: 1,
+              strokeWeight: hoveredPlotId === plot.id ? 2 : 1,
+              editable: false,
+              draggable: false,
+              cursor: 'pointer'
+            }}
+            onClick={(e) => handlePlotClick(plot, e)}
+            onMouseOver={() => setHoveredPlotId(plot.id)}
+            onMouseOut={() => setHoveredPlotId(null)}
+          />
+          {plot.center && showFieldNames && (
+            <OverlayView
+              position={{ lat: plot.center[0], lng: plot.center[1] }}
+              mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+              getPixelPositionOffset={getPixelPositionOffset}
+            >
+              <div
+                style={{
+                  background: 'rgba(255, 255, 255, 0.4)',
+                  padding: '2px 4px',
+                  borderRadius: '2px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  display: 'inline-block',
+                  whiteSpace: 'nowrap',
+                  cursor: 'pointer',
+                  userSelect: 'none'
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handlePlotClick(plot);
+                }}
+              >
+                {plot.name}
+              </div>
+            </OverlayView>
+          )}
+        </React.Fragment>
       ))}
     </GoogleMap>
   );

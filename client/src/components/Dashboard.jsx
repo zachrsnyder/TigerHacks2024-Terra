@@ -29,6 +29,7 @@ const Dashboard = () => {
   const [selectedPlot, setSelectedPlot] = useState(null);
   const [editingPlot, setEditingPlot] = useState(null);
   const [isEditingShape, setIsEditingShape] = useState(false);
+  const [showFieldNames, setShowFieldNames] = useState(true);
 
   const handleStartShapeEdit = (plot) => {
     setEditingPlot(plot);
@@ -293,20 +294,26 @@ const Dashboard = () => {
 
   return (
     <div className="h-screen w-screen relative">
-        <LeftDashboard pointPlots={existingPlots} setPointPlots={setExistingPlots} selectedPlot={selectedPlot} setSelectedPlot={setSelectedPlot}/>
+      <LeftDashboard 
+        pointPlots={existingPlots} 
+        setPointPlots={setExistingPlots} 
+        selectedPlot={selectedPlot} 
+        setSelectedPlot={setSelectedPlot}
+      />
       <div className="h-screen w-screen">
-      <MapComponent
-        isLoaded={isLoaded}
-        coordinates={coordinates}
-        points={points}
-        existingPlots={existingPlots.filter(plot => 
-          !editingPlot || plot.id !== editingPlot.id
-        )}
-        isDrawingMode={isDrawingMode}
-        onMapClick={handleMapClick}
-        onPolygonEdit={handlePolygonEdit}
-        onPlotClick={(plot) => setSelectedPlot(plot)}
-        onMapClickOutside={() => setSelectedPlot(null)}
+        <MapComponent
+          isLoaded={isLoaded}
+          coordinates={coordinates}
+          points={points}
+          existingPlots={existingPlots.filter(plot => 
+            !editingPlot || plot.id !== editingPlot.id
+          )}
+          isDrawingMode={isDrawingMode}
+          onMapClick={handleMapClick}
+          onPolygonEdit={handlePolygonEdit}
+          onPlotClick={(plot) => setSelectedPlot(plot)}
+          onMapClickOutside={() => setSelectedPlot(null)}
+          showFieldNames={showFieldNames}  
         />
       </div>
       
@@ -345,6 +352,8 @@ const Dashboard = () => {
         }}
         onCancelDrawing={clearDrawing}
         isEditing={isEditingShape}
+        showFieldNames={showFieldNames}
+        onToggleFieldNames={() => setShowFieldNames(!showFieldNames)}  
       />
       )}
       
