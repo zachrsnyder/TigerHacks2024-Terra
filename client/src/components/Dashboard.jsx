@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useJsApiLoader } from '@react-google-maps/api';
 import { db } from '../firebase';
-import { doc, getDoc, setDoc, deleteDoc, collection, getDocs } from 'firebase/firestore';
+import { doc, getDoc, setDoc, deleteDoc, collection, getDocs, updateDoc } from 'firebase/firestore';
 import MapComponent from './MapComponent';
 import SearchBar from './SearchBar';
 import PlotNameInput from './PlotNameInput';
@@ -12,6 +12,8 @@ import ErrorMessage from './ErrorMessage';
 import LeftDashboard from './LeftBar/LeftDashboard';
 import FieldInfo from './FieldInfo';
 import { useMap } from '../contexts/MapContext';
+import returnLargestCentroid from '../utils/kmeans';
+import { merge, uid } from 'chart.js/helpers';
 
 
 const Dashboard = () => {
@@ -32,6 +34,7 @@ const Dashboard = () => {
   const [isEditingShape, setIsEditingShape] = useState(false);
   const [showFieldNames, setShowFieldNames] = useState(true);
   const [showPlotFill, setShowPlotFill] = useState(true);
+  const {centerMap} = useMap()
 
   const handleStartShapeEdit = (plot) => {
     setEditingPlot(plot);
@@ -76,12 +79,13 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const farmDocRef = doc(db, 'farms', currentUser.uid);
         const farmDoc = await getDoc(doc(db, 'farms', currentUser.uid));
         if (farmDoc.exists()) {
           const farmData = farmDoc.data();
           if (farmData.farmName && farmData.location) {
             setFarmName(farmData.farmName); 
-            setCoordinates(farmData.location);
+            
             setZipCode(farmData.zipCode || '');
             setCurrentStep('complete');
             
@@ -94,6 +98,26 @@ const Dashboard = () => {
                 ...doc.data()
               });
             });
+
+            const allPlotCenters = plotsData.map(plot => plot.center)
+            console.log("Center", allPlotCenters)
+
+            const centerLoco = returnLargestCentroid(allPlotCenters, 4)
+            console.log(centerLoco)
+
+            await setDoc(farmDocRef, {
+              location: centerLoco
+            }, { merge: true });
+
+            const lat = centerLoco[0]
+            const lng = centerLoco[1]
+            centerMap({lat, lng});
+            
+
+
+
+
+
             setExistingPlots(plotsData);
           } else if (farmData.farmName) {
             setFarmName(farmData.farmName);
@@ -113,11 +137,16 @@ const Dashboard = () => {
   }, [currentUser.uid]);
 
   const handleMapClick = (e) => {
-    if (!isDrawingMode) return;
+    if (!isDrawingMode){
+      console.log(e.latLng.lat())
+      console.log(e.latLng.lng())
+      return;
+    }
     const newPoint = {
       lat: e.latLng.lat(),
       lng: e.latLng.lng()
     };
+    
     setPoints(prevPoints => [...prevPoints, newPoint]);
   };
 

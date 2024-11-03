@@ -13,12 +13,12 @@ export const useMap = () => {
 
 export const MapProvider = ({ children }) => {
   const [mapInstance, setMapInstance] = useState(null);
-  const [coordinates, setCoordinates] = useState({ lat: 38.9517, lng: -92.3341 });
+  const [coordinates, setCoordinates] = useState();
 
   const centerMap = (coords) => {
     if (mapInstance) {
       mapInstance.panTo(coords);
-      mapInstance.setZoom(18);
+      mapInstance.setZoom(14);
     }
     setCoordinates(coords);
   };

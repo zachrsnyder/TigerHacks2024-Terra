@@ -104,7 +104,7 @@ const MapComponent = ({
     <GoogleMap
       mapContainerStyle={{ width: '100%', height: '100%' }}
       center={coordinates}
-      zoom={18}
+      zoom={14}
       onLoad={onLoad}
       onUnmount={onUnmount}
       onClick={handleMapClick}
