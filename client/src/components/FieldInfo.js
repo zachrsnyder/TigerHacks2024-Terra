@@ -308,7 +308,7 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
   };
 
   return (
-    <div className="fixed right-4 top-32 w-80 bg-white rounded-lg shadow-xl border border-gray-200 animate-fade-in">
+    <div className="fixed right-4 top-32 w-80 max-h-[80vh] bg-white rounded-lg shadow-xl border border-gray-200 animate-fade-in overflow-y-auto">
       <div className="p-3">
         <div className="space-y-3">
           {/* Header Section with Name and Close Button */}
