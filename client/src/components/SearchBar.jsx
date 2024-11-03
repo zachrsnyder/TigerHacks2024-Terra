@@ -1,7 +1,7 @@
-// SearchBar.jsx
 import React from 'react';
 import { Search, Fence } from 'lucide-react';
 
+// Component that renders the search bar for the farm name or zip code
 const SearchBar = ({ 
   currentStep, 
   value, 
@@ -12,7 +12,6 @@ const SearchBar = ({
   const isNameStep = currentStep === 'name';
   const placeholder = isNameStep ? "Enter your farm's name" : "Enter your farm's zip code";
   const maxLength = isNameStep ? 50 : 5;
-
   return (
     <div className="absolute top-1/4 left-1/2 transform -translate-x-1/2 z-20">
       <form onSubmit={onSubmit} className="w-full">

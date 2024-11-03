@@ -1,6 +1,7 @@
 import React from 'react';
 import { AlertCircle } from 'lucide-react';
 
+// Component that renders a guide to open the sidebar
 const SidebarGuide = () => {
   return (
     <div className="absolute left-16 z-20 animate-bounce" style={{ top: '300px' }}>  {/* Using direct pixel value */}

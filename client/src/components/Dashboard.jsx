@@ -40,6 +40,7 @@ const Dashboard = () => {
   const [hasAddedField, setHasAddedField] = useState(false);
   const [showSidebarGuide, setShowSidebarGuide] = useState(false);
 
+  //called when editing starts, intializes plotting
   const handleStartShapeEdit = (plot) => {
     setEditingPlot(plot);
     setIsEditingShape(true);
@@ -47,6 +48,7 @@ const Dashboard = () => {
     setIsDrawingMode(true);
   };
 
+  //loads google maps api
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
@@ -81,6 +83,7 @@ const Dashboard = () => {
   
 
   useEffect(() => {
+    // Function to fetch and set up initial farm data
     const fetchData = async () => {
       try {
         const farmDocRef = doc(db, 'farms', currentUser.uid);
@@ -96,7 +99,8 @@ const Dashboard = () => {
           const hasFields = !plotsSnap.empty;
           setHasAddedField(hasFields);
           
-           if (hasFields) {
+          // Determine which setup step to show based on existing data
+          if (hasFields) {
             setCurrentStep('complete');
           } else if (farmData.location || farmData.zipCode) {
             setCurrentStep('addField');
@@ -131,11 +135,13 @@ const Dashboard = () => {
               // Use minimum between number of points and requested k
               const effectiveK = Math.min(4, allPlotCenters.length);
               const centerLoco = returnLargestCentroid(allPlotCenters, effectiveK);
-              
+
+              // Update farm document with new calculated center
               await setDoc(farmDocRef, {
                 location: centerLoco
               }, { merge: true });
-              
+
+              // Center map on calculated center
               const lat = centerLoco[0];
               const lng = centerLoco[1];
               centerMap({lat, lng}, null);
@@ -154,6 +160,7 @@ const Dashboard = () => {
             }, null);
           }
         } else {
+          // If farm doesn't exist, create new farm document
           setCurrentStep('name');
           await setDoc(farmDocRef, {
             owner: currentUser.uid,
@@ -170,6 +177,7 @@ const Dashboard = () => {
     fetchData();
   }, [currentUser.uid]);
 
+  // Function to handle map click events when in drawing mode
   const handleMapClick = (e) => {
     if (!isDrawingMode){
       console.log(e.latLng.lat())
@@ -184,6 +192,7 @@ const Dashboard = () => {
     setPoints(prevPoints => [...prevPoints, newPoint]);
   };
 
+  // Function to calculate area of a polygon
   const calculateArea = (points) => {
     if (points.length < 3) return 0;
     let area = 0;
@@ -196,10 +205,12 @@ const Dashboard = () => {
     return Math.round(area);
   };
 
+  // Function to handle polygon edit events and sets them in state
   const handlePolygonEdit = (updatedPoints) => {
     setPoints(updatedPoints);
   };
 
+  // Function to handle plot name submission
   const handlePlotNameSubmit = async (e) => {
     e.preventDefault();
     if (!newPlotName.trim()) {
@@ -207,15 +218,16 @@ const Dashboard = () => {
       return;
     }
   
-    const calcualteCenter = (points) => {
-      let lat = 0;
-      let lng = 0;
-      for (let i = 0; i < points.length; i++) {
-        lat += points[i].lat;
-        lng += points[i].lng;
-      }
-      return [lat / points.length, lng / points.length];
-    };
+    // Calculate center of plot
+  const calcualteCenter = (points) => {
+    let lat = 0;
+    let lng = 0;
+    for (let i = 0; i < points.length; i++) {
+      lat += points[i].lat;
+      lng += points[i].lng;
+    }
+    return [lat / points.length, lng / points.length];
+  };
   
     try {
       if (editingPlot) {
@@ -227,13 +239,15 @@ const Dashboard = () => {
           center: calcualteCenter(points),
           updatedAt: new Date().toISOString()
         };
-  
+        
+        // Update in Firestore
         await setDoc(
           doc(db, 'farms', currentUser.uid, 'plots', editingPlot.id),
           updatedPlot,
           { merge: true }
         );
-  
+        
+        // Update local state
         setExistingPlots(prev =>
           prev.map(plot =>
             plot.id === editingPlot.id ? updatedPlot : plot
@@ -253,9 +267,11 @@ const Dashboard = () => {
           center: calcualteCenter(points)
         };
   
+        // Save to Firestore
         await setDoc(plotRef, newPlot);
         setExistingPlots(prev => [...prev, { id: plotRef.id, ...newPlot }]);
 
+        // If this is the first field, update the setup step
         if (!hasAddedField) {
           setHasAddedField(true);
           setCurrentStep('complete');
@@ -280,13 +296,15 @@ const Dashboard = () => {
     }
   };
 
+  // Function to handle farm name submission
   const handleFarmNameSubmit = async (e) => {
     e.preventDefault();
     if (!farmName.trim()) {
       setError('Please enter a farm name');
       return;
     }
-  
+    
+    // Save farm name to Firestore
     try {
       await setDoc(doc(db, 'farms', currentUser.uid), {
         owner: currentUser.uid,
@@ -305,23 +323,26 @@ const Dashboard = () => {
     }
   };
 
+  // Function to handle zip code submission
   const handleZipCodeSubmit = async (e) => {
     e.preventDefault();
     if (zipCode.length !== 5 || !/^\d+$/.test(zipCode)) {
       setError('Please enter a valid 5-digit zip code');
       return;
     }
-  
+    
+    // Geocode zip code to get location
     try {
       const response = await fetch(
         `https://maps.googleapis.com/maps/api/geocode/json?address=${zipCode}&key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY}`
       );
       const data = await response.json();
-  
+      
+      // Check if we got a valid location
       if (data.results && data.results[0]) {
         const { lat, lng } = data.results[0].geometry.location;
         const location = { lat, lng };
-        
+        // Save location to Firestore
         try {
           await setDoc(doc(db, 'farms', currentUser.uid), {
             location: location,
@@ -329,7 +350,7 @@ const Dashboard = () => {
             setupStep: 'addField', // Changed from 'complete' to 'addField'
             updatedAt: new Date().toISOString()
           }, { merge: true });
-  
+          // Update local state
           setCoordinates(location);
           setCurrentStep('addField'); // Changed from 'complete' to 'addField'
           setError('');
@@ -345,7 +366,8 @@ const Dashboard = () => {
       console.error('Geocoding error:', error);
     }
   };
-
+  
+  // Function to handle plot deletion
   const handleDeletePlot = async (plotId) => {
     try {
       // Delete from Firestore
@@ -360,6 +382,7 @@ const Dashboard = () => {
     }
   };
 
+  // Function to clear drawing mode and reset state
   const clearDrawing = () => {
     setPoints([]);
     setIsDrawingMode(false);
@@ -409,9 +432,9 @@ const Dashboard = () => {
         />
       )}
 
-{currentStep === 'addField' && !isDrawingMode && (
-  <AddFieldGuide />
-)}
+      {currentStep === 'addField' && !isDrawingMode && (
+        <AddFieldGuide />
+      )}
       
       {isNamingPlot && (
         <PlotNameInput
@@ -422,44 +445,44 @@ const Dashboard = () => {
       )}
       
       {(currentStep === 'complete' || currentStep === 'addField') && (
-      <ControlButtons
-        isDrawingMode={isDrawingMode}
-        points={points}
-        onLocationChange={() => setCurrentStep('zipCode')}
-        onDrawingStart={() => {
-          setIsDrawingMode(true);
-          setEditingPlot(null);
-        }}
-        onSavePlot={() => {
-          setIsNamingPlot(true);
-          if (editingPlot) {
-            setNewPlotName(editingPlot.name);
-          }
-        }}
-        onCancelDrawing={clearDrawing}
-        isEditing={isEditingShape}
-        showFieldNames={showFieldNames}
-        onToggleFieldNames={() => setShowFieldNames(!showFieldNames)}
-        showPlotFill={showPlotFill}
-        onTogglePlotFill={() => setShowPlotFill(!showPlotFill)} 
-      />
+        <ControlButtons
+          isDrawingMode={isDrawingMode}
+          points={points}
+          onLocationChange={() => setCurrentStep('zipCode')}
+          onDrawingStart={() => {
+            setIsDrawingMode(true);
+            setEditingPlot(null);
+          }}
+          onSavePlot={() => {
+            setIsNamingPlot(true);
+            if (editingPlot) {
+              setNewPlotName(editingPlot.name);
+            }
+          }}
+          onCancelDrawing={clearDrawing}
+          isEditing={isEditingShape}
+          showFieldNames={showFieldNames}
+          onToggleFieldNames={() => setShowFieldNames(!showFieldNames)}
+          showPlotFill={showPlotFill}
+          onTogglePlotFill={() => setShowPlotFill(!showPlotFill)} 
+        />
       )}
       
       <ErrorMessage error={error} />
 
       {selectedPlot && (
-      <FieldInfo
-        plot={selectedPlot}
-        onClose={() => setSelectedPlot(null)}
-        onDelete={handleDeletePlot}
-        onUpdate={handleUpdatePlot}
-        onStartShapeEdit={handleStartShapeEdit}
-      />
-    )}
+        <FieldInfo
+          plot={selectedPlot}
+          onClose={() => setSelectedPlot(null)}
+          onDelete={handleDeletePlot}
+          onUpdate={handleUpdatePlot}
+          onStartShapeEdit={handleStartShapeEdit}
+        />
+      )}
 
-    {showSidebarGuide && !isDrawingMode && (
-      <SidebarGuide />
-    )}
+      {showSidebarGuide && !isDrawingMode && (
+        <SidebarGuide />
+      )}
 
     </div>
   );

@@ -7,6 +7,7 @@ const containerStyle = {
   height: '100%'
 };
 
+//Component that renders the Google Map with polygons
 const MapComponent = ({ 
   isLoaded, 
   points, 
@@ -23,23 +24,28 @@ const MapComponent = ({
   const [hoveredPlotId, setHoveredPlotId] = useState(null);
   const [polygon, setPolygon] = useState(null);
 
+  // Callback function to set the map instance
   const onLoad = useCallback((map) => {
     setMapInstance(map);
   }, [setMapInstance]);
 
+  // Callback function to unset the map instance
   const onUnmount = useCallback(() => {
     setMapInstance(null);
   }, [setMapInstance]);
 
+  // Callback function to set the polygon instance
   const onPolygonLoad = useCallback((poly) => {
     setPolygon(poly);
   }, []);
 
+  // Callback function to handle plot click
   const handlePlotClick = useCallback((plot, event) => {
     if (event) event.stop();
     if (onPlotClick) onPlotClick(plot);
   }, [onPlotClick]);
 
+  // Callback function to handle map click
   const handleMapClick = useCallback((event) => {
     if (onMapClick) {
       onMapClick(event);
@@ -50,13 +56,16 @@ const MapComponent = ({
     }
   }, [onMapClick, onMapClickOutside, isDrawingMode]);
 
+  // Callback function to handle vertex edit
   const handleVertexEdit = useCallback(() => {
     if (!polygon) return;
 
     try {
+      // Get the updated points of the polygon
       const path = polygon.getPath();
       const updatedPoints = [];
 
+      // Loop through the path and get the updated points
       for (let i = 0; i < path.getLength(); i++) {
         const point = path.getAt(i);
         updatedPoints.push({ lat: point.lat(), lng: point.lng() });
@@ -68,6 +77,7 @@ const MapComponent = ({
     }
   }, [polygon, onPolygonEdit]);
 
+  // Set the map instance in the context
   useEffect(() => {
     if (!polygon || !window.google) return;
 
@@ -93,6 +103,7 @@ const MapComponent = ({
     };
   }, [setMapInstance]);
 
+  // Return loading message if the Google Maps api is not loaded
   if (!isLoaded) return <div>Loading...</div>;
 
   const getPixelPositionOffset = (width, height) => ({
@@ -101,6 +112,7 @@ const MapComponent = ({
   });
 
   return (
+    // Render the Google Map component
     <GoogleMap
       mapContainerStyle={{ width: '100%', height: '100%' }}
       center={coordinates}
@@ -118,6 +130,7 @@ const MapComponent = ({
         rotateControl: false
       }}
     >
+      {/* Render the polygons if they exist */}
       {points.length > 0 && (
         <Polygon
           path={points}
@@ -135,6 +148,7 @@ const MapComponent = ({
           onDragEnd={handleVertexEdit}
         />
       )}
+      {/* Render the existing plots */}
       {existingPlots.map((plot) => (
         <React.Fragment key={plot.id}>
           <Polygon
@@ -153,6 +167,7 @@ const MapComponent = ({
             onMouseOver={() => setHoveredPlotId(plot.id)}
             onMouseOut={() => setHoveredPlotId(null)}
           />
+          {/* Render the plot name */}
           {plot.center && showFieldNames && (
             <OverlayView
               position={{ lat: plot.center[0], lng: plot.center[1] }}

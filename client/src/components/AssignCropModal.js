@@ -12,6 +12,7 @@ const AssignCropModal = ({ isOpen, onClose, plotId, onAssign }) => {
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState('');
 
+    // List of crops to search from
     const crops = [
         'corn',
         'wheat',
@@ -34,6 +35,7 @@ const AssignCropModal = ({ isOpen, onClose, plotId, onAssign }) => {
         crop.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
+    //puts crops into database
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!selectedCrop || !currentUser?.uid || !plotId) return;

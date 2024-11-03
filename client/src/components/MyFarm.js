@@ -10,6 +10,7 @@ const MyFarm = () => {
   const [coordinates, setCoordinates] = useState({ lat: 38.951674, lng: -92.332540 }); // Default coordinates
   const [isLoading, setIsLoading] = useState(true);
 
+  // Fetch user location when component appears
   useEffect(() => {
     const fetchUserLocation = async () => {
       if (!currentUser) {
@@ -38,6 +39,7 @@ const MyFarm = () => {
     fetchUserLocation();
   }, [currentUser, navigate]);
 
+  // Handle logout
   const handleLogout = async () => {
     try {
       await logout();
@@ -47,6 +49,7 @@ const MyFarm = () => {
     }
   };
 
+  // Show loading spinner while fetching user location
   if (isLoading) {
     return (
       <div className="h-screen w-screen flex items-center justify-center">

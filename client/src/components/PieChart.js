@@ -2,12 +2,15 @@ import React from 'react';
 import { ResponsivePie } from '@nivo/pie';
 
 const PieChart = ({ data }) => {
+
+    // Convert the data object into an array of objects for nivo/pie chart
     const chartData = data.labels.map((label, index) => ({
         id: label,
         label: label,
         value: data.values[index],
     }));
 
+    //pie chart component
     return (
         <ResponsivePie
             data={chartData}

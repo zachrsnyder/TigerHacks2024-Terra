@@ -1,7 +1,7 @@
-// PlotNameInput.jsx
 import React from 'react';
 import { Fence } from 'lucide-react';
 
+//Component that renders the input field for the plot name
 const PlotNameInput = ({ value, onChange, onSubmit }) => {
   return (
     <div className="absolute top-1/4 left-1/2 transform -translate-x-1/2 z-20">

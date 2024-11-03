@@ -1,6 +1,7 @@
 import * as React from "react"
 import * as SliderPrimitive from "@radix-ui/react-slider"
- 
+
+// Slider component for yprofit based on yield prediction
 const Slider = React.forwardRef(({ className, ...props }, ref) => (
   <SliderPrimitive.Root
     ref={ref}

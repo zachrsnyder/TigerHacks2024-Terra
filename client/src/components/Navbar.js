@@ -27,6 +27,7 @@ const Navbar = () => {
       values: []
     });
 
+    // Fetch crop data for the logged-in user
     const fetchCropData = async () => {
       if (!currentUser) return;
   
@@ -55,7 +56,7 @@ const Navbar = () => {
               cropTotals.set(cropType, currentTotal + areaInAcres);
           });
           
-          setTotalArea(Math.round(calculatedTotalArea * 100) / 100); // Round to 2 decimal places
+          setTotalArea(Math.round(calculatedTotalArea * 100) / 100);
           
           // Convert to chart data format
           const labels = Array.from(cropTotals.keys()).filter(crop => cropTotals.get(crop) > 0);
@@ -79,7 +80,7 @@ const Navbar = () => {
       }
     };
     
-
+    // Modal positioning effect
     useEffect(() => {
       if (isModalOpen && buttonRef.current && modalRef.current) {
         const buttonRect = buttonRef.current.getBoundingClientRect();
@@ -88,6 +89,7 @@ const Navbar = () => {
       }
     }, [isModalOpen]);
 
+    // Logout function
     const handleLogout = async (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -101,6 +103,7 @@ const Navbar = () => {
       }
     };
 
+    // Open My Farm modal
     const handleMyFarm = async (e) => {
       e.preventDefault();
       await fetchCropData(); // Fetch crop data before opening modal
@@ -108,7 +111,7 @@ const Navbar = () => {
       setIsModalOpen(false);
     };
 
-
+    // Fetch farm data on component appearing
     useEffect(() => {
       const getFarmData = async () => {
         if (currentUser) {
@@ -128,6 +131,7 @@ const Navbar = () => {
       getFarmData();
     }, [currentUser]);
 
+    // Handle zip code form submission
     const handleZipSubmit = async (e) => {
       e.preventDefault();
       setError('');
@@ -138,15 +142,18 @@ const Navbar = () => {
       }
     
       try {
+        // Fetch location data from Google Maps API
         const response = await fetch(
           `https://maps.googleapis.com/maps/api/geocode/json?address=${newZipCode}&key=AIzaSyCjb_mLTZBV4jfa3Yf8rpAqmqemQZQBugA`
         );
         const data = await response.json();
-    
+        
+        // Check if the response contains location data
         if (data.results && data.results[0]) {
           const { lat, lng } = data.results[0].geometry.location;
           const location = { lat, lng };
           
+          // Save the new zip code and location to Firestore
           try {
             await setDoc(doc(db, 'farms', currentUser.uid), {
               location: location,
@@ -177,6 +184,7 @@ const Navbar = () => {
     const handleFarmClick = async () => {
       if (zipCode) {
         try {
+          // Fetch location data from Google Maps API
           const response = await fetch(
             `https://maps.googleapis.com/maps/api/geocode/json?address=${zipCode}&key=${process.env.REACT_APP_GOOGLE_MAPS_API_KEY}`
           );
@@ -263,22 +271,19 @@ const Navbar = () => {
                     </div>
                 </div>
                 <div className="flex-1 flex">
-                    {/* Fixed Left Column - Pie Chart */}
+                    {/* Fixed Left Column for Pie Chart */}
                     <div className="w-1/2 px-8">
                         <div className="h-80 mt-10">
                             <PieChart data={chartData} />
                         </div>
                     </div>
-                    <div className="w-1/2 px-8 flex flex-col -mt-"> {/* Added negative margin here */}
+                    <div className="w-1/2 px-8 flex flex-col -mt-"> 
                         {chartData.values.length > 0 ? (
                             <div className="bg-gray-50 rounded-lg flex flex-col flex-1">
-                                {/* Fixed header */}
                                 <div className="p-6 border-b border-gray-200">
                                     <h3 className="text-sm font-medium text-gray-700">Crop Distribution</h3>
                                 </div>
-                                
-                                {/* Scrollable content */}
-                                <div className="p-6 pt-4 overflow-y-auto max-h-[calc(90vh-20rem)]">
+                                  <div className="p-6 pt-4 overflow-y-auto max-h-[calc(90vh-20rem)]">
                                     <div className="space-y-3">
                                         {chartData.labels.map((label, index) => (
                                             <div key={label} className="flex items-center justify-between py-2 border-b border-gray-200 last:border-0">
@@ -319,7 +324,7 @@ const Navbar = () => {
     )}
 
 
-      {/* Modal/Dropdown */}
+      {/* Modal */}
       {isModalOpen && (
         <>
           {/* Backdrop */}
@@ -328,7 +333,7 @@ const Navbar = () => {
             onClick={() => setIsModalOpen(false)}
           />
           
-          {/* Modal positioned like dropdown */}
+          {/* Dropdown */}
           <div
             ref={modalRef}
             className="fixed z-[200] w-80 bg-white rounded-lg shadow-lg"

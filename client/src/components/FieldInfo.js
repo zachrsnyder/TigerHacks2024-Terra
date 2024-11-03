@@ -15,13 +15,14 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
   const [isAssignCropModalOpen, setAssignCropModalOpen] = useState(false);
   const [currentCrop, setCurrentCrop] = useState(plot.crop);
   
-
+  //Grabs the current plot and sets the edited plot to the current plot
   useEffect(() => {
     setEditedPlot(plot);
     setCurrentCrop(plot.crop);
     fetchSoilData();
   }, [plot]);
 
+  //fetches soil data using the plot center and isric api
   const fetchSoilData = async () => {
     if (!plot.center) return;
     
@@ -52,7 +53,6 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
       // Convert values to proper units
       // Clay and sand are given in g/kg, convert to percentage (divide by 10)
       // pH is given in pH * 10, so divide by 10
-      // Organic carbon is in g/kg
       const processedData = {
         clay: (clayLayer?.depths?.[0]?.values?.mean || 0) / 10,
         sand: (sandLayer?.depths?.[0]?.values?.mean || 0) / 10,
@@ -69,6 +69,7 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
   
       console.log('Processed Data:', processedData);
       
+      // Analyze the soil data using the processed values
       const analysis = analyzeSoilData(processedData);
       setSoilData(analysis);
     } catch (error) {
@@ -79,32 +80,34 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
     }
   };
 
+  //Analyzes the soil data and returns the score and interpretations
   const analyzeSoilData = (soilData) => {
     console.log('Raw soil data for analysis:', soilData);
     
+    // Define score ranges for each component
     const scoreRanges = {
         organicCarbon: {
-          5: [40, 100],    // g/kg
+          5: [40, 100],   
           4: [30, 39.9],
           3: [20, 29.9],
           2: [10, 19.9],
           1: [0, 9.9]
         },
         pH: {
-          5: [6.0, 7.0],   // pH scale
+          5: [6.0, 7.0],   
           4: [5.5, 5.9],
           3: [7.1, 7.5],
           2: [5.0, 5.4],
           1: [0, 4.9]
         },
-        clay: {            // Now in percentage
+        clay: {        
           5: [30, 35],
           4: [25, 29.9],
           3: [20, 24.9],
           2: [15, 19.9],
           1: [0, 14.9]
         },
-        sand: {            // Now in percentage
+        sand: {       
           5: [30, 35],
           4: [25, 29.9],
           3: [20, 24.9],
@@ -112,7 +115,8 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
           1: [0, 14.9]
         }
       };
-  
+
+    // Map a value to a score based on the ranges
     const mapToScore = (value, ranges) => {
       for (let score = 5; score >= 1; score--) {
         const [min, max] = ranges[score];
@@ -120,7 +124,8 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
       }
       return 1; // Default to lowest score if out of all ranges
     };
-  
+    
+    // Calculate individual scores
     const scores = {
       organicCarbon: mapToScore(soilData.organicCarbon, scoreRanges.organicCarbon),
       pH: mapToScore(soilData.pH, scoreRanges.pH),
@@ -129,19 +134,21 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
     };
   
     console.log('Individual scores:', scores);
-  
+    
     const weights = {
       organicCarbon: 0.35,
       pH: 0.25,
       clay: 0.20,
       sand: 0.20
     };
-  
+    
     console.log('Calculating weighted scores:');
+    // Calculate weighted scores
     Object.entries(scores).forEach(([key, score]) => {
       console.log(`${key}: ${score} * ${weights[key]} * 20 = ${score * weights[key] * 20}`);
     });
-  
+    
+    // Calculate overall score
     const overallScore = Math.round(
       Object.entries(scores).reduce((total, [key, score]) => {
         return total + (score * weights[key] * 20);
@@ -169,6 +176,7 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
     };
   };
   
+  // Interpretation functions for cabron
   const getOrganicCarbonInterpretation = (value) => {
     if (value >= 400) return "Very high - Excellent soil fertility";
     if (value >= 300) return "High - Good soil fertility";
@@ -177,6 +185,7 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
     return "Very low - Needs organic matter amendment";
   };
   
+  // Interpretation functions for pH
   const getPHInterpretation = (value) => {
     if (value >= 7.5) return "Alkaline - May restrict nutrient availability";
     if (value >= 7.0) return "Slightly alkaline - Generally good for most crops";
@@ -186,6 +195,7 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
     return "Very acidic - Needs lime amendment";
   };
   
+  // Interpretation functions for clay
   const getClayInterpretation = (value) => {
     if (value >= 150) return "Very high - May have drainage issues";
     if (value >= 100) return "High - Good water retention";
@@ -194,6 +204,7 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
     return "Very low - Poor water retention";
   };
   
+  // Interpretation functions for sand
   const getSandInterpretation = (value) => {
     if (value >= 150) return "Very high - May have water retention issues";
     if (value >= 100) return "High - Good drainage";
@@ -202,6 +213,7 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
     return "Very low - May have drainage issues";
   };
   
+  // Interpretation functions for overall quality
   const getOverallQuality = (score) => {
     if (score >= 90) return "Excellent";
     if (score >= 80) return "Very Good";
@@ -217,7 +229,7 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
     '#F44336', '#EF5350', '#FFC107', '#FFCA28', '#9C27B0'
   ];
 
-  // Close color picker when clicking outside - moved to top level
+  // Close color picker when clicking outside, moved to top level
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (showColorPicker && !event.target.closest('.color-picker-container')) {
@@ -231,10 +243,13 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
     };
   }, [showColorPicker]);
 
+  // Check if plot data is available
   if (!plot) return null;
 
+  // Calculate area in acres
   const areaInAcres = (plot.area / 5446.86).toFixed(2);
 
+  // Format date string to readable format
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -243,6 +258,7 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
     });
   };
 
+  // Handler for delete confirmation
   const handleDelete = async () => {
     if (!isConfirmingDelete) {
       setIsConfirmingDelete(true);
@@ -253,6 +269,7 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
     onClose();
   };
 
+  // Handler for updating plot info
   const handleUpdate = async () => {
     await onUpdate(plot.id, {
       ...editedPlot,
@@ -261,16 +278,19 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
     setIsEditing(false);
   };
 
+  // Handler for canceling edit
   const handleCancel = () => {
     setEditedPlot(plot);
     setIsEditing(false);
   };
 
+  // Handler for editing shape
   const handleEditShape = () => {
     onStartShapeEdit(plot);
     onClose();
   };
 
+  // Handler for changing plot color
   const handleColorChange = (color) => {
     setEditedPlot({ ...editedPlot, color });
     setShowColorPicker(false);
@@ -308,81 +328,83 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
   };
 
   return (
-    <div className="fixed right-4 top-32 w-80 max-h-[80vh] bg-white rounded-lg shadow-xl border border-gray-200 animate-fade-in overflow-y-auto">
-      <div className="p-3">
-        <div className="space-y-3">
-          {/* Header Section with Name and Close Button */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              {isEditing ? (
-                <input
-                  type="text"
-                  value={editedPlot.name}
-                  onChange={(e) => setEditedPlot({ ...editedPlot, name: e.target.value })}
-                  className="text-xl font-bold text-gray-900 border-b border-gray-300 focus:outline-none focus:border-blue-500"
-                />
-              ) : (
-                <h2 className="text-xl font-bold text-gray-900">{plot.name}</h2>
-              )}
-              <div className="relative color-picker-container">
-                <button
-                  onClick={() => setShowColorPicker(!showColorPicker)}
-                  className="w-6 h-6 rounded border border-gray-300 shadow-sm hover:shadow-md transition-shadow"
-                  style={{ backgroundColor: editedPlot.color || '#4CAF50' }}
-                  aria-label="Change plot color"
-                />
-                {showColorPicker && (
-                  <div className="absolute z-10 top-full -left-20 mt-2 p-4 bg-white rounded-lg shadow-xl border border-gray-200 min-w-[200px]">
-                    <div className="flex flex-col gap-3">
-                      <p className="text-sm text-gray-600">Select plot color</p>
-                      <div className="grid grid-cols-4 gap-3">
-                        {colors.map((color) => (
-                          <button
-                            key={color}
-                            onClick={() => handleColorChange(color)}
-                            className="w-10 h-10 rounded hover:scale-105 transition-transform duration-200 shadow-sm hover:shadow-md"
-                            style={{ 
-                              backgroundColor: color,
-                              border: editedPlot.color === color ? '2px solid #000' : '1px solid #e5e7eb'
-                            }}
-                            aria-label={`Select color ${color}`}
-                          />
-                        ))}
-                      </div>
+    <div className="fixed right-4 top-32 w-80 max-h-[80vh] bg-white rounded-lg shadow-xl border border-gray-200 animate-fade-in flex flex-col">
+      <div className="sticky top-0 bg-white border-b border-gray-200 p-3 rounded-t-lg z-10">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            {isEditing ? (
+              <input
+                type="text"
+                value={editedPlot.name}
+                onChange={(e) => setEditedPlot({ ...editedPlot, name: e.target.value })}
+                className="text-xl font-bold text-gray-900 border-b border-gray-300 focus:outline-none focus:border-blue-500"
+              />
+            ) : (
+              <h2 className="text-xl font-bold text-gray-900">{plot.name}</h2>
+            )}
+            <div className="relative color-picker-container">
+              <button
+                onClick={() => setShowColorPicker(!showColorPicker)}
+                className="w-6 h-6 rounded border border-gray-300 shadow-sm hover:shadow-md transition-shadow"
+                style={{ backgroundColor: editedPlot.color || '#4CAF50' }}
+                aria-label="Change plot color"
+              />
+              {showColorPicker && (
+                <div className="absolute z-20 top-full -left-20 mt-2 p-4 bg-white rounded-lg shadow-xl border border-gray-200 min-w-[200px]">
+                  <div className="flex flex-col gap-3">
+                    <p className="text-sm text-gray-600">Select plot color</p>
+                    <div className="grid grid-cols-4 gap-3">
+                      {colors.map((color) => (
+                        <button
+                          key={color}
+                          onClick={() => handleColorChange(color)}
+                          className="w-10 h-10 rounded hover:scale-105 transition-transform duration-200 shadow-sm hover:shadow-md"
+                          style={{ 
+                            backgroundColor: color,
+                            border: editedPlot.color === color ? '2px solid #000' : '1px solid #e5e7eb'
+                          }}
+                          aria-label={`Select color ${color}`}
+                        />
+                      ))}
                     </div>
                   </div>
-                )}
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              {!isEditing && (
-                <div className="relative overflow-hidden">
-                  <button
-                    onClick={handleDelete}
-                    className={`flex items-center gap-1 py-1 px-2 rounded-full transition-all duration-200 ${
-                      isConfirmingDelete 
-                        ? 'bg-red-50 text-red-500 pr-20' 
-                        : 'hover:bg-red-50 text-gray-500 hover:text-red-500'
-                    }`}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    <span className={`text-sm whitespace-nowrap absolute left-7 transition-opacity duration-200 ${
-                      isConfirmingDelete ? 'opacity-100' : 'opacity-0'
-                    }`}>
-                      Confirm?
-                    </span>
-                  </button>
                 </div>
               )}
-              <button
-                onClick={onClose}
-                className="p-1 hover:bg-gray-100 rounded-full transition-colors"
-              >
-                <X className="h-4 w-4 text-gray-500" />
-              </button>
             </div>
           </div>
+          <div className="flex items-center gap-2">
+            {!isEditing && (
+              <div className="relative overflow-hidden">
+                <button
+                  onClick={handleDelete}
+                  className={`flex items-center gap-1 py-1 px-2 rounded-full transition-all duration-200 ${
+                    isConfirmingDelete 
+                      ? 'bg-red-50 text-red-500 pr-20' 
+                      : 'hover:bg-red-50 text-gray-500 hover:text-red-500'
+                  }`}
+                >
+                  <Trash2 className="h-4 w-4" />
+                  <span className={`text-sm whitespace-nowrap absolute left-7 transition-opacity duration-200 ${
+                    isConfirmingDelete ? 'opacity-100' : 'opacity-0'
+                  }`}>
+                    Confirm?
+                  </span>
+                </button>
+              </div>
+            )}
+            <button
+              onClick={onClose}
+              className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <X className="h-4 w-4 text-gray-500" />
+            </button>
+          </div>
+        </div>
+      </div>
 
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="p-3 space-y-3">
           {/* Edit Buttons Section */}
           {!isEditing && (
             <div className="flex gap-2">
@@ -394,7 +416,7 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
                           focus:ring-blue-500 transition-colors 
                           flex items-center justify-center gap-1"
               >
-                <Edit2 className="h-4 w-4" />
+              <Edit2 className="h-4 w-4" />
                 Edit Info
               </button>
               <button
