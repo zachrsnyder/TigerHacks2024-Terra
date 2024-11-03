@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { X, Trash2, Save, Edit2, Loader } from 'lucide-react';
+import CropProfit from './CropProfit';
+import AssignCropModal from './AssignCropModal';
+import { useAuth } from '../contexts/AuthContext'; 
 
 const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
@@ -9,6 +12,7 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
   const [soilData, setSoilData] = useState(null);
   const [isLoadingSoil, setIsLoadingSoil] = useState(false);
   const [soilError, setSoilError] = useState(null);
+  const [isAssignCropModalOpen, setAssignCropModalOpen] = useState(false);
 
   useEffect(() => {
     setEditedPlot(plot);
@@ -276,6 +280,7 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
       });
     }
   };
+  
 
   return (
     <div className="fixed right-4 top-32 w-80 bg-white rounded-lg shadow-xl border border-gray-200 animate-fade-in">
@@ -399,11 +404,6 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
                   <p className="text-xs text-gray-400">{soilData.interpretations?.pH || ''}</p>
                 </div>
               </div>
-              <div className="mt-2 pt-2 border-t border-gray-200">
-                <p className="text-sm font-medium text-gray-600">
-                  Overall Quality: <span className="text-gray-900">{soilData.quality || 'Unknown'}</span>
-                </p>
-              </div>
               <button 
                 onClick={fetchSoilData}
                 className="text-xs text-blue-500 hover:text-blue-600 mt-2"
@@ -461,57 +461,81 @@ const FieldInfo = ({ plot, onClose, onDelete, onUpdate, onStartShapeEdit }) => {
                 </>
               )}
             </div>
-            
-            <div className="flex gap-2">
-              {isEditing ? (
-                <>
-                  <button
-                    onClick={handleCancel}
-                    className="px-3 py-1.5 text-sm font-medium text-gray-700 
-                              bg-white border border-gray-300 rounded-md
-                              hover:bg-gray-50 focus:outline-none focus:ring-2 
-                              focus:ring-offset-1 focus:ring-blue-500
-                              transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleUpdate}
-                    className="px-3 py-1.5 text-sm font-medium text-white
-                              bg-blue-500 rounded-md hover:bg-blue-600 
-                              focus:outline-none focus:ring-2 focus:ring-offset-1 
-                              focus:ring-blue-500 transition-colors"
-                  >
-                    Save
-                  </button>
-                </>
-              ) : (
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setIsEditing(true)}
-                    className="px-3 py-1.5 text-sm font-medium text-gray-700 
-                              bg-white border border-gray-300 rounded-md
-                              hover:bg-gray-50 focus:outline-none focus:ring-2 
-                              focus:ring-offset-1 focus:ring-blue-500
-                              transition-colors"
-                  >
-                    Edit Info
-                  </button>
-                  <button
-                    onClick={handleEditShape}
-                    className="px-3 py-1.5 text-sm font-medium text-white
-                              bg-blue-500 rounded-md hover:bg-blue-600 
-                              focus:outline-none focus:ring-2 focus:ring-offset-1 
-                              focus:ring-red-500 transition-colors"
-                  >
-                    Edit Shape
-                  </button>
-                </div>
-              )}
-            </div>
+              <div className="flex flex-col gap-3 mt-4">
+                {isEditing ? (
+                  <div className="flex gap-2 justify-end">
+                    <button
+                      onClick={handleCancel}
+                      className="px-3 py-1.5 text-sm font-medium text-gray-700 
+                                bg-white border border-gray-300 rounded-md
+                                hover:bg-gray-50 focus:outline-none focus:ring-2 
+                                focus:ring-offset-1 focus:ring-blue-500
+                                transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleUpdate}
+                      className="px-3 py-1.5 text-sm font-medium text-white
+                                bg-blue-500 rounded-md hover:bg-blue-600 
+                                focus:outline-none focus:ring-2 focus:ring-offset-1 
+                                focus:ring-blue-500 transition-colors"
+                    >
+                      Save
+                    </button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => setIsEditing(true)}
+                      className="px-3 py-1.5 text-sm font-medium text-gray-700 
+                                bg-white border border-gray-300 rounded-md
+                                hover:bg-gray-50 focus:outline-none focus:ring-2 
+                                focus:ring-offset-1 focus:ring-blue-500
+                                transition-colors flex items-center justify-center gap-1"
+                    >
+                      <Edit2 className="h-4 w-4" />
+                      Edit Info
+                    </button>
+                    <button
+                      onClick={handleEditShape}
+                      className="px-3 py-1.5 text-sm font-medium text-gray-700 
+                                bg-white border border-gray-300 rounded-md
+                                hover:bg-gray-50 focus:outline-none focus:ring-2 
+                                focus:ring-offset-1 focus:ring-blue-500
+                                transition-colors"
+                    >
+                      Edit Shape
+                    </button>
+                    <button
+                      onClick={() => setAssignCropModalOpen(true)}
+                      className="px-3 py-1.5 text-sm font-medium text-white
+                                bg-green-500 rounded-md hover:bg-green-600 
+                                focus:outline-none focus:ring-2 focus:ring-offset-1 
+                                focus:ring-green-500 transition-colors col-span-2"
+                    >
+                      Assign Crop
+                    </button>
+                  </div>
+                )}
+              </div>
           </div>
         </div>
       </div>
+      {plot.crop && (
+        <div className="bg-gray-50 p-3 rounded-md">
+          <h3 className="text-sm font-medium text-gray-500 mb-2">Market Analysis</h3>
+          <CropProfit 
+            cropName={plot.crop} 
+            areaInAcres={parseFloat(areaInAcres)}
+          />
+        </div>
+      )}
+      <AssignCropModal
+        isOpen={isAssignCropModalOpen}
+        onClose={() => setAssignCropModalOpen(false)}
+        plotId={plot.id}
+      />
     </div>
   );
 };
