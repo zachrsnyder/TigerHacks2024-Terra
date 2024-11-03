@@ -17,10 +17,14 @@ const EquipmentSection = () => {
   const [selectedEquipment, setSelectedEquipment] = useState(null);
   const { currentUser } = useAuth();
 
+  // Fetch equipment data when component appears
   useEffect(() => {
+    // Return if no user is logged in
     if (!currentUser) return;
 
+    // Fetch equipment data
     const equipmentRef = collection(db, 'farms', currentUser.uid, 'equipment');
+    // Subscribe to equipment data changes
     const unsubscribe = onSnapshot(
       query(equipmentRef),
       (snapshot) => {
@@ -28,6 +32,7 @@ const EquipmentSection = () => {
           id: doc.id,
           ...doc.data()
         }));
+        // Set the equipment data and stop loading
         setEquipment(equipmentData);
         setIsLoading(false);
       },
@@ -37,10 +42,13 @@ const EquipmentSection = () => {
       }
     );
 
+    // Unsubscribe from the snapshot listener when the component disappears 
     return () => unsubscribe();
   }, [currentUser]);
 
+  // Delete equipment document
   const handleDeleteEquipment = async (equipmentId) => {
+    // Return if no user is logged in
     try {
       await deleteDoc(doc(db, 'farms', currentUser.uid, 'equipment', equipmentId));
     } catch (error) {
@@ -48,17 +56,22 @@ const EquipmentSection = () => {
     }
   };
 
+  // Edit equipment document
   const handleEditEquipment = (equipment) => {
+    // Set the selected equipment and show the edit modal
     setSelectedEquipment(equipment);
     setShowEditModal(true);
   };
 
+  // Group equipment by type
   const equipmentByType = equipment.reduce((acc, curr) => {
+    // Create a new array for each equipment type
     acc[curr.Type] = acc[curr.Type] || [];
     acc[curr.Type].push(curr);
     return acc;
   }, {});
 
+  // Render the equipment section
   return (
     <div className="border-b border-white/10">
       <SectionHeader

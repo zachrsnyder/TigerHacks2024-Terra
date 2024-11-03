@@ -9,9 +9,10 @@ const LeftDashboard = ({pointPlots, setPointPlots, selectedPlot, setSelectedPlot
     const [isCollapsed, setIsCollapsed] = useState(true);
     const [isHovered, setIsHovered] = useState(false);
 
+    // Function to toggle the sidebar open or closed
     const toggleAside = () => {
       setIsCollapsed(!isCollapsed);
-      setShowSidebarGuide(false); // Add this line
+      setShowSidebarGuide(false);
     };
 
     return (
