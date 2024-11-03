@@ -75,7 +75,7 @@ const VehicleCard = ({ vehicle, onDelete, onEdit }) => {
   isOpen={showAssignModal}
   onClose={() => setShowAssignModal(false)}
   item={vehicle}
-  type="vehicle"
+  type="vehicles"
   />
 </>
 )};

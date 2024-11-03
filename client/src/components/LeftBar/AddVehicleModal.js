@@ -31,6 +31,16 @@ const AddVehicleModal = ({ isOpen, onClose }) => {
     const [successMessage, setSuccessMessage] = useState('');
     const { currentUser } = useAuth();
 
+    const vehicleTypes = [
+        'Tractor',
+        'Combine Harvester',
+        'Bale Wagon',
+        'Sprayer',
+        'Seeder',
+        'Planter',
+        'Grain Cart'
+    ];
+
     const [newDocument, setDocument] = useState({
         Name: "",
         Manufacturer: "",
@@ -148,25 +158,28 @@ const AddVehicleModal = ({ isOpen, onClose }) => {
                         )}
 
                         <div className="p-6 space-y-4">
-                            <div>
+                            <div className="relative">
                                 <label className="block text-white text-sm font-medium mb-1">Type</label>
-                                <input
-                                    list="vehicle-types"
+                                <select
                                     value={newDocument.Type}
                                     onChange={(e) => setDocument({ ...newDocument, Type: e.target.value })}
-                                    className="w-full px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-gray-500 backdrop-blur-sm text-black"
-                                    placeholder="Search or select vehicle type"
+                                    className="w-full px-4 py-2.5 bg-white/70 border border-white/30 rounded-lg 
+                                            focus:outline-none focus:ring-2 focus:ring-white/50 
+                                            text-gray-900 appearance-none"
                                     required
-                                />
-                                <datalist id="vehicle-types">
-                                    <option value="Tractor" />
-                                    <option value="Combine Harvester" />
-                                    <option value="Bale Wagon" />
-                                    <option value="Sprayer" />
-                                    <option value="Seeder" />
-                                    <option value="Planter" />
-                                    <option value="Grain Cart" />
-                                </datalist>
+                                >
+                                    <option value="" disabled>Select vehicle type</option>
+                                    {vehicleTypes.map(type => (
+                                        <option key={type} value={type}>
+                                            {type}
+                                        </option>
+                                    ))}
+                                </select>
+                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 pt-6 text-gray-700">
+                                    <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                        <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                                    </svg>
+                                </div>
                             </div>
 
                             <div>
